@@ -1,0 +1,136 @@
+[
+  {
+    "id": "chidori",
+    "name": "Chidori",
+    "rank": "A",
+    "chakraCost": "High",
+    "seals": ["Ox", "Rabbit", "Monkey"],
+    "summary": "A high-speed thrust enveloped in concentrated lightning chakra that pierces defenses.",
+    "technique": [
+      "Compress lightning chakra into the dominant hand until audible chirping occurs.",
+      "Accelerate to high speed; lock target with tunnel-vision minimized.",
+      "Release in a single precise thrust at a vital or structural weak point."
+    ],
+    "training": [
+      "Tree/water walking refinement to prevent chakra leak at fingertips.",
+      "Target cones: keep dispersion under 10cm at 5m.",
+      "Reaction drills: partner feints to reduce tunnel vision."
+    ],
+    "tips": [
+      "Requires high-speed approach; Sharingan greatly mitigates tunnel vision.",
+      "Best used as a finisher or to break fortified defenses."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/8/8a/Chidori.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Chidori",
+    "sourcePage": "Chidori",
+    "pageId": 3472,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/8/8a/Chidori.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Chidori" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Lightning Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive",
+          "**Range:** Short",
+          "**Users:** Kakashi Hatake, Sasuke Uchiha",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "High‑speed thrust cloaked in dense raiton. Signature chirping sound from ionized air." }
+      ]
+    }
+  },
+  {
+    "id": "lightning-beast-tracking-fang",
+    "name": "Lightning Release: Lightning Beast Tracking Fang",
+    "rank": "B",
+    "chakraCost": "Medium",
+    "seals": ["Snake", "Ram", "Boar", "Tiger"],
+    "summary": "Projects a hound-shaped lightning construct that chases and bites at the target.",
+    "technique": [
+      "Form a tethered lightning construct with a defined head and forelimbs.",
+      "Guide via hand movements; maintain line-of-sight for optimal control.",
+      "Snap the 'jaw' closed to stun or bind on contact."
+    ],
+    "training": [
+      "Slalom course: maintain pursuit around obstacles without snapping tether.",
+      "Latency reduction: practice micro-gestures for faster direction changes."
+    ],
+    "tips": [
+      "Excellent for pursuit and crowd control.",
+      "Watered terrain amplifies conduction; beware friendly positions."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/6/6a/Lightning_Beast_Tracking_Fang.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Lightning_Release:_Lightning_Beast_Tracking_Fang",
+    "sourcePage": "Lightning Release: Lightning Beast Tracking Fang",
+    "pageId": 101640,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/6/6a/Lightning_Beast_Tracking_Fang.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Lightning Release: Lightning Beast Tracking Fang" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Lightning Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive, Supplementary",
+          "**Range:** Mid",
+          "**Users:** Sasuke Uchiha",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A lightning hound that pursues targets guided by the user's hand." }
+      ]
+    }
+  },
+  {
+    "id": "lariat",
+    "name": "Lariat (Lightning Chakra Mode)",
+    "rank": "A",
+    "chakraCost": "High",
+    "seals": [],
+    "summary": "A charging clothesline empowered by Lightning Release chakra to amplify speed, impact, and cutting force.",
+    "technique": [
+      "Cloak body with dense lightning chakra to reduce drag and enhance muscle output.",
+      "Sprint on a curved approach to maximize rotational force.",
+      "Impact at shoulder/neck line; follow-through to sever or incapacitate."
+    ],
+    "training": [
+      "Sprint repeats with timed entry into lightning cloak.",
+      "Impact dummies rated for edge trauma; measure penetration depth.",
+      "Partner drills for angle discipline and safe pull-through."
+    ],
+    "tips": [
+      "Coordination with a second attacker (Double Lariat) can guarantee decapitation.",
+      "Avoid prolonged cloak activation to prevent strain and chakra burn."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/f/f5/Double_Lariat.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Lariat",
+    "sourcePage": "Lariat",
+    "pageId": 19962,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/f/f5/Double_Lariat.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Lariat" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Lightning Release (chakra cloak)",
+          "**Classification:** Ninjutsu, Taijutsu",
+          "**Class:** Offensive",
+          "**Range:** Short",
+          "**Users:** A (Fourth Raikage), Killer B",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A lightning-augmented tackle that maximizes speed and cutting force on impact." }
+      ]
+    }
+  }
+]

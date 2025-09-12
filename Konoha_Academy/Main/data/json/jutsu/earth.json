@@ -1,0 +1,118 @@
+[
+  {
+    "id": "earth-release-mud-wall",
+    "name": "Earth Release: Mud Wall",
+    "rank": "C",
+    "chakraCost": "Low–Medium",
+    "seals": [],
+    "summary": "Create a sudden vertical barrier of hardened mud/earth to block attacks or slow advances.",
+    "technique": [
+      "Gather earth-nature chakra into the soles of the feet.",
+      "Strike the ground to force a vertical surge of packed mud.",
+      "Harden the surface quickly with concentrated chakra flow."
+    ],
+    "training": [
+      "Soil sensing: practice detecting underground moisture and pebble density.",
+      "Rapid hardening drills: form and harden small patches within 5 seconds.",
+      "Directional surge practice: push walls at varied angles for cover."
+    ],
+    "tips": [
+      "Works best on damp or loose terrain; dry rock reduces effectiveness.",
+      "Combine with water users to form instant concrete for longer durability."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/7/7a/Earth_Wall.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Earth_Release:_Mud_Wall",
+    "sourcePage": "Earth Release: Mud Wall",
+    "pageId": 41023,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/7/7a/Earth_Wall.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Earth Release: Mud Wall" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [ "**Element/Type:** Earth Release", "**Classification:** Ninjutsu", "**Class:** Defensive, Supplementary", "**Range:** Short, Mid" ] },
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A vertical wall of earth and mud is forced up from the ground to create cover or block incoming attacks." }
+      ]
+    }
+  },
+  {
+    "id": "earth-release-great-moving-earth-core",
+    "name": "Earth Release: Great Moving Earth Core",
+    "rank": "B",
+    "chakraCost": "Medium–High",
+    "seals": [],
+    "summary": "Form a powerful collapsing sink or core that displaces and crushes targets by manipulating large volumes of earth.",
+    "technique": [
+      "Channel earth chakra into a broad area beneath the target.",
+      "Pull and compact soil to create a sudden sink or rising column.",
+      "Use surrounding rock as a fulcrum to magnify displacement force."
+    ],
+    "training": [
+      "Large-volume manipulation practice: move boulders with small chakra increments.",
+      "Stability drills: prevent self-sinking while shifting earth beneath you.",
+      "Timing and prediction: coordinate with allies to trap moving targets."
+    ],
+    "tips": [
+      "Most effective in open terrain with loose strata.",
+      "Can be used to unbalance or trap taijutsu opponents who rely on footing."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/3/36/Great_Moving_Earth_Core.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Earth_Release:_Great_Moving_Earth_Core",
+    "sourcePage": "Earth Release: Great Moving Earth Core",
+    "pageId": 12814,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/3/36/Great_Moving_Earth_Core.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Earth Release: Great Moving Earth Core" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [ "**Element/Type:** Earth Release", "**Classification:** Ninjutsu", "**Class:** Offensive, Defensive", "**Range:** Mid, Long" ] },
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A technique that displaces large portions of the ground to create sinkholes, pillars or crushing cores to overwhelm enemies." }
+      ]
+    }
+  },
+  {
+    "id": "earth-release-earth-dragon-bullet",
+    "name": "Earth Release: Earth Dragon Bullet",
+    "rank": "A",
+    "chakraCost": "Medium–High",
+    "seals": [],
+    "summary": "Launches hardened, segmented earth constructs shaped like a dragon that pierce and ram through targets.",
+    "technique": [
+      "Compress earth chakra into a long tapered column.",
+      "Carve and segment the column with rotating chakra to simulate scales.",
+      "Launch forward with a linear thrust and sustain cohesion until impact."
+    ],
+    "training": [
+      "Column compression exercises to ensure structural integrity at range.",
+      "Segmented shaping practice to balance rigidity and flexibility.",
+      "Accuracy drills against moving targets at varying distances."
+    ],
+    "tips": [
+      "Can be combined with wind to increase range or water to soften and then harden around targets.",
+      "Aim for anchoring points (ground or structures) to maximize destructive leverage."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/1/11/Earth_Dragon.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Earth_Release:_Earth_Dragon_Bullet",
+    "sourcePage": "Earth Release: Earth Dragon Bullet",
+    "pageId": 22001,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/1/11/Earth_Dragon.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Earth Release: Earth Dragon Bullet" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [ "**Element/Type:** Earth Release", "**Classification:** Ninjutsu, Bukijutsu", "**Class:** Offensive", "**Range:** Mid" ] },
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A tapered, dragon-shaped earth projectile formed and fired to pierce through defenses and terrain." }
+      ]
+    }
+  }
+]
+```
+Note that no changes were made to the existing code to ensure that it remains the same as before.

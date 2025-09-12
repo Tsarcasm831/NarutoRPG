@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taijutsu Fundamentals — Mock</title>
+  <link rel="stylesheet" href="./taijutsu-fundamentals.css">
+</head>
+<body>
+  <header>
+    <h1>Taijutsu Fundamentals — Mock</h1>
+    <div class="actions">
+      <button class="btn" id="helpBtn">How to Play</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT -->
+    <section class="stage">
+      <div class="arena" role="region" aria-label="Dojo Floor">
+        <div class="label">Dojo Floor</div>
+        <div class="arena-canvas">
+          <div class="dummy" id="dummy">🥋</div>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="target"><strong>Target:</strong> <span id="targetName">Free Practice</span> <span id="targetSeq" style="opacity:.85"></span></div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="controls">
+        <div class="row">
+          <div class="tabs" id="stanceTabs"></div>
+          <span class="hint" id="stanceHint">Neutral stance — balanced startup/recovery.</span>
+        </div>
+
+        <!-- Action pad -->
+        <div class="pad" id="actionPad" aria-label="Action pad"></div>
+
+        <!-- Direction pad -->
+        <div class="dirpad" aria-label="Directions">
+          <div class="dir"></div>
+          <button class="dir" data-dir="↑" title="Up">↑</button>
+          <div class="dir"></div>
+          <button class="dir" data-dir="←" title="Left">←</button>
+          <button class="dir" data-dir="↓" title="Down">↓</button>
+          <button class="dir" data-dir="→" title="Right">→</button>
+        </div>
+
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="strictChk"> Strict timing</label>
+          <label class="toggle"><input type="checkbox" id="framesChk"> Show frame data</label>
+          <label class="toggle"><input type="checkbox" id="autoResetChk" checked> Auto‑reset on success</label>
+        </div>
+
+        <div class="bars">
+          <div class="bar" id="staminaBar"><div class="fill" style="width:100%"></div><div class="label">Stamina</div></div>
+          <div class="bar" id="poiseBar"><div class="fill" style="width:100%"></div><div class="label">Poise</div></div>
+        </div>
+      </div>
+
+      <!-- Combo row -->
+      <div class="combo">
+        <h3>Combo Input</h3>
+        <div class="dots" id="dots"></div>
+        <div class="legend hint">Keys: <strong>J</strong>=Light, <strong>K</strong>=Heavy, <strong>U</strong>=Guard, <strong>I</strong>=Dodge. Arrows = directions. <strong>Backspace</strong> undo.</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Reference & Drills -->
+    <aside class="side">
+      <h2>Reference & Drills</h2>
+      <div class="list">
+        <div class="card">
+          <h3>Core Principles</h3>
+          <table class="matrix">
+            <thead><tr><th>Principle</th><th>What it does</th><th>How to train</th></tr></thead>
+            <tbody>
+              <tr><td>Distance</td><td>Controls hit chance and startup safety.</td><td>Use arrows to step in/out between inputs.</td></tr>
+              <tr><td>Timing</td><td>Window to chain next move without dropping.</td><td>Toggle <em>Strict timing</em> and complete drills.</td></tr>
+              <tr><td>Guard/Poise</td><td>Reduces stagger; breaks at 0.</td><td>Alternate <em>Guard</em> and <em>Dodge</em> under pressure.</td></tr>
+              <tr><td>Stamina</td><td>Limits spam; actions cost stamina.</td><td>Watch bar; mix light/defensive moves.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Drills (select one)</h3>
+          <div id="drillList"></div>
+          <p class="hint">Selecting a drill sets the target combo (dots show required sequence).</p>
+        </div>
+
+        <div class="card" id="framesCard" hidden>
+          <h3>Frame Data (last action)</h3>
+          <table class="matrix">
+            <tbody>
+              <tr><td>Startup</td><td id="fdStartup">—</td></tr>
+              <tr><td>Active</td><td id="fdActive">—</td></tr>
+              <tr><td>Recovery</td><td id="fdRecovery">—</td></tr>
+              <tr><td>Cost</td><td id="fdCost">—</td></tr>
+            </tbody>
+          </table>
+          <p class="hint">Numbers are mock values for the training UI.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="./taijutsu-fundamentals.js"></script>
+</body>
+</html>

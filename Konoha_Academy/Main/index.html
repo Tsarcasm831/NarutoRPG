@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Konoha Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="logo">🍃</span>
+      <h1 class="title">Konoha Academy</h1>
+    </div>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#/" class="nav-link" data-route>Home</a>
+      <a href="#/lessons" class="nav-link" data-route>Lessons</a>
+
+      <div class="nav-dropdown" id="natureDrop" tabindex="0" aria-haspopup="true">
+        <button class="nav-link nav-trigger" type="button" aria-expanded="false">Nature Transformations ▾</button>
+        <ul class="nav-menu" role="menu" aria-label="Nature releases">
+          <li><a href="./data/lessons/wind/wind-release.html" role="menuitem">Wind Release</a></li>
+          <li><a href="./earth-release.html" role="menuitem">Earth Release</a></li>
+          <li><a href="./data/lessons/fire/fire-release.html" role="menuitem">Fire Release</a></li>
+          <li><a href="./data/lessons/water/water-release.html" role="menuitem">Water Release</a></li>
+          <li><a href="./data/lessons/lightning/lightning-release.html" role="menuitem">Lightning Release</a></li>
+        </ul>
+      </div>
+
+      <a href="#/about" class="nav-link" data-route>About</a>
+      <a href="#/contact" class="nav-link" data-route>Contact</a>
+    </nav>
+  </header>
+
+  <main id="app">
+    <section id="home" data-view>
+      <div class="hero">
+        <h2>Train like a shinobi.</h2>
+        <p>Explore lessons on chakra, jutsu, strategy, and more. Click any lesson to open a full HTML module.</p>
+        <a class="cta" href="#/lessons">Browse Lessons</a>
+      </div>
+    </section>
+
+    <section id="lessons" data-view hidden>
+      <div class="section-head">
+        <h2>Lessons</h2>
+        <p><span id="moduleCount">0</span> foundational modules. Click to open.</p>
+      </div>
+      <div id="lesson-grid" class="grid"></div>
+    </section>
+
+    <section id="about" data-view hidden>
+      <div class="section-head">
+        <h2>About</h2>
+      </div>
+      <div class="copy">
+        <p>Konoha Academy is an educational playground inspired by shinobi training. Content is fictional and for fun learning and practice.</p>
+      </div>
+    </section>
+
+    <section id="contact" data-view hidden>
+      <div class="section-head">
+        <h2>Contact</h2>
+      </div>
+      <div class="copy">
+        <p>Have ideas for new modules? Email sensei@narutoschool.example</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p> Konoha Academy</p>
+  </footer>
+
+  <div id="modal-root" aria-live="polite"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "@/app": "./app.js",
+      "@/modal": "./components/modal.js",
+      "@/lessons": "./data/lessons.js"
+    }
+  }
+  </script>
+  <script type="module">
+    import "@/app";
+    const drop = document.getElementById('natureDrop');
+    const trigger = drop?.querySelector('.nav-trigger');
+    function close(){ drop.classList.remove('open'); trigger?.setAttribute('aria-expanded','false'); }
+    trigger?.addEventListener('click', (e)=>{ e.stopPropagation(); const o=drop.classList.toggle('open'); trigger.setAttribute('aria-expanded', String(o)); });
+    document.addEventListener('click', (e)=>{ if (!drop.contains(e.target)) close(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') close(); });
+  </script>
+</body>
+</html>

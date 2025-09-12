@@ -1,0 +1,159 @@
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ninjutsu Science Lab — Fundamentals</title>
+  <link rel="stylesheet" href="./ninjutsu-intro.css">
+</head>
+<body>
+  <header>
+    <h1>Ninjutsu Science Lab — Fundamentals</h1>
+    <div class="actions">
+      <button class="btn" id="resetBtn">Reset</button>
+      <button class="btn" id="explainBtn">Explain this build</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <div class="arena" role="region" aria-label="Training field">
+        <div class="label">Field Output</div>
+        <div class="arena-canvas"><div class="big" id="big">📜</div></div>
+      </div>
+
+      <div class="panel" aria-label="Chakra model">
+        <h3 class="section-title">Chakra Molding & Control</h3>
+        <div class="grid2">
+          <div class="slider"><label>Control (fine shaping) — better control reduces leakage</label><input type="range" min="0" max="100" value="60" id="ctl"></div>
+          <div class="slider"><label>Output (power) — more power increases cost & instability</label><input type="range" min="0" max="100" value="55" id="out"></div>
+          <div class="slider"><label>Breath/Focus sync — steady breathing stabilizes flow</label><input type="range" min="0" max="100" value="70" id="br"></div>
+          <div class="slider"><label>Channel Quality — hands→weapon→surface (higher is smoother)</label><input type="range" min="0" max="100" value="65" id="chan"></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Stability</div><div class="v" id="vStab">—</div></div>
+          <div class="stat"><div class="k">Leakage</div><div class="v" id="vLeak">—</div></div>
+          <div class="stat"><div class="k">Cast Time</div><div class="v" id="vCast">—</div></div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Nature & shape">
+        <h3 class="section-title">Nature & Shape Transformation</h3>
+        <div class="selects">
+          <div class="field"><label>Primary Nature</label>
+            <select id="prim">
+              <option value="fire">🔥 Fire</option>
+              <option value="wind">🌀 Wind</option>
+              <option value="light">⚡ Lightning</option>
+              <option value="earth">🪨 Earth</option>
+              <option value="water">💧 Water</option>
+              <option value="yin">☯ Yin</option>
+              <option value="yang">☀ Yang</option>
+            </select>
+          </div>
+          <div class="field"><label>Secondary Nature (optional)</label>
+            <select id="sec">
+              <option value="">— none —</option>
+              <option value="fire">🔥 Fire</option>
+              <option value="wind">🌀 Wind</option>
+              <option value="light">⚡ Lightning</option>
+              <option value="earth">🪨 Earth</option>
+              <option value="water">💧 Water</option>
+              <option value="yin">☯ Yin</option>
+              <option value="yang">☀ Yang</option>
+            </select>
+          </div>
+          <div class="field"><label>Shape Archetype</label>
+            <select id="shape">
+              <option value="bolt">Bolt / Projectile</option>
+              <option value="beam">Beam</option>
+              <option value="cone">Cone / Breath</option>
+              <option value="wave">Wave / Sweep</option>
+              <option value="wall">Wall / Rampart</option>
+              <option value="dome">Dome / Barrier</option>
+              <option value="pillar">Pillar / Spike</option>
+              <option value="field">Field / Zone</option>
+              <option value="trap">Seal Trap (fūinjutsu)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="slider"><label>Range (m)</label><input type="range" min="1" max="50" value="15" id="range"></div>
+          <div class="slider"><label>Area (radius m)</label><input type="range" min="1" max="15" value="4" id="area"></div>
+        </div>
+        <div class="row">
+          <label class="checkbox"><input type="checkbox" id="onehand"> One‑hand seal (harder)</label>
+          <label class="checkbox"><input type="checkbox" id="noseal"> No seals (hardest)</label>
+          <label class="checkbox"><input type="checkbox" id="weapon"> Channel through weapon</label>
+          <label class="checkbox"><input type="checkbox" id="anchor"> Prime fūinjutsu anchor (prepped)</label>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Nature Complexity</div><div class="v" id="vNature">—</div></div>
+          <div class="stat"><div class="k">Shape Complexity</div><div class="v" id="vShape">—</div></div>
+          <div class="stat"><div class="k">Kekkei Result</div><div class="v" id="vKekkei">—</div></div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Environment & output">
+        <h3 class="section-title">Environment & Output</h3>
+        <div class="row">
+          <label class="checkbox"><input type="checkbox" id="envWet"> Wet / Rain</label>
+          <label class="checkbox"><input type="checkbox" id="envWind"> Windy</label>
+          <label class="checkbox"><input type="checkbox" id="envRocky"> Rocky / Soil</label>
+          <label class="checkbox"><input type="checkbox" id="envHot"> Hot / Dry</label>
+          <label class="checkbox"><input type="checkbox" id="envStorm"> Stormy</label>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Chakra Cost (per cast)</div><div class="v" id="vCost">—</div></div>
+          <div class="stat"><div class="k">Potency</div><div class="v" id="vPot">—</div></div>
+          <div class="stat"><div class="k">Backfire Risk</div><div class="v" id="vRisk">—</div></div>
+        </div>
+        <div class="meter" title="Chakra reserve"><div class="fill" id="chakraFill"></div></div>
+        <div class="explain" id="explainBox">Select options and hit <em>Explain this build</em> to get a plain‑language breakdown of how the science stacks up.</div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>Curriculum — The Science of Ninjutsu</h2>
+      <div class="card">
+        <h3>Chakra Physiology</h3>
+        <ul class="list">
+          <li><strong>Coils & Tenketsu:</strong> Chakra flows through a network; poor control leaks through open tenketsu.</li>
+          <li><strong>Molding:</strong> Hand seals coordinate breath, intent, and muscle tension into a stable waveform.</li>
+          <li><strong>Resonance:</strong> Matching breath cadence to the mold improves stability (why calm focus matters).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Nature vs Shape</h3>
+        <p><strong>Nature Transformation</strong> alters chakra’s element (🔥🌀⚡🪨💧, Yin/Yang). <strong>Shape Transformation</strong> defines geometry (beam, wall, dome…). Complex natures/combinations raise cost; complex shapes raise control demands.</p>
+      </div>
+      <div class="card">
+        <h3>Elemental Interactions</h3>
+        <ul class="list">
+          <li>Wheel: Fire ▶ Wind ▶ Lightning ▶ Earth ▶ Water ▶ Fire (context modifies outcomes).</li>
+          <li><strong>Kekkei Genkai:</strong> Two natures can combine (e.g., Wind+Water → <em>Ice</em>, Earth+Water → <em>Wood</em>, Fire+Earth → <em>Lava</em>). Harder to mold, stronger effects.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Fūinjutsu & S/T</h3>
+        <p>Sealing formulas act like capacitors/filters: prep time up front, cheaper casts later. Space‑Time techniques spike difficulty and risk if seals are skipped.</p>
+      </div>
+      <div class="card">
+        <h3>Sensory & Suppression</h3>
+        <p>Large casts broadcast chakra signature. Suppression (Yin‑heavy) narrows your signal but increases control strain.</p>
+      </div>
+      <div class="card">
+        <h3>Safety & Ethics</h3>
+        <ul class="list">
+          <li>Never overdraw: backfire risk scales when stability drops.</li>
+          <li>Respect terrain & collateral; fields and waves linger.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="./ninjutsu-intro.js"></script>
+</body>
+</html>

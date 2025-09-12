@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Konoha - Combat Training</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "howler": "https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.core.min.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1>Konoha — Combat Training</h1>
+      <div class="topbar-right">
+        <button id="muteBtn" aria-label="Toggle sound on or off">Sound: On</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <canvas id="game" width="1024" height="576" aria-label="Game canvas"></canvas>
+      <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true">
+        <div class="panel">
+          <h2 id="panelTitle">Konoha — Combat Training</h2>
+          <p id="panelBody">Defeat waves of training drones. You are stationary. Click to throw shuriken.</p>
+          <button id="primaryBtn">Start Training</button>
+        </div>
+      </div>
+      <div class="hud" aria-live="polite">
+        <div class="stat"><span>Wave</span><b id="hudWave">1</b></div>
+        <div class="stat"><span>Score</span><b id="hudScore">0</b></div>
+        <div class="stat"><span>HP</span><b id="hudHP">100</b></div>
+        <div class="stat"><span>Chakra</span><b id="hudChakra">0</b></div>
+        <div class="stat"><span>Left</span><b id="hudLeft">0</b></div>
+      </div>
+      <div class="abilities" role="toolbar" aria-label="Abilities">
+        <button class="ability-slot" id="ability1" aria-label="Ability 1 (key 1)"><span>1</span></button>
+        <button class="ability-slot" id="ability2" aria-label="Ability 2 (key 2)"><span>2</span></button>
+        <button class="ability-slot" id="ability3" aria-label="Ability 3 (key 3)"><span>3</span></button>
+        <button class="ability-slot" id="ability4" aria-label="Ability 4 (key 4)"><span>4</span></button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>Auto-attack: 1/s at nearest enemy • P: Pause</span>
+    </footer>
+  </div>
+  <script>
+    if (!new URLSearchParams(location.search).has('play')) location.replace('./menu.html');
+  </script>
+  <script type="module" src="./src/main.js" defer></script>
+</body>
+</html>

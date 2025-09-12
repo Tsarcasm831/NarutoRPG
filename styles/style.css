@@ -1,0 +1,11 @@
+body { margin: 0; overflow: hidden; background-color: black; }
+canvas { display: block; }
+#root { width: 100vw; height: 100vh; }
+
+/* Show a loading splash image before React mounts the main menu */
+html, body {
+  background-image: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

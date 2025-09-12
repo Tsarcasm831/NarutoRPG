@@ -1,0 +1,19 @@
+{
+  "angle_system": "0deg east, CCW positive",
+  "districts": [
+    { "name": "Hyuuga",  "ang0": 25,  "ang1": 80 },
+    { "name": "Inuzuka", "ang0": 80,  "ang1": 125 },
+    { "name": "Akimichi","ang0": 125, "ang1": 165 },
+    { "name": "Nara",    "ang0": 165, "ang1": 205 },
+    { "name": "Yamanaka","ang0": 205, "ang1": 245 },
+    { "name": "Aburame", "ang0": 245, "ang1": 295 },
+    { "name": "Civic-NW","ang0": 295, "ang1": 360 },
+    { "name": "Civic-NE","ang0": 0,   "ang1": 25 }
+  ],
+  "primary_radii": [300, 600, 900],
+  "secondary_radii": [180, 260, 340, 420, 500, 580, 660, 740, 820],
+  "primary_step_deg": 45,
+  "district_step_deg": 7.5,
+  "widths": { "primary": 14, "secondary": 10, "tertiary": 6 },
+  "max_radius": 900
+}

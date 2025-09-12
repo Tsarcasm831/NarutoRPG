@@ -1,0 +1,339 @@
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hand Sign Trainer – Mock (v2)</title>
+  <style>
+    :root{
+      --bg:#0f1115;--panel:#151a22;--panel-2:#171f2d;--ink:#e7ecf3;--muted:#9fb0c8;
+      --accent:#4cc9f0;--good:#22c55e;--bad:#ef4444;--warn:#f59e0b;--locked:#2a3243;--special:#3a2a43;
+      --ring:rgba(76,201,240,.35);--radius:16px;--shadow:0 10px 30px rgba(0,0,0,.25),0 2px 8px rgba(0,0,0,.25);
+      --dot:clamp(48px,7.2vw,64px);--gap:14px
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0c0f14,#0f1115);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial}
+    a{color:var(--accent)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;position:sticky;top:0;z-index:10;background:rgba(15,17,21,.8);backdrop-filter:blur(6px);border-bottom:1px solid #232b3b}
+    h1{margin:0;font-size:18px;letter-spacing:.4px}
+    .btn{background:var(--panel);color:var(--ink);border:1px solid #2b3447;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{border-color:#3a4661}
+    
+    main{display:grid;grid-template-columns:1fr 320px;gap:18px;max-width:1200px;margin:0 auto;padding:18px}
+    @media (max-width: 1000px){main{grid-template-columns:1fr}}
+    
+    /* LEFT */
+    .stage{display:grid;gap:14px;align-content:start}
+    .game-area{border-radius:var(--radius);background:radial-gradient(60% 80% at 50% 40%,#1b2230,#111722 70%);min-height:380px;border:1px solid #283149;position:relative;overflow:hidden}
+    .game-area .label{position:absolute;left:12px;top:12px;background:rgba(20,26,38,.7);border:1px solid #2a3451;padding:6px 10px;border-radius:9px;color:var(--muted);font-size:12px;text-transform:uppercase}
+    .game-visual{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+    .seal-big{font-size:96px;line-height:1;opacity:.95;text-shadow:0 8px 26px rgba(0,0,0,.45)}
+    
+    .hud{display:grid;gap:8px;grid-template-columns:1fr auto;align-items:center;padding:10px;border-radius:12px;background:var(--panel-2);border:1px solid #2a3451}
+    .hud .target{font-size:14px;color:var(--muted)}
+    
+    .help{background:var(--panel);border:1px solid #2a3451;border-radius:12px;padding:10px;display:grid;gap:8px}
+    .help h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+    .help ol{margin:0 0 0 18px;padding:0}
+    .kbd{font-family:ui-monospace,Consolas,monospace;border:1px solid #3a4661;border-bottom-width:3px;background:#0f1420;border-radius:6px;padding:0 6px;font-size:12px}
+    
+    /* SEAL PAD */
+    .seal-pad{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+    .seal-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border-radius:10px;background:#0f1420;border:1px solid #2b3550;cursor:pointer}
+    .seal-btn:hover{border-color:#3a5a8a}
+    .seal-emoji{font-size:24px}
+    .seal-name{font-size:12px;color:var(--muted)}
+    
+    /* COMBO INPUT */
+    .combo-panel{padding:14px;border-radius:var(--radius);background:var(--panel-2);border:1px solid #2a3451;display:grid;gap:12px}
+    .combo-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .combo-grid{display:grid;grid-template-columns:repeat(5, var(--dot));gap:var(--gap)}
+    .row{display:contents}
+    .dot{width:var(--dot);height:var(--dot);border-radius:50%;display:grid;place-items:center;border:1px solid #323d58;background:#0f1420;position:relative}
+    .dot .inner{width:62%;height:62%;border-radius:50%;border:1px solid #26304a;background:#0b1220;display:grid;place-items:center;transition:transform .15s ease, background .2s ease, border-color .2s ease}
+    .dot.unlocked{cursor:pointer;border-color:#3a4661}
+    .dot.unlocked:hover .inner{transform:scale(1.06);border-color:#3c73a6}
+    .dot.unlocked.active .inner{background:#113b22;border-color:#1f8a4c}
+    .dot.locked{background:#0e141f;border-color:var(--locked)}
+    .dot.locked::after{content:"🔒";position:absolute;font-size:14px;color:var(--muted)}
+    .dot.special{background:#120f18;border-color:var(--special)}
+    .dot.special::after{content:"✨";position:absolute;font-size:14px;color:#b28df6}
+    .dot .glyph{font-size:22px}
+    
+    .legend{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:12px}
+    .legend .sw{width:14px;height:14px;border-radius:50%;border:2px solid #3a4661;background:#121722;display:inline-block}
+    .legend .sw.active{background:#113b22;border-color:#1f8a4c}
+    .legend .sw.locked{background:#0e141f;border-color:var(--locked)}
+    .legend .sw.special{background:#120f18;border-color:var(--special)}
+    
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    
+    /* RIGHT */
+    .sidebar{background:var(--panel);border:1px solid #2a3451;border-radius:var(--radius);padding:14px;height:fit-content;position:sticky;top:72px;display:grid;gap:10px}
+    .sidebar h2{margin:0 0 4px;font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+    .jutsu-list{display:grid;gap:10px}
+    .jutsu{border:1px solid #303a55;background:#121723;padding:10px;border-radius:12px;display:grid;gap:6px;cursor:pointer}
+    .jutsu .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .jutsu .name{font-weight:700;font-size:14px}
+    .badge{font-size:11px;color:#b7c2d9;border:1px solid #33405c;padding:2px 6px;border-radius:999px}
+    .seals{font-size:12px;color:var(--muted)}
+    .jutsu.active{outline:2px solid var(--accent);outline-offset:2px}
+    
+    .status{font-size:13px}
+    .status.ok{color:var(--good)}
+    .status.no{color:var(--bad)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hand Sign Trainer – Mock (v2)</h1>
+    <div class="actions">
+      <button class="btn" id="helpBtn" title="Show how to play">How to Play</button>
+      <button class="btn" id="resetBtn" title="Clear input">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT -->
+    <section class="stage">
+      <div class="game-area" role="region" aria-label="Game visual stage">
+        <div class="label">Training Ground</div>
+        <div class="game-visual">
+          <div class="seal-big" id="bigSeal" aria-live="polite">🐅</div>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="target">
+          <strong>Target:</strong> <span id="targetName">Free Play (no check)</span>
+          <span id="targetSeq" style="opacity:.85"></span>
+        </div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="help" id="helpBox" hidden>
+        <h3>How to Play</h3>
+        <ol>
+          <li>Pick a jutsu from the right (or stay in <em>Free Play</em>).</li>
+          <li>Enter seals using the <span class="kbd">1</span>–<span class="kbd">9</span>, <span class="kbd">Q</span>, <span class="kbd">W</span>, <span class="kbd">E</span> keys or by clicking the seal buttons below.</li>
+          <li>The first 4 dots are <strong>unlocked</strong>. Middle rows are <strong>locked</strong>. Bottom rows are <strong>special locked</strong>.</li>
+          <li>Use <span class="kbd">Backspace</span> to undo last input. Hit <button class="btn" disabled style="pointer-events:none;opacity:.7">Submit</button> to check (auto-checks when 4 inputs filled).</li>
+        </ol>
+      </div>
+
+      <!-- Seal input pad -->
+      <div class="seal-pad" id="sealPad" aria-label="Seal input pad"></div>
+
+      <!-- Combination input -->
+      <div class="combo-panel" aria-label="Combination input panel">
+        <div class="combo-header">
+          <div>
+            <strong>Combination Input</strong>
+            <div class="legend">
+              <span><span class="sw"></span> Unlocked</span>
+              <span><span class="sw active"></span> Active</span>
+              <span><span class="sw locked"></span> Locked</span>
+              <span><span class="sw special"></span> Special Locked</span>
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn" id="undoBtn" title="Remove last">Undo</button>
+            <button class="btn" id="submitBtn" title="Check against target">Submit</button>
+          </div>
+        </div>
+        <div class="combo-grid" id="comboGrid" role="grid" aria-label="20 input slots (4×5)"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Jutsu list -->
+    <aside class="sidebar" aria-label="Jutsu sidebar">
+      <h2>Known / Memorized Jutsu</h2>
+      <div class="jutsu-list" id="jutsuList"></div>
+    </aside>
+  </main>
+
+<script>
+// ====== Data ======
+const SEALS = [
+  { id:0, name:'Rat',    key:'1', emoji:'🐀' },
+  { id:1, name:'Ox',     key:'2', emoji:'🐂' },
+  { id:2, name:'Tiger',  key:'3', emoji:'🐅' },
+  { id:3, name:'Hare',   key:'4', emoji:'🐇' },
+  { id:4, name:'Dragon', key:'5', emoji:'🐉' },
+  { id:5, name:'Snake',  key:'6', emoji:'🐍' },
+  { id:6, name:'Horse',  key:'7', emoji:'🐎' },
+  { id:7, name:'Ram',    key:'8', emoji:'🐏' },
+  { id:8, name:'Monkey', key:'9', emoji:'🐒' },
+  { id:9, name:'Bird',   key:'Q', emoji:'🐦' },
+  { id:10,name:'Dog',    key:'W', emoji:'🐕' },
+  { id:11,name:'Boar',   key:'E', emoji:'🐗' },
+];
+
+// NOTE: Sequences are demo values for layout/testing.
+const JUTSU = [
+  { name:'Katon: Great Fireball', seq:[5,7,8,11,6,2] }, // Snake → Ram → Monkey → Boar → Horse → Tiger
+  { name:'Kage Bunshin no Jutsu', seq:[7] },            // Ram (crossed variant)
+  { name:'Mizu Ryūdan (Water Dragon)', seq:[0,1,2,3,4,5,6,7,8,9,10,11,2,5,7,8,0,1,6,2,4,7,8,11,9,10,2,6,7,0,5,8,1,4,9,10,11,2,6,7,8,11,3,2] }, // long
+  { name:'Substitution Technique', seq:[2] },
+  { name:'Chidori (mock)', seq:[2,5,6] }
+];
+
+// ====== Elements ======
+const bigSeal = document.getElementById('bigSeal');
+const comboGrid = document.getElementById('comboGrid');
+const jutsuList = document.getElementById('jutsuList');
+const targetName = document.getElementById('targetName');
+const targetSeqEl = document.getElementById('targetSeq');
+const statusEl = document.getElementById('status');
+const helpBox = document.getElementById('helpBox');
+
+// ====== Build Seal Pad ======
+const sealPad = document.getElementById('sealPad');
+SEALS.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'seal-btn';
+  b.setAttribute('data-seal', s.id);
+  b.innerHTML = `<div class="seal-emoji">${s.emoji}</div><div class="seal-name">${s.name} <span class="kbd">${s.key}</span></div>`;
+  b.addEventListener('click', () => pushSeal(s.id));
+  sealPad.appendChild(b);
+});
+
+// ====== Build Combo Grid (4×5) ======
+const SLOT_TOTAL = 20;
+const UNLOCKED = 4; // first 4
+for (let i=1;i<=SLOT_TOTAL;i++){
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.setAttribute('data-index', i);
+  const inner = document.createElement('div');
+  inner.className = 'inner';
+  const glyph = document.createElement('div');
+  glyph.className = 'glyph';
+  inner.appendChild(glyph);
+  d.appendChild(inner);
+
+  if (i<=UNLOCKED){
+    d.classList.add('unlocked');
+    d.title = `Input slot ${i} (unlocked)`
+  } else if (i>=11){
+    d.classList.add('special');
+    d.title = `Input slot ${i} (special locked)`
+  } else {
+    d.classList.add('locked');
+    d.title = `Input slot ${i} (locked)`
+  }
+  comboGrid.appendChild(d);
+}
+
+// Track current input (only first 4 used for check in this mock)
+let input = [];
+let target = null; // {name, seq}
+
+function renderInput(){
+  // Clear glyphs in first 4
+  for (let i=1;i<=UNLOCKED;i++){
+    const d = comboGrid.querySelector(`.dot[data-index="${i}"]`);
+    d.classList.remove('active');
+    d.querySelector('.glyph').textContent = '';
+  }
+  input.forEach((sealId, idx)=>{
+    const d = comboGrid.querySelector(`.dot[data-index="${idx+1}"]`);
+    const s = SEALS[sealId];
+    d.classList.add('active');
+    d.querySelector('.glyph').textContent = s.emoji;
+  });
+}
+
+function pushSeal(sealId){
+  if (input.length>=UNLOCKED) return; // only first 4 available
+  input.push(sealId);
+  renderInput();
+  bigSeal.textContent = SEALS[sealId].emoji;
+  // Auto-check when filled
+  if (input.length===UNLOCKED) check();
+}
+
+function undo(){
+  input.pop();
+  renderInput();
+  setStatus('');
+}
+
+function reset(){
+  input = [];
+  renderInput();
+  setStatus('');
+}
+
+function setStatus(msg, type){
+  statusEl.textContent = msg || '';
+  statusEl.className = 'status' + (type? ' ' + type : '');
+}
+
+function setTarget(j){
+  target = j;
+  if (!j){
+    targetName.textContent = 'Free Play (no check)';
+    targetSeqEl.textContent = '';
+    return;
+  }
+  targetName.textContent = j.name;
+  // Show first 4 seals for the target as hint
+  const preview = j.seq.slice(0,UNLOCKED).map(id=>SEALS[id].emoji).join(' ');
+  targetSeqEl.textContent = ' — first 4: ' + preview;
+}
+
+function check(){
+  if (!target){ setStatus('No target selected — Free Play.', ''); return; }
+  const need = target.seq.slice(0,UNLOCKED).join(',');
+  const got  = input.slice(0,UNLOCKED).join(',');
+  if (need===got){
+    setStatus('Success! Sequence matched.', 'ok');
+  } else {
+    setStatus('Nope. Try again.', 'no');
+  }
+}
+
+// Build jutsu list
+JUTSU.forEach(j => {
+  const card = document.createElement('div');
+  card.className = 'jutsu';
+  const badge = `${j.seq.length} seals`;
+  const seqPreview = j.seq.slice(0,6).map(id=>SEALS[id].emoji).join(' ');
+  card.innerHTML = `<div class="top"><div class="name">${j.name}</div><span class="badge">${badge}</span></div><div class="seals">${seqPreview}${j.seq.length>6?' …':''}</div>`;
+  card.addEventListener('click', ()=>{
+    // activate
+    document.querySelectorAll('.jutsu').forEach(el=>el.classList.remove('active'));
+    card.classList.add('active');
+    setTarget(j);
+    reset();
+  });
+  jutsuList.appendChild(card);
+});
+
+// Default state: Free Play
+setTarget(null);
+
+// Buttons & Keys
+const resetBtn = document.getElementById('resetBtn');
+resetBtn.addEventListener('click', reset);
+const undoBtn = document.getElementById('undoBtn');
+undoBtn.addEventListener('click', undo);
+const submitBtn = document.getElementById('submitBtn');
+submitBtn.addEventListener('click', check);
+const helpBtn = document.getElementById('helpBtn');
+helpBtn.addEventListener('click', ()=>{ helpBox.hidden = !helpBox.hidden; });
+
+// Keyboard input
+window.addEventListener('keydown', (e)=>{
+  const k = e.key.toUpperCase();
+  if (k==='BACKSPACE'){ e.preventDefault(); undo(); return; }
+  const seal = SEALS.find(s=>s.key===k);
+  if (seal){ e.preventDefault(); pushSeal(seal.id); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+/* ...existing styles from prompt (separated) ... */
+:root{
+  --bg:#0f1115;--panel:#151a22;--panel-2:#171f2d;--ink:#e7ecf3;--muted:#9fb0c8;--line:#2a3451;--radius:16px;
+  --accent:#4cc9f0;--good:#22c55e;--bad:#ef4444;--warn:#f59e0b;
+  --fire:#ef4444;--water:#3b82f6;--wind:#10b981;--earth:#a16207;--light:#a78bfa;--yin:#cbd5e1;--yang:#fde047;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background: linear-gradient(180deg,#0b1114,#0f1115);
+  color:var(--ink);
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px}
+h1{margin:0;font-size:18px;letter-spacing:.4px}
+.btn{background:#121723;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:#3a4661}
+main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+@media (max-width: 1000px){ main{grid-template-columns:1fr} }
+.stage{display:grid;gap:14px;align-content:start}
+.arena{position:relative;min-height:380px;border:1px solid var(--line);background:radial-gradient(60% 80% at 50% 40%,#1b2230,#111722 70%);border-radius:16px;overflow:hidden}
+.arena .label{position:absolute;left:12px;top:12px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:rgba(20,26,38,.7);padding:6px 10px;border-radius:9px;text-transform:uppercase}
+.arena-canvas{position:absolute;inset:0;display:grid;place-items:center}
+.big{font-size:96px;line-height:1;text-shadow:0 10px 30px rgba(0,0,0,.45)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.section-title{font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:.6px;margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width: 920px){ .grid2{grid-template-columns:1fr} }
+.slider{display:grid;gap:6px}
+.slider label{font-size:12px;color:var(--muted)}
+input[type=range]{width:100%}
+.pill{border:1px solid var(--line);background:#0f1420;color:var(--ink);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-flex;align-items:center;gap:8px}
+.pill .sw{width:14px;height:14px;border-radius:50%}
+.selects{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width: 920px){ .selects{grid-template-columns:1fr} }
+.field{display:grid;gap:6px}
+.field label{font-size:12px;color:var(--muted)}
+select, .checkbox{background:#0f1420;color:var(--ink);border:1px solid var(--line);padding:8px;border-radius:10px}
+.meter{height:12px;border-radius:999px;background:#0f1420;border:1px solid var(--line);overflow:hidden}
+.meter .fill{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);transform-origin:left center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width: 920px){ .stats{grid-template-columns:1fr 1fr} }
+.stat{border:1px solid var(--line);background:#121723;border-radius:12px;padding:10px;display:grid;gap:6px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-weight:700}
+.hint{font-size:12px;color:var(--muted)}
+.explain{border:1px solid var(--line);background:#0f1420;border-radius:12px;padding:10px}
+.side{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px;height:fit-content;position:sticky;top:72px}
+.side h2{margin:0;font-size:14px;text-transform:uppercase;color:var(--muted);letter-spacing:.6px}
+.card{border:1px solid var(--line);background:#121723;border-radius:12px;padding:10px}
+.card h3{margin:0 0 6px}
+.card p{margin:6px 0}
+.list{margin:0;padding-left:18px}
+.kbd{font-family:ui-monospace,Consolas,monospace;border:1px solid #3a4661;border-bottom-width:3px;background:#0f1420;border-radius:6px;padding:0 6px;font-size:12px}
