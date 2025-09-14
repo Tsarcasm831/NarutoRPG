@@ -41,8 +41,8 @@ import { placeHospital } from './placements/hospital.js';
 import { placeKonohaGates } from './placements/konohaGates.js';
 import { placeCitySlice } from './placements/citySlice.js';
 import { placeKitbash } from './placements/kitbash.js';
-// Forest placement (instanced)
-import { placeForestTrees } from './placements/forestTrees.js';
+// Forest placement (random deciduous assortment)
+import { placeDeciduousTreesInForests } from './placements/trees/index.js';
 import { fillDistrict, listDistrictIdsByPrefix } from './placements/districtFill.js';
 import { WALL_RADIUS } from '../player/movement/constants.js';
 import { parseGridLabel, posForCell } from './utils/gridLabel.js';
@@ -147,12 +147,12 @@ export function updateObjects(scene, currentObjects, settings) {
   const ichiraku = placeIchiraku(scene, objectGrid, worldSize, settings);
   if (ichiraku) renderObjects.push(ichiraku);
 
-  // Populate forests from map polygons using instanced trees (semi-thick, performant)
+  // Populate forests from map polygons with a randomized mix of deciduous trees
   try {
-    const forestGroup = placeForestTrees(scene, objectGrid, worldSize, settings, { spacing: 18 });
+    const forestGroup = placeDeciduousTreesInForests(scene, objectGrid, worldSize, settings, { spacing: 18 });
     if (forestGroup) renderObjects.push(forestGroup);
   } catch (e) {
-    console.warn('Forest instanced placement failed:', e);
+    console.warn('Forest deciduous placement failed:', e);
   }
 
   if (ENABLE_CITY_SLICE) {
