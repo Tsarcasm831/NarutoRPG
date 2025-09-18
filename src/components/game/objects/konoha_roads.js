@@ -6,7 +6,7 @@ const DEFAULT_DISTRICTS = (MAP_DEFAULT_MODEL?.districts) || {};
 // Utility: grid label parsing and world position helper for rivers
 import { parseGridLabel, posForCell } from '../../../game/objects/utils/gridLabel.js';
 /* @tweakable world size used to convert percent map coordinates into world units */
-import { WORLD_SIZE, getTerrainTextureForBiome } from '/src/scene/terrain.js';
+import { WORLD_SIZE } from '/src/scene/terrain.js';
 
 /**
  * Load roads and districts from the map defaults.
@@ -51,11 +51,7 @@ const ROAD_COLOR = '#d9c3a3';
 const ROAD_OPACITY = 0.85;
 const ROAD_BASE_WIDTH = 6; // pixels when r.width == 3
 /* road textures (project-root paths) */
-// Use the dirt path texture for all non-canal roads. Use the same resolver as terrain.
-function resolveRoadTexturePath(){
-  const base = getTerrainTextureForBiome('dirt') || 'dirt_path_texture.png';
-  return base;
-}
+const ROAD_TEX_SECONDARY = '/secondary_road_texture.png';
 
 // Cached image/pattern for road texture strokes
 let __roadTexImg = null;
@@ -75,13 +71,11 @@ async function ensureRoadPattern(ctx){
   if(__roadTexPattern) return __roadTexPattern;
   if(!__roadTexLoaded){
     __roadTexLoaded = true;
-    const src = resolveRoadTexturePath();
-    __roadTexImg = await loadImage(src) || await loadImage('/' + src);
+    __roadTexImg = await loadImage(ROAD_TEX_SECONDARY);
   }
   if(__roadTexImg){
     // Draw into a small offscreen canvas to control tile size
-    // Slightly larger tile to make texture details visible on strokes
-    const tile = 64; // px
+    const tile = 24; // px
     const can = document.createElement('canvas');
     can.width = tile; can.height = tile;
     const c2 = can.getContext('2d');
