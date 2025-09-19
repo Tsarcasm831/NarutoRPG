@@ -192,7 +192,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "helmet")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "helmet"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -212,7 +214,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "weapon")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "weapon"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -232,7 +236,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "shield")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "shield"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -253,7 +259,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "armor")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "armor"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -273,7 +281,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "gloves")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "gloves"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -293,7 +303,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "boots")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "boots"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -314,7 +326,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "ring1")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "ring1"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -335,7 +349,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "ring2")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "ring2"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -356,7 +372,9 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
                     onMouseLeave: handleMouseLeave,
                     onDrop: handleDrop,
                     onDragStart: handleDragStart,
-                    onDragOver: (e) => handleDragOver(e, "equipment", "amulet")
+                    onDragOver: (e) => handleDragOver(e, "equipment", "amulet"),
+                    onDragLeave: () => setCanDrop(true),
+                    canDrop
                   },
                   void 0,
                   false,
@@ -423,7 +441,7 @@ const InventoryPanel = ({ inventory, setInventory, onClose }) => {
               lineNumber: 254,
               columnNumber: 13
             }),
-            /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-8 gap-2 mb-4", style: { height: "380px", alignContent: "start" }, onDragOver: (e) => handleDragOver(e, "storage", null), children: inventory.storage.map((item, index) => /* @__PURE__ */ jsxDEV(StorageSlot, { item, index, onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave, onDrop: handleDrop, onDragStart: handleDragStart }, index, false, {
+            /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-8 gap-2 mb-4", style: { height: "380px", alignContent: "start" }, onDragOver: (e) => handleDragOver(e, "storage", null), children: inventory.storage.map((item, index) => /* @__PURE__ */ jsxDEV(StorageSlot, { item, index, onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave, onDrop: handleDrop, onDragStart: handleDragStart, canDrop, onDragLeave: () => setCanDrop(true), onDragOver: (e) => handleDragOver(e, "storage", index) }, index, false, {
               fileName: "<stdin>",
               lineNumber: 263,
               columnNumber: 17
