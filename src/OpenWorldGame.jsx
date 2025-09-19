@@ -96,6 +96,14 @@ const OpenWorldGame = () => {
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: useCallback(() => setGameReady(true), []) });
   const musicWasPlayingRef = useRef(false);
+  const releasePauseMenu = useCallback(() => {
+    const wasPausedBefore = window.__pauseMenuWasPausedBefore;
+    delete window.__pauseMenuActive;
+    if (!wasPausedBefore) {
+      window.__gamePaused = false;
+    }
+    delete window.__pauseMenuWasPausedBefore;
+  }, []);
   useEffect(() => {
     const open = () => {
       window.__gamePaused = true;
@@ -229,11 +237,15 @@ const OpenWorldGame = () => {
     }),
     /* NEW: Pause Menu overlay */
     gameState === "Playing" && showPauseMenu && /* @__PURE__ */ jsxDEV(PauseMenu, {
-      onResume: () => setShowPauseMenu(false),
+      onResume: () => {
+        releasePauseMenu();
+        setShowPauseMenu(false);
+      },
       onOptions: () => {
         setShowSettings(true);
       },
       onExitToMenu: () => {
+        releasePauseMenu();
         setShowPauseMenu(false);
         setShowSettings(false);
         setShowCharacter(false);

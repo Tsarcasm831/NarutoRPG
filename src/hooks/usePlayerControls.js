@@ -4,12 +4,56 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
     const keysRef = useRef({});
 
     useEffect(() => {
+        const exitPointerLockSafely = () => {
+            if (typeof document.exitPointerLock !== 'function') return;
+            const isPointerLocked = document.pointerLockElement != null;
+            if (!isPointerLocked) return;
+            try {
+                document.exitPointerLock();
+            } catch (_) {
+                // Some browsers throw if pointer lock isn't actually engaged
+            }
+        };
+
+        const applyPauseState = (shouldPause) => {
+            if (shouldPause) {
+                const wasPausedBefore = !!window.__gamePaused;
+                window.__pauseMenuWasPausedBefore = wasPausedBefore;
+                window.__pauseMenuActive = true;
+                window.__gamePaused = true;
+                keysRef.current = {};
+                exitPointerLockSafely();
+            } else {
+                const wasPausedBefore = window.__pauseMenuWasPausedBefore;
+                delete window.__pauseMenuActive;
+                delete window.__pauseMenuWasPausedBefore;
+                if (!wasPausedBefore) {
+                    window.__gamePaused = false;
+                }
+            }
+        };
+
         const handleKeyDown = (event) => {
             // Prevent panel toggling if an input field is focused
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
                 return;
             }
-            
+
+            if (event.code === 'Backquote') {
+                if (typeof setShowPause === 'function' && gameState === 'Playing') {
+                    setShowPause(prev => {
+                        const next = !prev;
+                        applyPauseState(next);
+                        return next;
+                    });
+                }
+                return;
+            }
+
+            if (window.__gamePaused) {
+                return;
+            }
+
             keysRef.current[event.code] = true;
 
             // Edge-triggered click flag for Interact (F)
@@ -61,16 +105,7 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                         }
 
                         // Opening a panel should free the cursor if pointer lock is active
-                        if (typeof document.exitPointerLock === 'function') {
-                            const isPointerLocked = document.pointerLockElement != null;
-                            if (isPointerLocked) {
-                                try {
-                                    document.exitPointerLock();
-                                } catch (error) {
-                                    // Some browsers throw if pointer lock isn't actually engaged
-                                }
-                            }
-                        }
+                        exitPointerLockSafely();
                     }
 
                     return willOpen;
@@ -142,13 +177,6 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                 case 'Escape':
                     closeAllPanels();
                     break;
-                /* @tweakable keyboard event.code used to toggle the Pause Menu */
-                case 'Backquote': {
-                    if (typeof setShowPause === 'function' && gameState === 'Playing') {
-                        setShowPause(prev => !prev);
-                    }
-                    break;
-                }
             }
         };
 
@@ -158,6 +186,9 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
 
         // Mouse buttons (bind left-click for attack)
         const handleMouseDown = (event) => {
+            if (window.__gamePaused) {
+                return;
+            }
             // Only register attacks when clicking on the game canvas to avoid UI clicks triggering attacks
             if (event.button === 0 && event.target && event.target.tagName === 'CANVAS') {
                 keysRef.current['MouseLeft'] = true;

@@ -5,7 +5,8 @@ const LATEST_DATE = "2025-09-06";
 const LATEST_CHANGES = [
   "Defaulted controls and UI to desktop-first experience.",
   "Switched Hospital model to local asset to resolve CORS issues.",
-  "Updated version labels across UI for consistency."
+  "Updated version labels across UI for consistency.",
+  "Pause menu Backquote toggle now exits pointer lock, sets a global pause flag, and suppresses gameplay input while paused."
 ];
 const changelogData = [
   { version: LATEST_VERSION, date: LATEST_DATE, changes: LATEST_CHANGES },
