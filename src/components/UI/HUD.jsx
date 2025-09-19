@@ -5,12 +5,28 @@ import { PlayerInfo } from "./hud/PlayerInfo.jsx";
 import { ControlsInfo } from "./hud/ControlsInfo.jsx";
 import { Minimap } from "./hud/Minimap.jsx";
 import { Compass } from "./hud/Compass.jsx";
+const CONTROLS_STORAGE_KEY = "hud.showControlsInfo";
 const HUDComponent = ({ playerStats, playerRef, worldObjects, zoomRef, settings }) => {
-  const [showControlsInfo, setShowControlsInfo] = useState(true);
+  const [showControlsInfo, setShowControlsInfo] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    const storedValue = window.localStorage.getItem(CONTROLS_STORAGE_KEY);
+    return storedValue === null ? true : storedValue === "true";
+  });
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(CONTROLS_STORAGE_KEY, showControlsInfo ? "true" : "false");
+  }, [showControlsInfo]);
+  useEffect(() => {
+    if (!showControlsInfo) {
+      return;
+    }
     const t = setTimeout(() => setShowControlsInfo(false), 1e4);
     return () => clearTimeout(t);
-  }, []);
+  }, [showControlsInfo]);
   return /* @__PURE__ */ jsxDEV(Fragment, { children: [
     /* Left top cluster */
     /* Player info + Controls modal */
