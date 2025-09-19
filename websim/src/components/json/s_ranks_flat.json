@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "schema": "naruto-jutsu-sranks/v1",
+    "generated_at": "2025-08-18T17:05:49.394197Z",
+    "counts": {
+      "C": 2,
+      "D": 1,
+      "E": 1,
+      "F": 1,
+      "K": 1,
+      "L": 2,
+      "N": 2,
+      "O": 1,
+      "R": 2,
+      "S": 6,
+      "T": 2,
+      "W": 3,
+      "Y": 1
+    },
+    "total": 25
+  },
+  "items": [
+    "Continuous Tailed Beast Balls",
+    "Creation Rebirth",
+    "Dead Demon Consuming Seal",
+    "Eight Branches Technique",
+    "Flying Thunder God Technique",
+    "Kirin",
+    "Lightning Cutter",
+    "Living Corpse Reincarnation",
+    "Night Guy",
+    "Ninja Art Creation Rebirth — Strength of a Hundred Technique",
+    "One's Own Life Reincarnation",
+    "Red Secret Technique: Performance of a Hundred Puppets",
+    "Reverse Four Symbols Sealing",
+    "Sealing Technique: Phantom Dragons Nine Consuming Seals",
+    "Spirit Transformation Technique",
+    "Strength of a Hundred Seal",
+    "S cont.",
+    "Summoning: Impure World Reincarnation",
+    "Super Mini-Tailed Beast Ball",
+    "Tailed Beast Ball",
+    "Tailed Beast Ball Rasenshuriken",
+    "Water Prison Shark Dance Technique",
+    "White Secret Technique: The Chikamatsu Collection of Ten Puppets",
+    "Wind Release: Rasenshuriken",
+    "Yin Seal: Release"
+  ]
+}

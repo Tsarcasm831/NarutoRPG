@@ -1,0 +1,11 @@
+{
+  "name": "naruto-rpg-battle",
+  "version": "0.005.006",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "split:anime": "node scripts/split_anime.mjs"
+  }
+}

@@ -1,0 +1,43 @@
+{
+    "basic_natures": [
+      { "name": "Fire Release", "japanese": "Katon", "strength": "Wind Release", "weakness": "Water Release" },
+      { "name": "Wind Release", "japanese": "Fūton", "strength": "Lightning Release", "weakness": "Fire Release" },
+      { "name": "Lightning Release", "japanese": "Raiton", "strength": "Earth Release", "weakness": "Wind Release" },
+      { "name": "Earth Release", "japanese": "Doton", "strength": "Water Release", "weakness": "Lightning Release" },
+      { "name": "Water Release", "japanese": "Suiton", "strength": "Fire Release", "weakness": "Earth Release" }
+    ],
+    "element_chart": {
+      "Fire Release": { "strong_against": ["Wind Release"], "weak_against": ["Water Release"] },
+      "Wind Release": { "strong_against": ["Lightning Release"], "weak_against": ["Fire Release"] },
+      "Lightning Release": { "strong_against": ["Earth Release"], "weak_against": ["Wind Release"] },
+      "Earth Release": { "strong_against": ["Water Release"], "weak_against": ["Lightning Release"] },
+      "Water Release": { "strong_against": ["Fire Release"], "weak_against": ["Earth Release"] }
+    },
+    "yin_yang": [
+      { "name": "Yin Release", "japanese": "Inton", "description": "Spiritual energy, imagination, illusion creation" },
+      { "name": "Yang Release", "japanese": "Yōton", "description": "Physical energy, life force, vitality enhancement" },
+      { "name": "Yin–Yang Release", "japanese": "Onmyōton", "description": "Combination of both to create life or nullify other jutsu" }
+    ],
+    "kekkei_genkai": [
+      { "name": "Ice Release", "japanese": "Hyōton", "combination": ["Water Release", "Wind Release"], "user_examples": ["Haku"] },
+      { "name": "Wood Release", "japanese": "Mokuton", "combination": ["Earth Release", "Water Release"], "user_examples": ["Hashirama Senju"] },
+      { "name": "Lava Release", "japanese": "Yōton", "combination": ["Fire Release", "Earth Release"], "user_examples": ["Mei Terumī", "Rōshi"] },
+      { "name": "Boil Release", "japanese": "Futton", "combination": ["Fire Release", "Water Release"], "user_examples": ["Mei Terumī"] },
+      { "name": "Storm Release", "japanese": "Ranton", "combination": ["Water Release", "Lightning Release"], "user_examples": ["Darui"] },
+      { "name": "Magnet Release", "japanese": "Jiton", "combination": ["Wind Release", "Earth Release"], "user_examples": ["Third Kazekage", "Rasa"] },
+      { "name": "Explosion Release", "japanese": "Bakuton", "combination": ["Earth Release", "Lightning Release"], "user_examples": ["Gari"] },
+      { "name": "Scorch Release", "japanese": "Shakuton", "combination": ["Fire Release", "Wind Release"], "user_examples": ["Pakura"] }
+    ],
+    "kekkei_tota": [
+      { "name": "Dust Release", "japanese": "Jinton", "combination": ["Earth Release", "Wind Release", "Fire Release"], "user_examples": ["Mū", "Ōnoki"] }
+    ],
+    "other_unique": [
+      { "name": "Crystal Release", "japanese": "Shōton", "status": "Anime-only", "combination": "Unknown" },
+      { "name": "Dark Release", "japanese": "Meiton", "status": "Anime/Game-only", "effect": "Absorbs chakra" },
+      { "name": "Swift Release", "japanese": "Jinton", "status": "Anime-only", "effect": "Extreme speed" },
+      { "name": "Steel Release", "japanese": "Kōton", "status": "Anime-only", "effect": "Hardened metallic body" },
+      { "name": "Typhoon Release", "japanese": "Taiton", "status": "Game-only", "effect": "Advanced wind control" },
+      { "name": "Blood Release", "japanese": "Chiketsu", "status": "Game-only", "effect": "Blood manipulation" }
+    ]
+  }
+  

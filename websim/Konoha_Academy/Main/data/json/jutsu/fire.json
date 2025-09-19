@@ -1,0 +1,97 @@
+[
+  {
+    "id": "all-is-suffering",
+    "name": "All is Suffering",
+    "rank": "S",
+    "chakraCost": "Very High",
+    "seals": [],
+    "summary": "Using the giant statue as a medium, each of the five smaller heads encircling the statue’s main head simultaneously release streams of different elemental nature attacks.",
+    "technique": [
+      "Summon and channel chakra into the Demonic Statue of the Outer Path.",
+      "Direct elemental chakra into each of the five smaller heads surrounding the main one.",
+      "Synchronize releases to project simultaneous elemental streams across a wide area."
+    ],
+    "training": [
+      "Elemental sync drill: practice switching between two elements rapidly to prepare for multi-element casting.",
+      "Chakra partitioning: divide reserves evenly into multiple channels without collapse.",
+      "Focus endurance: hold five steady outputs for 30 seconds with consistent pressure."
+    ],
+    "tips": [
+      "Only practical with external mediums like the Gedo Statue.",
+      "Extreme chakra drain—reserve for finishing maneuvers or overwhelming defense.",
+      "Coordinate with allies to cover downtime afterwards."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/d/d6/All_is_Suffering.png/revision/latest/scale-to-width-down/600?cb=20150113025056"
+    ],
+    "url": "https://naruto.fandom.com/wiki/All_is_Suffering",
+    "sourcePage": "All is Suffering",
+    "pageId": 201183,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/d/d6/All_is_Suffering.png/revision/latest/scale-to-width-down/600?cb=20150113025056",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "All is Suffering" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Wood, Fire, Earth, Water, Lightning, Wind (via medium)",
+          "**Classification:** Ninjutsu, Kekkei Genkai (via medium)",
+          "**Class:** Offensive",
+          "**Range:** Mid, Long",
+          "**Users:** Tobi (Zetsu)",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "Using the giant statue as a medium, each of the five smaller heads encircling the statue's main head simultaneously release a stream of a different elemental nature attack." }
+      ]
+    }
+  },
+  {
+    "id": "allied-shinobi-forces-technique",
+    "name": "Allied Shinobi Forces Technique",
+    "rank": "S",
+    "chakraCost": "Collective/Extreme",
+    "seals": [],
+    "summary": "A massive cooperation jutsu devised by Shikaku Nara, combining the unique abilities of the Allied Shinobi Forces to restrain the Ten-Tails and coordinate an assault.",
+    "technique": [
+      "Kumo-nin use Lightning Release: Lightning Illusion Flash of Lightning Pillar and Storm Release: Laser Circus to blind and obscure vision.",
+      "Suna-nin manipulate the dust cloud with Wind Release: Air Current Wild Dance.",
+      "Aburame clan and Kiri-nin deploy Insect Jamming Technique and Hiding in Mist Technique to impair sensory perception.",
+      "Iwa-nin use Earth Release: Great Moving Earth Core to sink the Ten-Tails.",
+      "Lava users spread quicklime, which Kiri-nin combine with water to harden restraints.",
+      "Sarutobi clan members heat the mixture into concrete, immobilizing the beast.",
+      "Alliance taijutsu squads, coordinated with Naruto, rush Madara and Obito."
+    ],
+    "training": [
+      "Multi-squad timing exercises to synchronize elemental releases.",
+      "Telepathic coordination simulations for large-scale formations.",
+      "Stamina conditioning to sustain long-duration cooperative jutsu."
+    ],
+    "tips": [
+      "Highly situational—requires full allied cooperation.",
+      "Best used as a large-scale restraining maneuver to set up follow-up strikes.",
+      "Vulnerable to evolution or transformation of the restrained target."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/a/a8/Allied_Forces_jutsu.png/revision/latest/scale-to-width-down/600?cb=20150914121326"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Allied_Shinobi_Forces_Technique",
+    "sourcePage": "Allied Shinobi Forces Technique",
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/a/a8/Allied_Forces_jutsu.png/revision/latest/scale-to-width-down/600?cb=20150914121326",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Allied Shinobi Forces Technique" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Multi-Element Cooperative Ninjutsu",
+          "**Classification:** Ninjutsu, Collaboration",
+          "**Class:** Offensive, Supplementary",
+          "**Range:** Long",
+          "**Users:** Allied Shinobi Forces",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A large-scale collaborative technique combining multiple elemental releases and clan abilities to restrain the Ten-Tails and enable a coordinated strike." }
+      ]
+    }
+  }
+]

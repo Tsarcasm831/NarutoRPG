@@ -1,0 +1,136 @@
+[
+  {
+    "id": "wind-release-great-breakthrough",
+    "name": "Wind Release: Great Breakthrough",
+    "rank": "C",
+    "chakraCost": "Low–Medium",
+    "seals": ["Tiger"],
+    "summary": "Expels a powerful gust of wind that can knock back targets and fan flames.",
+    "technique": [
+      "Gather wind-nature chakra in the lungs and throat.",
+      "Shape the release into a wide, forceful cone.",
+      "Exhale in a steady surge; adjust head tilt to control elevation."
+    ],
+    "training": [
+      "Paper flag drill: keep a line of flags horizontal for 3 seconds.",
+      "Cone control: maintain a 45° spread without side eddies.",
+      "Pair with candles to practice precise airflow without extinguishing."
+    ],
+    "tips": [
+      "Amplifies existing fire—coordinate with Katon users.",
+      "Best for crowd control and clearing smoke or mist."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/5/58/Wind_Release_Great_Breakthrough.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Wind_Release:_Great_Breakthrough",
+    "sourcePage": "Wind Release: Great Breakthrough",
+    "pageId": 8029,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/5/58/Wind_Release_Great_Breakthrough.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Wind Release: Great Breakthrough" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Wind Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive, Supplementary",
+          "**Range:** Short, Mid",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A broad gust that knocks enemies back and manipulates battlefield airflow." }
+      ]
+    }
+  },
+  {
+    "id": "wind-release-vacuum-bullets",
+    "name": "Wind Release: Vacuum Bullets",
+    "rank": "B",
+    "chakraCost": "Medium",
+    "seals": [],
+    "summary": "Fires multiple high-pressure wind bullets capable of puncturing targets at range.",
+    "technique": [
+      "Partition breath into rapid micro-bursts.",
+      "Compress wind-nature chakra into tight, rotating spheres.",
+      "Tap rhythmically with tongue/cheek to sequence shots."
+    ],
+    "training": [
+      "Metronome drill at 120 BPM to time consistent salvos.",
+      "Paper target array at staggered depths; log penetration.",
+      "Breath economy—limit chest movement to reduce recoil."
+    ],
+    "tips": [
+      "Best from cover; minimal visual tell beyond muzzle distortion.",
+      "Pairs with shadow binding to fix targets in place."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/9/9f/Vacuum_Bullets.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Wind_Release:_Vacuum_Bullets",
+    "sourcePage": "Wind Release: Vacuum Bullets",
+    "pageId": 14841,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/9/9f/Vacuum_Bullets.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Wind Release: Vacuum Bullets" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Wind Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive",
+          "**Range:** Mid, Long",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "Rapid-fire wind projectiles that puncture with rotational pressure." }
+      ]
+    }
+  },
+  {
+    "id": "wind-release-rasenshuriken",
+    "name": "Wind Release: Rasenshuriken",
+    "rank": "S",
+    "chakraCost": "Very High",
+    "seals": [],
+    "summary": "An advanced Rasengan variant infused with Wind Release that creates a massive shuriken of microscopic blades.",
+    "technique": [
+      "Form a stable Rasengan with external clone assistance or perfected control.",
+      "Imbue wind-nature chakra, creating peripheral blade arms.",
+      "Throw or detonate in hand; maintain cohesion to the point of impact."
+    ],
+    "training": [
+      "Rotation and compression mastery with clone feedback.",
+      "Wind nature transformation drills on small spheres.",
+      "Distance practice to ensure safe detonation away from allies."
+    ],
+    "tips": [
+      "Causes cellular-level damage; avoid friendly proximity.",
+      "High stamina and recovery window required after use."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/6/6f/Rasenshuriken.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Wind_Release:_Rasenshuriken",
+    "sourcePage": "Wind Release: Rasenshuriken",
+    "pageId": 102916,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/6/6f/Rasenshuriken.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Wind Release: Rasenshuriken" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Wind Release",
+          "**Classification:** Ninjutsu, Kekkei Tōta-like microstructure",
+          "**Class:** Offensive",
+          "**Range:** Short, Mid",
+          "**Users:** Naruto Uzumaki",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A wind-augmented Rasengan forming a giant shuriken that tears targets at a microscopic level." }
+      ]
+    }
+  }
+]
+```

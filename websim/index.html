@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto RPG v0.007.002 [Alpha]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/style.css">
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react/jsx-dev-runtime": "https://esm.sh/react@18.2.0/jsx-dev-runtime",
+        "three": "https://esm.sh/three@0.158.0",
+        "three/addons/": "https://esm.sh/three@0.158.0/examples/jsm/",
+        "prop-types": "https://esm.sh/prop-types@15.8.1",
+        "nipplejs": "https://esm.sh/nipplejs@0.10.1",
+        "@tweenjs/tween.js": "https://esm.sh/@tweenjs/tween.js@21.0.0",
+        "/src/": "./src/",
+        "/map/": "./map/",
+        "/hokage/": "./hokage/"
+      }
+    }
+    </script>
+    <style>
+      /* Splash overlay sits above everything until React mounts */
+      #splash {
+        position: fixed;
+        inset: 0;
+        background: #000 center/cover no-repeat;
+        z-index: 99999;
+        opacity: 1;
+        transition: opacity 300ms ease;
+      }
+      /* Ensure the splash <img> covers the splash area and is accessible */
+      /* No longer needed if using background-image on #splash directly */
+      /* #splash img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+      } */
+      #splash.fade-out { opacity: 0; pointer-events: none; }
+    </style>
+    <!-- @tweakable Preload the initial splash image for fastest first paint -->
+    <link rel="preload" as="image" href="./loading.png" fetchpriority="high">
+    <!-- @tweakable Preload the main menu background image to avoid delay -->
+    <link rel="preload" as="image" href="./menu.png" fetchpriority="high">
+    <!-- @tweakable Preload the in-game loading overlay image to avoid delay -->
+    <link rel="preload" as="image" href="./loading1.png" fetchpriority="high">
+</head>
+<body>
+    <!-- Apply background-image inline so it renders before scripts execute -->
+    <div id="splash" aria-label="Loading screen" style="background-image:url('./loading.png')"></div>
+    <!-- The img is inserted and set via script for the fastest possible eager render -->
+    <div id="root"></div>
+    <!-- Mobile rotate-to-landscape overlay -->
+    <div id="rotate-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.8);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;">
+      <div style="max-width:420px;">
+        <div style="font-weight:700;font-size:20px;margin-bottom:8px;">Rotate your device</div>
+        <div style="font-size:14px;opacity:0.9;margin-bottom:14px;">For the best experience, play in landscape.</div>
+        <button id="rotate-btn" style="padding:10px 14px;background:#f59e0b;color:#000;border:2px solid #fbbf24;border-radius:10px;font-weight:700;">Rotate to landscape</button>
+        <div style="font-size:12px;opacity:0.7;margin-top:8px;">If the button doesn’t work, rotate your device manually.</div>
+      </div>
+    </div>
+    <!-- @tweakable when true, add hidden <img> tags to force high-priority fetch/decode of hero images -->
+    <img src="./loading.png" alt="" aria-hidden="true" width="1" height="1" decoding="async" fetchpriority="high" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;">
+    <img src="./menu.png" alt="" aria-hidden="true" width="1" height="1" decoding="async" fetchpriority="high" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;">
+    <img src="./loading1.png" alt="" aria-hidden="true" width="1" height="1" decoding="async" fetchpriority="high" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;">
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" data-type="module">
+        // @tweakable path/URL to the splash image shown before React mounts
+        /* @tweakable The splash image shown immediately on page load. Use an absolute path to avoid relative-load timing issues. */
+        const SPLASH_IMAGE_URL = './loading.png';
+        /* @tweakable milliseconds to fade out the splash once React starts */
+        const SPLASH_FADE_MS = 300;
+        /* @tweakable minimum milliseconds to keep splash visible before fading */
+        const SPLASH_MIN_VISIBLE_MS = 0;
+        /* @tweakable fetch priority for splash image: 'high' | 'auto' | 'low' */
+        const SPLASH_FETCH_PRIORITY = 'high';
+        /* @tweakable fetch priority for main menu image: 'high' | 'auto' | 'low' */
+        const MENU_FETCH_PRIORITY = 'high';
+        /* @tweakable fetch priority for secondary loading image: 'high' | 'auto' | 'low' */
+        const LOADING1_FETCH_PRIORITY = 'high';
+        /* @tweakable inject hidden <img> preloaders (set false if not needed) */
+        const ENABLE_HIDDEN_IMG_PRELOADERS = true;
+        // Apply splash image immediately by setting background-image on the splash div
+        const __splash = document.getElementById('splash');
+        if (__splash) {
+          __splash.style.backgroundImage = `url('${SPLASH_IMAGE_URL}')`;
+          // The CSS rule for #splash already specifies background-size, background-repeat, background-position.
+          // No need to set them again here unless overriding default CSS.
+        }
+        // Ensure priority hints are applied to hidden preloaders at runtime (if present)
+        if (ENABLE_HIDDEN_IMG_PRELOADERS) {
+          const setFP = (sel, val) => { const el = document.querySelector(sel); if (el) el.fetchPriority = val; };
+          setFP(`img[src="./loading.png"]`, SPLASH_FETCH_PRIORITY);
+          setFP(`img[src="./menu.png"]`, MENU_FETCH_PRIORITY);
+          setFP(`img[src="./loading1.png"]`, LOADING1_FETCH_PRIORITY);
+        }
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import OpenWorldGame from './src/OpenWorldGame.jsx';
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const __splashShownAt = performance.now();
+        root.render(<OpenWorldGame />);
+
+        // Fade out and remove splash after React begins rendering
+        const __hideSplash = () => {
+          if (!__splash) return;
+          const elapsed = performance.now() - __splashShownAt;
+          const delay = Math.max(0, SPLASH_MIN_VISIBLE_MS - elapsed);
+          setTimeout(() => {
+            __splash.classList.add('fade-out');
+            setTimeout(() => __splash.remove(), SPLASH_FADE_MS);
+          }, delay);
+        };
+        // Next tick is enough; if needed this can be tied to a more specific readiness signal later
+        requestAnimationFrame(__hideSplash);
+    </script>
+    <script>
+      (function(){
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const overlay = document.getElementById('rotate-overlay');
+        const showIfPortrait = () => {
+          if (!isTouch) { if (overlay) overlay.style.display = 'none'; return; }
+          const portrait = window.innerHeight > window.innerWidth;
+          if (overlay) overlay.style.display = portrait ? 'flex' : 'none';
+        };
+        showIfPortrait();
+        window.addEventListener('resize', showIfPortrait);
+        window.addEventListener('orientationchange', showIfPortrait);
+        document.getElementById('rotate-btn')?.addEventListener('click', async () => {
+          try {
+            if (screen.orientation && screen.orientation.lock) {
+              await screen.orientation.lock('landscape');
+            }
+          } catch(_) {
+            try { await document.documentElement.requestFullscreen?.(); await screen.orientation.lock?.('landscape'); } catch(__) {}
+          } finally { showIfPortrait(); }
+        });
+      })();
+    </script>
+</body>
+</html>

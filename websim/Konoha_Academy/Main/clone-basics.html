@@ -1,0 +1,290 @@
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elemental Clone Basics — Mock</title>
+  <style>
+    :root {
+      --bg:#0f1115; --panel:#151a22; --ink:#e7ecf3; --muted:#9fb0c8; --line:#2a3451; --radius:16px;
+      --accent:#4cc9f0; --good:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+      --fire:#ef4444; --water:#3b82f6; --wind:#10b981; --earth:#a16207; --light:#a78bfa;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0c0f14,#0f1115);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial}
+    a{color:var(--accent)}
+    header{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px}
+    h1{margin:0;font-size:18px;letter-spacing:.4px}
+    .btn{background:#121723;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{border-color:#3a4661}
+
+    main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    @media (max-width: 1000px){ main{grid-template-columns:1fr} }
+
+    /* Left side */
+    .stage{display:grid;gap:14px;align-content:start}
+    .arena{position:relative;min-height:380px;border:1px solid var(--line);background:radial-gradient(60% 80% at 50% 40%,#1b2230,#111722 70%);border-radius:16px;overflow:hidden}
+    .arena .label{position:absolute;left:12px;top:12px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:rgba(20,26,38,.7);padding:6px 10px;border-radius:9px;text-transform:uppercase}
+    .arena-canvas{position:absolute;inset:0;display:grid;place-items:center}
+    .element-glyph{font-size:92px;line-height:1;text-shadow:0 10px 30px rgba(0,0,0,.45)}
+
+    .controls{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{border:1px solid var(--line);background:#0f1420;color:var(--ink);padding:8px 10px;border-radius:999px;cursor:pointer;font-size:13px}
+    .tab[data-el="fire"].active{outline:2px solid var(--fire)}
+    .tab[data-el="water"].active{outline:2px solid var(--water)}
+    .tab[data-el="wind"].active{outline:2px solid var(--wind)}
+    .tab[data-el="earth"].active{outline:2px solid var(--earth)}
+    .tab[data-el="light"].active{outline:2px solid var(--light)}
+
+    .chip{border:1px solid var(--line);background:#0f1420;color:var(--ink);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-flex;align-items:center;gap:8px}
+    .sw{width:14px;height:14px;border-radius:50%}
+    .sw.fire{background:var(--fire)}
+    .sw.water{background:var(--water)}
+    .sw.wind{background:var(--wind)}
+    .sw.earth{background:var(--earth)}
+    .sw.light{background:var(--light)}
+
+    .env{display:flex;gap:8px;flex-wrap:wrap}
+    .toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0f1420;border-radius:10px;padding:6px 10px;cursor:pointer}
+    .toggle input{accent-color:var(--accent)}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    @media (max-width: 800px){ .grid{grid-template-columns:1fr 1fr} }
+    .stat{border:1px solid var(--line);background:#121723;border-radius:12px;padding:10px;display:grid;gap:6px}
+    .stat .k{color:var(--muted);font-size:12px}
+    .stat .v{font-weight:700}
+
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    .clones{display:flex;gap:8px;flex-wrap:wrap}
+    .clone{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;border:2px solid #26304a;background:#0b1220}
+    .clone.fire{border-color:var(--fire)}
+    .clone.water{border-color:var(--water)}
+    .clone.wind{border-color:var(--wind)}
+    .clone.earth{border-color:var(--earth)}
+    .clone.light{border-color:var(--light)}
+
+    /* Right side */
+    .side{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px;height:fit-content;position:sticky;top:72px}
+    .side h2{margin:0;font-size:14px;text-transform:uppercase;color:var(--muted);letter-spacing:.6px}
+
+    .ref{display:grid;gap:10px}
+    .card{border:1px solid var(--line);background:#121723;border-radius:12px;padding:10px}
+    .card h3{margin:0 0 6px}
+    .matrix{width:100%;border-collapse:collapse;font-size:13px}
+    .matrix th,.matrix td{border:1px solid #2b3447;padding:6px 8px;text-align:center}
+    .matrix th{color:var(--muted);font-weight:600}
+    .tag{border:1px solid #33405c;border-radius:999px;padding:0 6px;font-size:11px;color:#b7c2d9}
+
+    .note{color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Elemental Clone Basics — Mock</h1>
+    <div>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT: Arena + Controls -->
+    <section class="stage">
+      <div class="arena" role="region" aria-label="Training arena">
+        <div class="label">Training Arena</div>
+        <div class="arena-canvas">
+          <div class="element-glyph" id="glyph">🔥</div>
+        </div>
+      </div>
+
+      <div class="controls" aria-label="Clone controls">
+        <div class="row" aria-label="Element tabs">
+          <div class="tabs" id="tabs"></div>
+          <span class="chip" id="selectedChip"><span class="sw fire"></span><strong>Fire Clone</strong></span>
+        </div>
+
+        <div class="row env" aria-label="Environment modifiers">
+          <label class="toggle"><input type="checkbox" id="env-wet"> Wet / Rainy</label>
+          <label class="toggle"><input type="checkbox" id="env-windy"> Windy</label>
+          <label class="toggle"><input type="checkbox" id="env-rocky"> Rocky Ground</label>
+          <label class="toggle"><input type="checkbox" id="env-hot"> Hot / Dry</label>
+          <label class="toggle"><input type="checkbox" id="env-storm"> Stormy (Lightning)</label>
+        </div>
+
+        <div class="grid" aria-label="Stats">
+          <div class="stat"><div class="k">Chakra Cost</div><div class="v" id="stat-cost">—</div></div>
+          <div class="stat"><div class="k">Durability</div><div class="v" id="stat-dura">—</div></div>
+          <div class="stat"><div class="k">Contact Effect</div><div class="v" id="stat-effect">—</div></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="summonBtn">Summon Clone</button>
+          <button class="btn" id="hitBtn" title="Test counter hit">Hit with Counter</button>
+          <button class="btn" id="dispelBtn">Dispel All</button>
+        </div>
+
+        <div class="clones" id="clones" aria-live="polite"></div>
+        <div class="note">This is a mock. Stats and effects are simplified. Elemental strengths follow Naruto's basic wheel (Fire▶Wind▶Lightning▶Earth▶Water▶Fire).</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Reference -->
+    <aside class="side">
+      <h2>Reference</h2>
+      <div class="ref">
+        <div class="card">
+          <h3>What are Elemental Clones?</h3>
+          <p>Elemental clones are chakra constructs that inherit traits of an element. Unlike <em>shadow clones</em> (which are fully solid and transfer memories), elemental clones typically have a themed <strong>on‑contact effect</strong> and different <strong>durability/cost</strong> profiles. This page gives a quick, game‑ready breakdown.</p>
+          <p class="note">Lore-friendly; not a 1:1 canon mapping. Use as a design baseline.</p>
+        </div>
+
+        <div class="card">
+          <h3>Element Wheel</h3>
+          <table class="matrix" aria-label="Elemental strengths">
+            <thead>
+              <tr><th>Element</th><th>Strong vs</th><th>Weak to</th><th>Terrain Bonus</th></tr>
+            </thead>
+            <tbody id="wheel"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Design Notes</h3>
+          <ul>
+            <li><span class="tag">Cost</span> is how much chakra a single clone drains relative to others.</li>
+            <li><span class="tag">Durability</span> is the rough hit tolerance before the clone breaks.</li>
+            <li><span class="tag">Contact Effect</span> is a status or burst applied when a target touches the clone.</li>
+            <li>Environment toggles modify stats (e.g., <strong>Wet</strong> boosts Water; <strong>Stormy</strong> boosts Lightning).</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const EL = {
+      fire:   { name:'Fire',    glyph:'🔥', color:'var(--fire)',    effect:'Burn/Scorch',            cost:3, dura:2, strong:'wind', weak:'water', terrain:'Hot/Dry' },
+      water:  { name:'Water',   glyph:'💧', color:'var(--water)',   effect:'Soak/Slow',              cost:2, dura:3, strong:'fire', weak:'earth', terrain:'Wet/Rainy' },
+      wind:   { name:'Wind',    glyph:'🌀', color:'var(--wind)',    effect:'Push/Knockback',         cost:2, dura:2, strong:'light', weak:'fire', terrain:'Windy' },
+      earth:  { name:'Earth',   glyph:'🪨', color:'var(--earth)',   effect:'Stagger/Root (brief)',   cost:3, dura:4, strong:'water', weak:'light', terrain:'Rocky' },
+      light:  { name:'Lightning',glyph:'⚡', color:'var(--light)',  effect:'Shock/Stun (brief)',     cost:4, dura:2, strong:'earth', weak:'wind', terrain:'Stormy' },
+    };
+
+    // Naruto wheel order: Fire > Wind > Lightning > Earth > Water > Fire
+    const ORDER = ['fire','wind','light','earth','water'];
+
+    const tabs = document.getElementById('tabs');
+    const clones = document.getElementById('clones');
+    const glyph = document.getElementById('glyph');
+    const selectedChip = document.getElementById('selectedChip');
+
+    let current = 'fire';
+
+    // Build tabs and wheel
+    function buildUI(){
+      tabs.innerHTML = '';
+      Object.keys(EL).forEach(key => {
+        const t = document.createElement('button');
+        t.className = 'tab';
+        t.dataset.el = key;
+        t.innerHTML = `<span class="sw ${key}"></span>${EL[key].name}`;
+        t.addEventListener('click', ()=> selectEl(key));
+        tabs.appendChild(t);
+      });
+      selectEl(current);
+
+      const wheel = document.getElementById('wheel');
+      wheel.innerHTML = '';
+      Object.keys(EL).forEach(k => {
+        const e = EL[k];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><span class="sw ${k}"></span> ${e.name}</td><td>${EL[e.strong].name}</td><td>${EL[e.weak].name}</td><td>${e.terrain}</td>`;
+        wheel.appendChild(tr);
+      });
+    }
+
+    function selectEl(key){
+      current = key;
+      document.querySelectorAll('.tab').forEach(b=> b.classList.toggle('active', b.dataset.el===key));
+      glyph.textContent = EL[key].glyph;
+      selectedChip.innerHTML = `<span class="sw ${key}"></span><strong>${EL[key].name} Clone</strong>`;
+      renderStats();
+    }
+
+    // Environment toggles
+    const env = {
+      wet: document.getElementById('env-wet'),
+      windy: document.getElementById('env-windy'),
+      rocky: document.getElementById('env-rocky'),
+      hot: document.getElementById('env-hot'),
+      storm: document.getElementById('env-storm'),
+    };
+    Object.values(env).forEach(inp=> inp.addEventListener('change', renderStats));
+
+    // Stats
+    const statCost = document.getElementById('stat-cost');
+    const statDura = document.getElementById('stat-dura');
+    const statEff  = document.getElementById('stat-effect');
+
+    function renderStats(){
+      const e = EL[current];
+      // Base
+      let cost = e.cost; let dura = e.dura; const effect = e.effect;
+      // Terrain bonuses
+      if (env.wet.checked   && current==='water') dura += 1;
+      if (env.hot.checked   && current==='fire')  dura += 1;
+      if (env.windy.checked && current==='wind')  dura += 1;
+      if (env.rocky.checked && current==='earth') dura += 1;
+      if (env.storm.checked && current==='light') dura += 1;
+      // Mild cross penalties
+      if (env.wet.checked   && current==='fire')  dura -= 1;
+      if (env.hot.checked   && current==='water') dura -= 1;
+
+      // Keep ranges readable
+      dura = Math.max(1, Math.min(5, dura));
+
+      statCost.textContent = cost + ' ⚝';
+      statDura.textContent = '★'.repeat(dura) + '☆'.repeat(5-dura);
+      statEff.textContent  = effect;
+    }
+
+    // Actions
+    const resetBtn = document.getElementById('resetBtn');
+    const summonBtn = document.getElementById('summonBtn');
+    const hitBtn = document.getElementById('hitBtn');
+    const dispelBtn = document.getElementById('dispelBtn');
+
+    resetBtn.addEventListener('click', ()=>{ clones.innerHTML=''; });
+    dispelBtn.addEventListener('click', ()=>{ clones.innerHTML=''; });
+
+    summonBtn.addEventListener('click', ()=>{
+      const e = EL[current];
+      const item = document.createElement('div');
+      item.className = `clone ${current}`;
+      item.title = `${e.name} Clone`;
+      item.innerHTML = `<span style="font-size:24px">${e.glyph}</span>`;
+      clones.appendChild(item);
+    });
+
+    hitBtn.addEventListener('click', ()=>{
+      // Simulate one counter hit: if a clone is weak to its counter, remove the last one of that type
+      const items = Array.from(clones.querySelectorAll('.clone'));
+      if (!items.length) return;
+      const last = items[items.length-1];
+      const type = Array.from(last.classList).find(c=> EL[c]);
+      if (!type) return;
+      const weakTo = EL[type].weak;
+      // Visual flash
+      last.animate([{transform:'scale(1)',opacity:.9},{transform:'scale(1.15)',opacity:1},{transform:'scale(.8)',opacity:0}],{duration:380,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish = ()=> last.remove();
+    });
+
+    buildUI();
+    renderStats();
+  </script>
+</body>
+</html>

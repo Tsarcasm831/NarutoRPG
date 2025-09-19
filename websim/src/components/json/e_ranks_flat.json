@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "schema": "naruto-jutsu-eranks/v1",
+    "generated_at": "2025-08-18T17:05:24.130877Z",
+    "counts": {
+      "B": 1,
+      "C": 2,
+      "O": 1,
+      "R": 1,
+      "S": 1,
+      "T": 1
+    },
+    "total": 7
+  },
+  "items": [
+    "Body Replacement Technique",
+    "Cloak of Invisibility Technique",
+    "Clone Technique",
+    "One Thousand Years of Death",
+    "Rope Escape Technique",
+    "Sexy Technique",
+    "Transformation Technique"
+  ]
+}

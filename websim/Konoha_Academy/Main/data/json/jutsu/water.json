@@ -1,0 +1,132 @@
+[
+  {
+    "id": "water-release-water-dragon-bullet",
+    "name": "Water Release: Water Dragon Bullet Technique",
+    "rank": "B",
+    "chakraCost": "High",
+    "seals": ["Ox","Monkey","Hare","Rat","Boar","Ox","Dog","Hare","Snake","Dragon"],
+    "summary": "Shapes a massive dragon out of water that surges toward the target with crushing force.",
+    "technique": [
+      "Mold chakra and convert to water nature.",
+      "Pull ambient water or generate from chakra to form a serpentine mass.",
+      "Guide the dragon’s head to impact and coil through the target zone."
+    ],
+    "training": [
+      "Form control: practice keeping a coherent dragon head at 15m.",
+      "Flow rehearsal: sustain continuous water stream for 5 seconds.",
+      "Target steering: curve mid‑flight without shearing apart."
+    ],
+    "tips": [
+      "Near lakes/rivers reduces chakra cost significantly.",
+      "Wind can disrupt the head—cast with tailwind when possible."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/9/9a/Water_Dragon_Bullet_Technique.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Water_Release:_Water_Dragon_Bullet_Technique",
+    "sourcePage": "Water Release: Water Dragon Bullet Technique",
+    "pageId": 3057,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/9/9a/Water_Dragon_Bullet_Technique.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Water Release: Water Dragon Bullet Technique" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Water Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive",
+          "**Range:** Mid, Long",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A high‑level suiton that forms a raging dragon to smash and drown targets." }
+      ]
+    }
+  },
+  {
+    "id": "water-release-water-shark-bullet",
+    "name": "Water Release: Water Shark Bullet Technique",
+    "rank": "B",
+    "chakraCost": "Medium",
+    "seals": ["Tiger","Dragon","Rat","Tiger"],
+    "summary": "Condenses water into a fast shark-shaped projectile that drills into the opponent.",
+    "technique": [
+      "Compress water into a dense core.",
+      "Shape fins for stability and a pointed muzzle for penetration.",
+      "Release with a burst to maintain cohesion over distance."
+    ],
+    "training": [
+      "Cone compression drill: reduce spread under crosswind.",
+      "Target boards at 10/20/30m for penetration consistency."
+    ],
+    "tips": [
+      "Excels underwater—speed and pressure both increase.",
+      "Pairs well with clone feints to mask approach."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/6/64/Water_Shark_Bullet_Technique.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Water_Release:_Water_Shark_Bullet_Technique",
+    "sourcePage": "Water Release: Water Shark Bullet Technique",
+    "pageId": 5174,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/6/64/Water_Shark_Bullet_Technique.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Water Release: Water Shark Bullet Technique" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Water Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Offensive",
+          "**Range:** Mid",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "A compressive suiton projectile shaped like a shark that tears through defenses." }
+      ]
+    }
+  },
+  {
+    "id": "hidden-mist-technique",
+    "name": "Hiding in Mist Technique",
+    "rank": "D",
+    "chakraCost": "Low",
+    "seals": ["Ox","Snake","Ram"],
+    "summary": "Blankets the area in thick mist, obscuring vision and masking presence.",
+    "technique": [
+      "Vaporize ambient moisture and thicken with controlled temperature drop.",
+      "Spread low, then rise to head height for maximum denial.",
+      "Maintain through subtle pulses to prevent dissipation."
+    ],
+    "training": [
+      "Area practice: evenly cover a 20m radius.",
+      "Silent movement drills within mist to avoid telltale wakes."
+    ],
+    "tips": [
+      "Wind counters—use terrain to shield mist edge.",
+      "Pair with sensory jutsu to offset visibility loss."
+    ],
+    "images": [
+      "https://static.wikia.nocookie.net/naruto/images/1/1c/Hiding_in_Mist_Technique.png/revision/latest/scale-to-width-down/600"
+    ],
+    "url": "https://naruto.fandom.com/wiki/Hiding_in_Mist_Technique",
+    "sourcePage": "Hiding in Mist Technique",
+    "pageId": 4072,
+    "thumbnail": "https://static.wikia.nocookie.net/naruto/images/1/1c/Hiding_in_Mist_Technique.png/revision/latest/scale-to-width-down/600",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Hiding in Mist Technique" },
+        { "type": "heading", "level": 2, "text": "Quick Facts" },
+        { "type": "list", "items": [
+          "**Element/Type:** Water Release",
+          "**Classification:** Ninjutsu",
+          "**Class:** Supplementary",
+          "**Range:** Short, Mid",
+          "**Media:** Anime, Manga, Game"
+        ]},
+        { "type": "heading", "level": 2, "text": "Summary" },
+        { "type": "paragraph", "text": "Creates a dense fog that conceals the user’s movements and suppresses enemy vision." }
+      ]
+    }
+  }
+]

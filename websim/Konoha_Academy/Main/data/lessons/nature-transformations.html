@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Nature Transformations — Overview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#fff;--ink:#111;--muted:#666;--ring:rgba(0,0,0,.1);--bg:#f4f5f7;
+      --accent:#0055A4;--good:#22c55e;--bad:#ef4444;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:#111;color:var(--ink);font-family:"Noto Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
+    header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--ring)}
+    .title{margin:0;font-size:18px;font-weight:700;color:#000}
+    main{background:var(--bg);padding:18px}
+    .container{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+    .intro{background:var(--paper);border:1px solid var(--ring);border-radius:16px;padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr 1fr; } }
+    .card{background:#fafafa;border:1px solid var(--ring);border-radius:12px;padding:12px;display:grid;gap:8px;text-align:center}
+    .emoji{font-size:28px}
+    .name{font-weight:700}
+    .btn{display:inline-block;text-decoration:none;background:var(--accent);color:#fff;border-radius:10px;padding:8px 10px;font-size:12px}
+    .btn:hover{filter:brightness(.95)}
+    .panel{background:var(--paper);border:1px solid var(--ring);border-radius:16px;padding:14px;display:grid;gap:10px}
+    .wheel{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .el{border:1px solid var(--ring);background:#f7f8f9;border-radius:12px;padding:10px;cursor:pointer;text-align:center;transition:transform .12s ease}
+    .el:focus,.el:hover{outline:2px solid var(--accent);outline-offset:2px;transform:translateY(-1px)}
+    .el.active{box-shadow:0 0 0 2px var(--accent) inset}
+    .desc{color:var(--muted);font-size:14px}
+    .matrix{width:100%;border-collapse:collapse}
+    .matrix th,.matrix td{border:1px solid var(--ring);padding:8px;text-align:center;font-size:14px}
+    .legend{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px}
+    .sw{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid var(--ring)}
+    .sw.good{background:#e9f9ef;border-color:#a7e3b7}
+    .sw.bad{background:#fdecec;border-color:#f3b1b1}
+    footer{padding:14px;text-align:center;color:#ddd}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="title">Nature Transformations — Overview</h1>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="intro">
+        <p>Five elemental natures shape most ninjutsu. Click an element to see strengths and weaknesses, and jump into its dedicated module.</p>
+      </section>
+
+      <section class="panel" aria-label="Element Modules">
+        <div class="grid">
+          <div class="card">
+            <div class="emoji">🔥</div>
+            <div class="name">Fire (Katon)</div>
+            <a class="btn" href="./fire/fire-release.html">Open Fire Release</a>
+          </div>
+          <div class="card">
+            <div class="emoji">🌀</div>
+            <div class="name">Wind (Fūton)</div>
+            <a class="btn" href="./wind/wind-release.html">Open Wind Release</a>
+          </div>
+          <div class="card">
+            <div class="emoji">⚡</div>
+            <div class="name">Lightning (Raiton)</div>
+            <a class="btn" href="./lightning/lightning-release.html">Open Lightning Release</a>
+          </div>
+          <div class="card">
+            <div class="emoji">🪨</div>
+            <div class="name">Earth (Doton)</div>
+            <a class="btn" href="./earth/earth-release.html">Open Earth Release</a>
+          </div>
+          <div class="card">
+            <div class="emoji">💧</div>
+            <div class="name">Water (Suiton)</div>
+            <a class="btn" href="./water/water-release.html">Open Water Release</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Interactive Wheel">
+        <strong>Interaction Wheel</strong>
+        <div class="wheel" id="wheel" role="tablist" aria-label="Select element">
+          <button class="el" data-k="fire" role="tab" aria-selected="false">🔥 Fire</button>
+          <button class="el" data-k="wind" role="tab" aria-selected="false">🌀 Wind</button>
+          <button class="el" data-k="light" role="tab" aria-selected="false">⚡ Lightning</button>
+          <button class="el" data-k="earth" role="tab" aria-selected="false">🪨 Earth</button>
+          <button class="el" data-k="water" role="tab" aria-selected="false">💧 Water</button>
+        </div>
+        <div id="readout" class="desc" aria-live="polite">Select an element to view details.</div>
+        <div class="legend"><span class="sw good"></span> Strong vs · <span class="sw bad"></span> Weak to</div>
+        <table class="matrix" aria-label="Strength/Weakness Matrix">
+          <thead><tr><th>Element</th><th>Strong vs</th><th>Weak to</th></tr></thead>
+          <tbody id="matrix"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <footer>Konoha Academy — Nature Transformations</footer>
+</div>
+
+<script type="module">
+  const EL = {
+    fire:  { n:'Fire',     emoji:'🔥', strong:'wind',  weak:'water',  note:'Expansive, pressure‑driven. Amplifies existing flames.' },
+    wind:  { n:'Wind',     emoji:'🌀', strong:'light', weak:'fire',   note:'Precision, cutting, shaping. Great for control.' },
+    light: { n:'Lightning',emoji:'⚡', strong:'earth', weak:'wind',   note:'Piercing, conduction, speed. Risk of tunnel vision.' },
+    earth: { n:'Earth',    emoji:'🪨', strong:'water', weak:'light',  note:'Mass, defense, stability. Terrain matters a lot.' },
+    water: { n:'Water',    emoji:'💧', strong:'fire',  weak:'earth',  note:'Flow, pressure, adaptability. Nearby water lowers cost.' }
+  };
+
+  const wheel = document.getElementById('wheel');
+  const readout = document.getElementById('readout');
+  const matrix = document.getElementById('matrix');
+
+  // Build matrix
+  matrix.innerHTML = Object.keys(EL).map(k=>{
+    const e = EL[k]; return `<tr><td>${e.emoji} ${e.n}</td><td><span class="sw good"></span> ${EL[e.strong].n}</td><td><span class="sw bad"></span> ${EL[e.weak].n}</td></tr>`;
+  }).join('');
+
+  function select(key){
+    document.querySelectorAll('.el').forEach(b=>{
+      const on = b.dataset.k===key; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
+    });
+    const e = EL[key];
+    readout.innerHTML = `${e.emoji} <strong>${e.n}</strong> — Strong vs <span class="sw good"></span> ${EL[e.strong].n} · Weak to <span class="sw bad"></span> ${EL[e.weak].n}. ${e.note}`;
+  }
+
+  wheel.querySelectorAll('.el').forEach(b=>{
+    b.addEventListener('click', ()=> select(b.dataset.k));
+    b.addEventListener('keydown', (ev)=>{ if (ev.key==='Enter' || ev.key===' ') { ev.preventDefault(); select(b.dataset.k); } });
+  });
+
+  // Default
+  select('fire');
+</script>
+</body>
+</html>

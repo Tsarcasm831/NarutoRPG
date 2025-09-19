@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "schema": "naruto-mora-list/v1",
+    "generated_at": "2025-08-18T17:07:54.919853Z",
+    "counts": {
+      "A": 2,
+      "B": 1,
+      "E": 2,
+      "G": 1,
+      "I": 1,
+      "R": 3,
+      "Y": 1
+    },
+    "total": 11
+  },
+  "items": [
+    "All-Killing Ash Bones",
+    "Amenominaka",
+    "Byakugan",
+    "Eighty Gods Vacuum Attack",
+    "Expansive Truth-Seeking Ball",
+    "God: Nativity of a World of Trees",
+    "Infinite Tsukuyomi",
+    "Rabbit Hair Needle",
+    "Rinne Sharingan",
+    "Rinnegan",
+    "Yomotsu Hirasaka"
+  ]
+}

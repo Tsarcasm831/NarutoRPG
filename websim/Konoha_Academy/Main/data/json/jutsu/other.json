@@ -1,0 +1,92 @@
+[
+  {
+    "id": "summon-paper-bird",
+    "name": "Summoning: Paper Bird",
+    "rank": "D",
+    "chakraCost": "Low",
+    "seals": ["Bird","Ram"],
+    "summary": "Creates a small paper bird that delivers messages or small items and can scout short distances.",
+    "technique": [
+      "Fold and infuse paper with a simple summoning seal.",
+      "Imbue a guiding pulse of chakra to steer the bird.",
+      "Recall with a short command or let it land and wait."
+    ],
+    "training": [
+      "Practice stable flight over 50m.",
+      "Mini-delivery drills: land within a 1m circle.",
+      "Stealth movement to avoid detection when scouting."
+    ],
+    "tips": [
+      "Excellent for discreet messaging; weak in rain.",
+      "Can be combined with ink seals to carry tiny traps or markers."
+    ],
+    "images": [],
+    "thumbnail": "",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Summoning: Paper Bird" },
+        { "type": "paragraph", "text": "A lightweight summoning used for reconnaissance and small deliveries. Useful for scouts and couriers." }
+      ]
+    }
+  },
+  {
+    "id": "memory-bind-seal",
+    "name": "Memory Bind Seal",
+    "rank": "B",
+    "chakraCost": "Medium",
+    "seals": [],
+    "summary": "A sealing technique that temporarily locks a short memory fragment for later retrieval by the caster.",
+    "technique": [
+      "Trace a small circular seal around the target memory point (often performed on a token).",
+      "Anchor the seal with a short breath and a focused intent phrase.",
+      "Keep the token secure; retrieval requires the original caster's chakra signature."
+    ],
+    "training": [
+      "Focus drills: recall small details then seal them.",
+      "Token management: protect and conceal anchors.",
+      "Stability training to prevent corruption of sealed memory."
+    ],
+    "tips": [
+      "Ethically fraught — treat as sensitive skill.",
+      "Works best on short, well-defined memories (faces, phrases)."
+    ],
+    "images": [],
+    "thumbnail": "",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Memory Bind Seal" },
+        { "type": "paragraph", "text": "A sealing jutsu for temporarily preserving a short memory fragment; requires care and discipline." }
+      ]
+    }
+  },
+  {
+    "id": "illumination-lantern",
+    "name": "Illumination Lantern",
+    "rank": "C",
+    "chakraCost": "Low",
+    "seals": ["Ox"],
+    "summary": "Produces a hovering light source that follows the user and can be dimmed or brightened with thought.",
+    "technique": [
+      "Compress a small pool of yang chakra into a palm-sized orb.",
+      "Stabilize the orb with a simple single-seal anchor.",
+      "Adjust intensity via subtle breath control."
+    ],
+    "training": [
+      "Sustain the light for increasing durations.",
+      "Practice dimming without dispersion.",
+      "Train to keep orb steady in wind or rain (protected casting)."
+    ],
+    "tips": [
+      "Low-cost utility for night operations.",
+      "Can be used to signal allies with timed flashes."
+    ],
+    "images": [],
+    "thumbnail": "",
+    "raw": {
+      "markdown": [
+        { "type": "heading", "level": 1, "text": "Illumination Lantern" },
+        { "type": "paragraph", "text": "A low-cost utility jutsu that creates a controllable floating light." }
+      ]
+    }
+  }
+]

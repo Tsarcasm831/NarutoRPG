@@ -1,0 +1,221 @@
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Konoha Map</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="mapPane">
+    <svg id="map" viewBox="0 0 1018 968" aria-label="Konohagakure interactive map">
+      <image href="konohagakure.jpg" x="0" y="0" width="1018" height="968" preserveAspectRatio="xMidYMid slice"></image>
+      <defs>
+        <!-- Road texture patterns -->
+        <pattern id="roadSecondaryTex" patternUnits="userSpaceOnUse" width="32" height="32">
+          <image href="../secondary_road_texture.png" x="0" y="0" width="32" height="32"/>
+        </pattern>
+      </defs>
+      <!-- New paint layers (bottom-most overlay to top-most paint): -->
+      <g id="grassLayer"></g>
+      <g id="forestLayer"></g>
+      <g id="mountainLayer"></g>
+      <!-- Layers order: roads below districts for readability; pins on top -->
+      <g id="roadLayer"></g>
+      <g id="riverLayer"></g>
+      <g id="districtLayer"></g>
+      <g id="wallLayer"></g>
+      <g id="poiLayer"></g>
+      <g id="handleLayer"></g>
+    </svg>
+    <div id="tip" hidden></div>
+    <!-- Quick panel (bottom-left) -->
+    <div id="quickPanel">
+      <button id="addPoiBtn" class="primary">Add POI</button>
+      <div class="key">
+        <span><i class="dot gate"></i> Gate</span>
+        <span><i class="dot park"></i> Park</span>
+        <span><i class="dot letter"></i> Letter</span>
+        <span><i class="dot poi"></i> POI</span>
+      </div>
+    </div>
+    <!-- POI modal -->
+    <div id="poiModal" hidden>
+      <div class="hdr">New POI</div>
+      <div class="row">
+        <label>Type
+          <select id="poiType">
+            <option value="gate">gate</option>
+            <option value="park">park</option>
+            <option value="letter">letter</option>
+            <option value="poi">poi</option>
+          </select>
+        </label>
+        <label>ID <input id="poiId" type="text" size="8" placeholder="auto"></label>
+        <label>Name <input id="poiName" type="text" size="18" placeholder="optional"></label>
+      </div>
+      <div class="row"><label style="flex:1">Description <input id="poiDesc" type="text" style="width:100%" placeholder="optional"></label></div>
+      <div class="row" style="opacity:.8">Location set. Enter details and click Create.</div>
+      <div class="row">
+        <button id="poiCancel">Cancel</button>
+        <button id="poiCreate" class="primary">Create POI</button>
+      </div>
+    </div>
+    <!-- District modal -->
+    <div id="districtModal" hidden>
+      <div class="hdr">District Settings</div>
+      <div class="row">
+        <label>ID <input id="dmId" type="text" size="10"></label>
+        <label>Name <input id="dmName" type="text" size="20"></label>
+      </div>
+      <div class="row"><label style="flex:1">Description <input id="dmDesc" type="text" style="width:100%"></label></div>
+      <div class="row"><label>Color <input id="dmColor" type="color" value="#22d3ee"></label></div>
+      <div class="row">
+        <button id="dmCancel">Cancel</button>
+        <button id="dmApply" class="primary">Apply</button>
+      </div>
+    </div>
+    <div id="legend">
+      <div class="hdr">Legend</div>
+      <ul>
+        <li><b>1</b> Hokage Palace</li>
+        <li><b>2</b> Academy & Training Ground</li>
+        <li><b>3</b> ROOT</li>
+        <li><b>4</b> Uchiha Lake</li>
+        <li><b>5</b> Uchiha Training Ground</li>
+        <li><b>6</b> Museum | Library</li>
+        <li><b>7</b> Hospital / Greenhouse</li>
+        <li><b>8</b> Hotel</li>
+        <li><b>9</b> ANBU Headquarters</li>
+        <li><b>10</b> Research Facility</li>
+        <li><b>11</b> Arena</li>
+        <li><b>12</b> ANBU Outpost</li>
+        <li><b>A.</b> Plaza of Fire</li>
+        <li><b>B.</b> Marketplace II</li>
+        <li><b>C.</b> Parks</li>
+        <li><b>D.</b> Cemetery</li>
+        <li><b>E.</b> Gates</li>
+      </ul>
+    </div>
+  </div>
+
+  <aside id="side">
+    <h2>Konoha Map — Editor</h2>
+
+    <fieldset>
+      <legend>Mode</legend>
+      <div class="row">
+        <label><input type="radio" name="mode" value="select" checked> Select / Move</label>
+        <label><input type="radio" name="mode" value="draw-district"> Draw District</label>
+        <label><input type="radio" name="mode" value="draw-road"> Draw Road</label>
+        <label><input type="radio" name="mode" value="draw-wall"> Draw Wall</label>
+        <label><input type="radio" name="mode" value="draw-river"> Draw River</label>
+        <label><input type="radio" name="mode" value="draw-forest"> Draw Forest</label>
+        <label><input type="radio" name="mode" value="draw-mountain"> Draw Mountain</label>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="snap"> Snap 1% grid</label>
+        <label><input type="checkbox" id="edit"> Edit overlay (handles)</label>
+        <label><input type="checkbox" id="autosave" checked> Autosave</label>
+      </div>
+      <div class="row" style="opacity:.8">Tips: drag vertices. <b>Alt+drag</b> to move whole road/district. <b>Esc</b> cancel, <b>Enter</b> or double-click finish.</div>
+    </fieldset>
+
+    <fieldset id="brushPanel">
+      <legend>Brush Settings</legend>
+      <div class="row" data-for="draw-road">
+        <label>Type
+          <select id="brRoadType">
+            <option value="street">street</option>
+            <option value="avenue">avenue</option>
+            <option value="canal">canal</option>
+          </select>
+        </label>
+        <label>Width <input id="brRoadW" type="number" min="1" max="24" step="1" value="4">px</label>
+      </div>
+      <div class="row" data-for="draw-river" hidden>
+        <label>Width <input id="brRiverW" type="number" min="3" max="32" step="1" value="7">px</label>
+      </div>
+      <div class="row" data-for="draw-forest" hidden>
+        <label>Width <input id="brForestW" type="number" min="10" max="120" step="5" value="40">px</label>
+      </div>
+      <div class="row" data-for="draw-mountain" hidden>
+        <label>Shape
+          <select id="brMountainShape">
+            <option value="line">hand‑drawn line</option>
+            <option value="triangle">triangle</option>
+          </select>
+        </label>
+        <label id="brMountainWWrap">Width <input id="brMountainW" type="number" min="4" max="48" step="1" value="10">px</label>
+        <label id="brMountainTriWrap" hidden>Size <input id="brMountainTri" type="number" min="2" max="40" step="1" value="8">%</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Selected</legend>
+      <div id="selNone" class="row" style="opacity:.7">Nothing selected.</div>
+      <div id="selForm" hidden>
+        <div class="row"><label>Type <input id="sType" type="text" readonly></label></div>
+        <div class="row">
+          <label>ID <input id="sId" type="text"></label>
+          <label>Name <input id="sName" type="text" size="22"></label>
+        </div>
+        <div class="row"><label style="flex:1">Description <input id="sDesc" type="text" style="width:100%"></label></div>
+        <div id="roadExtras" class="row" hidden>
+          <label>Road type
+            <select id="sRoadType">
+              <option value="avenue">avenue</option>
+              <option value="street">street</option>
+              <option value="canal">canal</option>
+            </select>
+          </label>
+          <label>Width <input id="sRoadW" type="number" min="1" max="24" step="1" value="4">px</label>
+        </div>
+        <div class="row">
+          <button id="apply" class="primary">Apply</button>
+          <button id="delete">Delete selected</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Export / Import</legend>
+      <div class="row">
+        <button id="copyJson">Copy JSON</button>
+        <button id="downloadJson" class="primary">Download JSON</button>
+        <button id="exportSvg">Export SVG Overlay</button>
+        <button id="downloadJsModel">Download JS Default</button>
+        <button id="saveAsDefault">Save as Default</button>
+      </div>
+      <div class="row">
+        <input type="file" id="importFile" accept="application/json">
+        <button id="loadAutosave">Load Autosave</button>
+        <button id="clearAll">Clear All</button>
+      </div>
+      <textarea id="json" readonly></textarea>
+      <!-- Piece Analyzer -->
+      <div class="row">
+        <label>View piece
+          <select id="viewPiece">
+            <option value="districts">districts</option>
+            <option value="roads">roads</option>
+            <option value="poi">poi</option>
+            <option value="walls">walls</option>
+            <option value="rivers">rivers</option>
+            <option value="forest">forest</option>
+            <option value="grass">grass</option>
+            <option value="mountains">mountains</option>
+          </select>
+        </label>
+        <button id="copyPiece">Copy Piece</button>
+      </div>
+      <textarea id="piece" readonly></textarea>
+    </fieldset>
+
+    <p style="opacity:.65">Shortcuts: <b>E</b> toggle Edit, <b>H</b> hide panel.</p>
+  </aside>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
