@@ -1,5 +1,5 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { EquipmentSlot } from "./inventory/EquipmentSlot.jsx";
 import { PotionSlot } from "./inventory/PotionSlot.jsx";
 import { StorageSlot } from "./inventory/StorageSlot.jsx";
