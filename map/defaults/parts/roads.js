@@ -13,7 +13,7 @@ export const DEFAULT_ROADS = [
     "id": "road-2",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [52.22, 23.08],
       [53.48, 87.43]
@@ -23,7 +23,7 @@ export const DEFAULT_ROADS = [
     "id": "road-3",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [53.97, 87.43],
       [87.87, 53.33]
@@ -33,7 +33,7 @@ export const DEFAULT_ROADS = [
     "id": "road-4",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [53.06, 87.57],
       [18.67, 53.48]
@@ -43,7 +43,7 @@ export const DEFAULT_ROADS = [
     "id": "road-5",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [18.67, 52.37],
       [49.96, 23.08]
@@ -53,7 +53,7 @@ export const DEFAULT_ROADS = [
     "id": "road-6",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [53.9, 22.49],
       [87.73, 52.37]
@@ -63,7 +63,7 @@ export const DEFAULT_ROADS = [
     "id": "road-7",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [25.7, 28.33],
       [52.5, 39.64]
@@ -73,7 +73,7 @@ export const DEFAULT_ROADS = [
     "id": "road-8",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [38.36, 34.1],
       [39.84, 52.74]
@@ -83,7 +83,7 @@ export const DEFAULT_ROADS = [
     "id": "road-9",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [40.19, 52.74],
       [52.22, 40.46]
@@ -93,7 +93,7 @@ export const DEFAULT_ROADS = [
     "id": "road-10",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [52.85, 39.72],
       [80.42, 28.25]
@@ -103,7 +103,7 @@ export const DEFAULT_ROADS = [
     "id": "road-11",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [62.98, 35.65],
       [65.72, 52.81]
@@ -113,7 +113,7 @@ export const DEFAULT_ROADS = [
     "id": "road-12",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [65.44, 52.74],
       [52.78, 39.87]
@@ -133,7 +133,7 @@ export const DEFAULT_ROADS = [
     "id": "road-14",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [64.73, 46.23],
       [73.74, 44.45]
@@ -143,7 +143,7 @@ export const DEFAULT_ROADS = [
     "id": "road-15",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [76.83, 53.03],
       [76.76, 53.18],
@@ -154,7 +154,7 @@ export const DEFAULT_ROADS = [
     "id": "road-16",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [58.9, 66.12],
       [53.41, 71.6]
@@ -164,7 +164,7 @@ export const DEFAULT_ROADS = [
     "id": "road-17",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [58.83, 66.27],
       [58.69, 62.43],
@@ -185,7 +185,7 @@ export const DEFAULT_ROADS = [
     "id": "road-19",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [59.04, 66.2],
       [64.8, 63.83],
@@ -197,7 +197,7 @@ export const DEFAULT_ROADS = [
     "id": "road-20",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [39.98, 85.43],
       [52.99, 72.19],
@@ -208,7 +208,7 @@ export const DEFAULT_ROADS = [
     "id": "road-21",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [30.34, 78.85],
       [36.53, 71.52]
@@ -218,7 +218,7 @@ export const DEFAULT_ROADS = [
     "id": "road-22",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [20.85, 65.09],
       [25.91, 61.02],
@@ -230,7 +230,7 @@ export const DEFAULT_ROADS = [
     "id": "road-23",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [18.88, 42.6],
       [45.96, 46.67]
@@ -240,7 +240,7 @@ export const DEFAULT_ROADS = [
     "id": "road-24",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [21.27, 34.99],
       [32.73, 38.98]
@@ -250,7 +250,7 @@ export const DEFAULT_ROADS = [
     "id": "road-25",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [85.34, 64.57],
       [79.86, 69.08],
@@ -262,7 +262,7 @@ export const DEFAULT_ROADS = [
     "id": "road-26",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [60.58, 71.89],
       [62.34, 78.4]
@@ -272,7 +272,7 @@ export const DEFAULT_ROADS = [
     "id": "road-27",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [38.15, 21.89],
       [30.9, 30.25]
@@ -282,7 +282,7 @@ export const DEFAULT_ROADS = [
     "id": "road-28",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [44.69, 27.66],
       [36.88, 23.74]
@@ -292,7 +292,7 @@ export const DEFAULT_ROADS = [
     "id": "road-29",
     "name": "",
     "type": "street",
-    "width": 3,
+    "width": 4,
     "points": [
       [59.04, 15.61],
       [76.2, 36.02]

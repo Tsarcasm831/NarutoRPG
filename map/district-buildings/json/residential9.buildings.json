@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "primaryBaseName": "Kitbash-22",
+    "varietyRatio": 0.2,
+    "source": "mixed",
+    "paletteIndex": 0
+  },
+  "entries": [
+    {
+      "baseName": "Building",
+      "pos": [
+        588.8105190844619,
+        123.69554576885322
+      ],
+      "rotY": 0.015064773630440882,
+      "scale": 0.55
+    },
+    {
+      "baseName": "Building",
+      "pos": [
+        617.1857370144309,
+        128.5631371722184
+      ],
+      "rotY": 2.9833523291389104,
+      "scale": 0.28
+    }
+  ]
+}
