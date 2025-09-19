@@ -1,9 +1,13 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
+import { computeInventoryStats } from "./inventoryUtils.js";
 const InventoryStats = ({ inventory }) => {
-  const weight = 127;
+  const { totalWeight, totalValue, conditionPercentage } = computeInventoryStats(inventory);
   const maxWeight = 200;
-  const value = 2847;
+  const weightPercentage = maxWeight > 0 ? Math.min(100, totalWeight / maxWeight * 100) : 0;
+  const weightDisplay = totalWeight.toLocaleString(void 0, { maximumFractionDigits: 1 });
+  const formattedValue = totalValue.toLocaleString();
+  const qualityDisplay = conditionPercentage !== null ? `${conditionPercentage}%` : "N/A";
   return /* @__PURE__ */ jsxDEV("div", { className: "bg-gray-800 bg-opacity-70 border border-yellow-500 rounded-lg p-3", children: /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-3 gap-4 text-sm", children: [
     /* @__PURE__ */ jsxDEV("div", { children: [
       /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between text-yellow-300 mb-1", children: [
@@ -13,7 +17,7 @@ const InventoryStats = ({ inventory }) => {
           columnNumber: 17
         }),
         /* @__PURE__ */ jsxDEV("span", { children: [
-          weight,
+          weightDisplay,
           "/",
           maxWeight
         ] }, void 0, true, {
@@ -26,7 +30,7 @@ const InventoryStats = ({ inventory }) => {
         lineNumber: 13,
         columnNumber: 15
       }),
-      /* @__PURE__ */ jsxDEV("div", { className: "w-full bg-gray-700 rounded-full h-2", children: /* @__PURE__ */ jsxDEV("div", { className: "bg-blue-500 h-2 rounded-full", style: { width: `${weight / maxWeight * 100}%` } }, void 0, false, {
+      /* @__PURE__ */ jsxDEV("div", { className: "w-full bg-gray-700 rounded-full h-2", children: /* @__PURE__ */ jsxDEV("div", { className: "bg-blue-500 h-2 rounded-full", style: { width: `${weightPercentage}%` } }, void 0, false, {
         fileName: "<stdin>",
         lineNumber: 18,
         columnNumber: 17
@@ -48,7 +52,7 @@ const InventoryStats = ({ inventory }) => {
           columnNumber: 17
         }),
         /* @__PURE__ */ jsxDEV("span", { children: [
-          value,
+          formattedValue,
           " Gold"
         ] }, void 0, true, {
           fileName: "<stdin>",
@@ -77,7 +81,7 @@ const InventoryStats = ({ inventory }) => {
           lineNumber: 30,
           columnNumber: 17
         }),
-        /* @__PURE__ */ jsxDEV("span", { children: "Good" }, void 0, false, {
+        /* @__PURE__ */ jsxDEV("span", { children: qualityDisplay }, void 0, false, {
           fileName: "<stdin>",
           lineNumber: 31,
           columnNumber: 17
