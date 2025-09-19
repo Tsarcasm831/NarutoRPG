@@ -19,7 +19,7 @@ const PotionSlotBase = ({ potion, onMouseEnter, onMouseLeave, onItemUse }) => /*
           tabIndex: 0,
           "aria-label": `Potion ${potion?.type || ""} (${potion?.color || ""}). Right-click to use`,
           className: "w-14 h-18 bg-gradient-to-b from-gray-700 to-gray-800 border-2 border-yellow-600 rounded-lg flex flex-col items-center justify-end cursor-pointer hover:border-yellow-400 transition-all duration-200 relative overflow-hidden",
-          onClick: () => console.log("Left-click on potion. Hint: Right-click to use."),
+          onClick: () => onItemUse(potion),
           onKeyDown: (e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
