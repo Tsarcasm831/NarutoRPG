@@ -14,6 +14,7 @@ export function drawAll(){
 
 function drawDistricts(){
   clear(dLayer);
+  if(state.mode==='draw-road') return; // hide districts when focusing on roads
   if(!getToggle('toggleDistricts')) return;
   const locked = !!state.locks?.districtsLocked;
   for(const k in MODEL.districts){
@@ -40,14 +41,20 @@ function drawDistricts(){
 function drawRoads(){
   clear(rLayer);
   if(!getToggle('toggleRoads')) return;
+  const drawMode = state.mode==='draw-road';
   for(let i=0;i<MODEL.roads.length;i++){
     const r=MODEL.roads[i];
     const d=r.points.map(p=>[p[0]*W/100,p[1]*H/100].join(',')).join(' ');
-    const attrs = {class:`road ${r.type} ${isSelected('road',i)?'selected':''}`,'data-i':i,points:d,strokeWidth:Math.max(4, r.width ?? 4)};
-    // Use secondary road texture for 'street' and 'avenue' types
+    const baseWidth = Math.max(4, r.width ?? 4);
+    const attrs = {class:`road ${r.type} ${drawMode?'draw-mode ':''}${isSelected('road',i)?'selected':''}`.trim(),'data-i':i,points:d,strokeWidth:drawMode ? baseWidth + 4 : baseWidth};
+    // Use secondary road texture for 'street' and 'avenue' types when not in draw focus
     const rtype = (r.type||'').toLowerCase();
-    if(rtype==='street' || rtype==='avenue'){
+    if(!drawMode && (rtype==='street' || rtype==='avenue')){
       attrs.stroke = 'url(#roadSecondaryTex)';
+    } else if(rtype==='canal'){
+      attrs.stroke = drawMode ? '#38bdf8' : 'var(--canal)';
+    } else if(drawMode){
+      attrs.stroke = '#f8fafc';
     }
     const pl=mk('polyline', attrs);
     pl.addEventListener('mouseenter',e=>showTip(e,{name:r.name||r.id||'road',desc:r.type+` (${r.width||3}px)`}));
