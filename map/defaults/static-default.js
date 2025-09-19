@@ -106,7 +106,7 @@ export const STATIC_DEFAULT_MODEL = {
     },
     "district-17": {
       "id": "district-17",
-      "name": "",
+      "name": "Guard District",
       "desc": "",
       "tags": [],
       "points": [[19.22,43.27],[18.37,51.95],[26.84,44.27]]
@@ -141,7 +141,7 @@ export const STATIC_DEFAULT_MODEL = {
     },
     "district-22": {
       "id": "district-22",
-      "name": "",
+      "name": "Guard District",
       "desc": "",
       "tags": [],
       "points": [[18.59,54.28],[20.91,64.4],[25.25,60.96]]

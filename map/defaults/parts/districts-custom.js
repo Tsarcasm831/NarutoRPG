@@ -71,16 +71,6 @@ export const DEFAULT_DISTRICTS = {
       [65.07,46.61],[65.99,52.76],[71.71,52.83],[72.21,45.05]
     ]
   },
-  "district-7": {
-    "id": "district-7",
-    "name": "",
-    "desc": "",
-    "tags": [],
-    "points": [
-      [74.01,44.83],[73.06,44.83],[72.09,52.71],[87.9,52.62],[87.85,48.05],[76.87,49.5]
-    ],
-    "color": "#22d3ee"
-  },
   "district-8": {
     "id": "district-8",
     "name": "Market District",
@@ -158,7 +148,7 @@ export const DEFAULT_DISTRICTS = {
   },
   "district-17": {
     "id": "district-17",
-    "name": "",
+    "name": "Guard District",
     "desc": "",
     "tags": [],
     "points": [
@@ -203,7 +193,7 @@ export const DEFAULT_DISTRICTS = {
   },
   "district-22": {
     "id": "district-22",
-    "name": "",
+    "name": "Guard District",
     "desc": "",
     "tags": [],
     "points": [
@@ -430,15 +420,9 @@ export const DEFAULT_DISTRICTS = {
   },
   "residential6": {
     "id": "residential6",
-    "name": "residential6",
+    "name": "Guard District",
     "desc": "",
     "points": [[44.18,81.55],[40.74,85.13],[44.73,86.52],[51.82,87.84],[52.12,87.22],[46.98,82.25],[46.47,82.91],[44.95,82.79]]
-  },
-  "residential7": {
-    "id": "residential7",
-    "name": "residential7",
-    "desc": "",
-    "points": [[62.82,57.04],[63.18,57.38],[62.08,60.08],[62.04,61.5],[62.45,62.53],[61.72,63.18],[59.27,64.03],[59.02,62.4]]
   },
   "residential8": {
     "id": "residential8",
