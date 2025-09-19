@@ -6,10 +6,34 @@ const MAP_MODAL_WIDTH_PCT = 98;
 const MAP_MODAL_HEIGHT_PCT = 98;
 const MAP_MODAL_BACKDROP_OPACITY = 0.6;
 const MAP_EDITOR_ENABLED = true;
+const WELCOME_DISMISSED_KEY = "narutoRPG.welcomeDismissed";
+const safeGetWelcomeFlag = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return localStorage.getItem(WELCOME_DISMISSED_KEY) === "true";
+  } catch (error) {
+    return false;
+  }
+};
+const safeSetWelcomeFlag = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(WELCOME_DISMISSED_KEY, "true");
+  } catch (error) {
+  }
+};
 const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showMapModal, setShowMapModal] = React.useState(false);
-  const [showWelcome, setShowWelcome] = React.useState(true);
+  const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
+  const dismissWelcome = React.useCallback(() => {
+    setShowWelcome(false);
+    safeSetWelcomeFlag();
+  }, []);
   React.useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") setShowMapModal(false);
@@ -242,7 +266,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
           }
         ),
         showWelcome && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: () => setShowWelcome(false) }, void 0, false, {
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: dismissWelcome }, void 0, false, {
             fileName: "<stdin>",
             lineNumber: 124,
             columnNumber: 17
@@ -254,7 +278,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
                 lineNumber: 127,
                 columnNumber: 21
               }),
-              /* @__PURE__ */ jsxDEV("button", { onClick: () => setShowWelcome(false), className: "text-red-400 hover:text-red-300 text-2xl font-bold", "aria-label": "Close", children: "\xD7" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("button", { onClick: dismissWelcome, className: "text-red-400 hover:text-red-300 text-2xl font-bold", "aria-label": "Close", children: "\xD7" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 128,
                 columnNumber: 21
@@ -290,7 +314,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
               lineNumber: 130,
               columnNumber: 19
             }),
-            /* @__PURE__ */ jsxDEV("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxDEV("button", { onClick: () => setShowWelcome(false), className: "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg border border-yellow-600", children: "Continue" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxDEV("button", { onClick: dismissWelcome, className: "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg border border-yellow-600", children: "Continue" }, void 0, false, {
               fileName: "<stdin>",
               lineNumber: 137,
               columnNumber: 21
