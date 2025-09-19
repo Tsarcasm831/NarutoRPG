@@ -1,12 +1,31 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
-const LATEST_VERSION = "0.005.006 [Alpha]";
-const LATEST_DATE = "2025-09-06";
+const LATEST_VERSION = "0.009.000 [Alpha]";
+const LATEST_DATE = "2025-09-19";
 const LATEST_CHANGES = [
+<<<<<<< Updated upstream
   "Defaulted controls and UI to desktop-first experience.",
   "Switched Hospital model to local asset to resolve CORS issues.",
   "Updated version labels across UI for consistency.",
   "Pause menu Backquote toggle now exits pointer lock, sets a global pause flag, and suppresses gameplay input while paused."
+=======
+  "Map: Named and color-coded Market/Guard districts; added several residential presets.",
+  "Map: Increased street widths (3 → 4) and corrected SVG attribute usage (stroke-width).",
+  "Map: Secondary road pattern now uses dirt path texture (rotated) for better visual flow.",
+  "Roads (Canvas): Dynamic width/color mapping by road tier; texture overlay blended for depth.",
+  "Assets: Added src/assets/textures/dirt_path_texture.png and new district building JSON files.",
+  ".htaccess: SPA routing fallback and CORS headers for common static assets and preflight.",
+  "Inventory: New inventoryUtils computes live total weight/value and average condition.",
+  "Inventory: Equipment/Storage slots show invalid-drop feedback (shake + red glow); better DnD handling.",
+  "Inventory: Weight bar and currency formatting improved; quality/condition display added.",
+  "Potions: Left-click now uses a potion (keyboard accessible via Enter/Space).",
+  "HUD: Controls hint visibility persists via localStorage; auto-hide respects current state.",
+  "Main Menu: Welcome dismissal persists; Map modal gains focus trap, Escape behavior, and focus restore.",
+  "Loading: Respects prefers-reduced-motion; progress bar transitions are reduced when requested.",
+  "Controls: Opening panels releases pointer lock to free the cursor in gameplay.",
+  "Styles: Added inventory-slot-shake keyframes and invalid-drop-shake utility class.",
+  "Misc: Minor UI polish and consistency updates across panels."
+>>>>>>> Stashed changes
 ];
 const changelogData = [
   { version: LATEST_VERSION, date: LATEST_DATE, changes: LATEST_CHANGES },
