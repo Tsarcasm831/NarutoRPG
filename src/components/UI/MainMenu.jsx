@@ -6,9 +6,29 @@ const MAP_MODAL_WIDTH_PCT = 98;
 const MAP_MODAL_HEIGHT_PCT = 98;
 const MAP_MODAL_BACKDROP_OPACITY = 0.6;
 const MAP_EDITOR_ENABLED = true;
+const WELCOME_DISMISSED_KEY = "narutoRPG.welcomeDismissed";
+const safeGetWelcomeFlag = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return localStorage.getItem(WELCOME_DISMISSED_KEY) === "true";
+  } catch (error) {
+    return false;
+  }
+};
+const safeSetWelcomeFlag = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(WELCOME_DISMISSED_KEY, "true");
+  } catch (error) {
+  }
+};
 const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showMapModal, setShowMapModal] = React.useState(false);
-  const [showWelcome, setShowWelcome] = React.useState(true);
+  const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
   const mapButtonRef = React.useRef(null);
   const mapCloseButtonRef = React.useRef(null);
@@ -84,6 +104,81 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
       }
     };
   }, [showMapModal]);
+  const mapModalWasOpenRef = React.useRef(false);
+  const dismissWelcome = React.useCallback(() => {
+    setShowWelcome(false);
+    safeSetWelcomeFlag();
+  }, []);
+  React.useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (showMapModal) {
+        setShowMapModal(false);
+        return;
+      }
+      if (showWelcome) {
+        setShowWelcome(false);
+        return;
+      }
+      if (showHints) {
+        setShowHints(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+
+  }, []);
+  React.useEffect(() => {
+    if (showMapModal) {
+      if (mapCloseButtonRef.current) mapCloseButtonRef.current.focus();
+    } else if (mapModalWasOpenRef.current) {
+      if (mapButtonRef.current) mapButtonRef.current.focus();
+    }
+    mapModalWasOpenRef.current = showMapModal;
+  }, [showMapModal]);
+  React.useEffect(() => {
+    if (!showMapModal || !mapModalContentRef.current) return;
+    const modalNode = mapModalContentRef.current;
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") return;
+      const focusableSelectors = "button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex='-1'])";
+      const focusableElements = Array.from(modalNode.querySelectorAll(focusableSelectors)).filter((element) => {
+        if (element.hasAttribute("disabled")) return false;
+        if (element.getAttribute("tabindex") === "-1") return false;
+        return element.getAttribute("aria-hidden") !== "true";
+      });
+      if (!focusableElements.length) {
+        event.preventDefault();
+        return;
+      }
+      if (focusableElements.length === 1) {
+        event.preventDefault();
+        focusableElements[0].focus();
+        return;
+      }
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+      if (event.shiftKey) {
+        if (activeElement === firstElement || !modalNode.contains(activeElement)) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        return;
+      }
+      if (activeElement === lastElement || !modalNode.contains(activeElement)) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+    modalNode.addEventListener("keydown", handleKeyDown);
+    return () => {
+      modalNode.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showMapModal]);
+
+  }, [showMapModal, showWelcome, showHints]);
+
   return /* @__PURE__ */ jsxDEV(
     "div",
     {
@@ -312,7 +407,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
           }
         ),
         showWelcome && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: () => setShowWelcome(false) }, void 0, false, {
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: dismissWelcome }, void 0, false, {
             fileName: "<stdin>",
             lineNumber: 124,
             columnNumber: 17
@@ -324,7 +419,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
                 lineNumber: 127,
                 columnNumber: 21
               }),
-              /* @__PURE__ */ jsxDEV("button", { onClick: () => setShowWelcome(false), className: "text-red-400 hover:text-red-300 text-2xl font-bold", "aria-label": "Close", children: "\xD7" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("button", { onClick: dismissWelcome, className: "text-red-400 hover:text-red-300 text-2xl font-bold", "aria-label": "Close", children: "\xD7" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 128,
                 columnNumber: 21
@@ -360,7 +455,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
               lineNumber: 130,
               columnNumber: 19
             }),
-            /* @__PURE__ */ jsxDEV("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxDEV("button", { onClick: () => setShowWelcome(false), className: "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg border border-yellow-600", children: "Continue" }, void 0, false, {
+            /* @__PURE__ */ jsxDEV("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxDEV("button", { onClick: dismissWelcome, className: "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg border border-yellow-600", children: "Continue" }, void 0, false, {
               fileName: "<stdin>",
               lineNumber: 137,
               columnNumber: 21
