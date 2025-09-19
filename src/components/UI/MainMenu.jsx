@@ -322,7 +322,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             className: "fixed inset-0 z-50 flex items-center justify-center",
             role: "dialog",
             "aria-modal": "true",
-            "aria-label": "Map Editor",
+            "aria-labelledby": "map-editor-title",
             children: [
               /* @__PURE__ */ jsxDEV(
                 "div",
@@ -349,6 +349,11 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
                     height: `${MAP_MODAL_HEIGHT_PCT}vh`
                   },
                   children: [
+                    /* @__PURE__ */ jsxDEV("h2", { id: "map-editor-title", className: "sr-only", children: "Map Editor" }, void 0, false, {
+                      fileName: "<stdin>",
+                      lineNumber: 100,
+                      columnNumber: 21
+                    }),
                     /* @__PURE__ */ jsxDEV("div", { className: "absolute top-2 right-2 z-10", children: /* @__PURE__ */ jsxDEV(
                       "button",
                       {
@@ -406,15 +411,17 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             columnNumber: 15
           }
         ),
-        showWelcome && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: dismissWelcome }, void 0, false, {
+
+        showWelcome && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", role: "dialog", "aria-modal": "true", "aria-labelledby": "welcome-dialog-title", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: () => setShowWelcome(false) }, void 0, false, {
+
             fileName: "<stdin>",
             lineNumber: 124,
             columnNumber: 17
           }),
           /* @__PURE__ */ jsxDEV("div", { className: "relative bg-gray-900 text-white border-2 border-yellow-600 rounded-xl shadow-2xl w-[95vw] max-w-[700px] p-6", children: [
             /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between mb-3", children: [
-              /* @__PURE__ */ jsxDEV("h2", { className: "text-yellow-400 font-bold text-xl", children: "Welcome to Naruto RPG \u2014 Early Alpha" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("h2", { id: "welcome-dialog-title", className: "text-yellow-400 font-bold text-xl", children: "Welcome to Naruto RPG \u2014 Early Alpha" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 127,
                 columnNumber: 21
@@ -474,7 +481,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
           lineNumber: 123,
           columnNumber: 15
         }),
-        showHints && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", children: [
+        showHints && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-50 flex items-center justify-center", role: "dialog", "aria-modal": "true", "aria-labelledby": "hints-dialog-title", children: [
           /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-black/70", onClick: () => setShowHints(false) }, void 0, false, {
             fileName: "<stdin>",
             lineNumber: 144,
@@ -482,7 +489,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
           }),
           /* @__PURE__ */ jsxDEV("div", { className: "relative bg-gray-900 text-white border-2 border-yellow-600 rounded-xl shadow-2xl w-[90vw] max-w-[520px] p-5", children: [
             /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between mb-2", children: [
-              /* @__PURE__ */ jsxDEV("h2", { className: "text-yellow-400 font-bold", children: "Hints" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("h2", { id: "hints-dialog-title", className: "text-yellow-400 font-bold", children: "Hints" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 146,
                 columnNumber: 75
