@@ -30,6 +30,10 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showMapModal, setShowMapModal] = React.useState(false);
   const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
+  const mapButtonRef = React.useRef(null);
+  const mapCloseButtonRef = React.useRef(null);
+  const mapModalContentRef = React.useRef(null);
+  const mapModalWasOpenRef = React.useRef(false);
   const dismissWelcome = React.useCallback(() => {
     setShowWelcome(false);
     safeSetWelcomeFlag();
@@ -51,7 +55,59 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+
+  }, []);
+  React.useEffect(() => {
+    if (showMapModal) {
+      if (mapCloseButtonRef.current) mapCloseButtonRef.current.focus();
+    } else if (mapModalWasOpenRef.current) {
+      if (mapButtonRef.current) mapButtonRef.current.focus();
+    }
+    mapModalWasOpenRef.current = showMapModal;
+  }, [showMapModal]);
+  React.useEffect(() => {
+    if (!showMapModal || !mapModalContentRef.current) return;
+    const modalNode = mapModalContentRef.current;
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") return;
+      const focusableSelectors = "button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex='-1'])";
+      const focusableElements = Array.from(modalNode.querySelectorAll(focusableSelectors)).filter((element) => {
+        if (element.hasAttribute("disabled")) return false;
+        if (element.getAttribute("tabindex") === "-1") return false;
+        return element.getAttribute("aria-hidden") !== "true";
+      });
+      if (!focusableElements.length) {
+        event.preventDefault();
+        return;
+      }
+      if (focusableElements.length === 1) {
+        event.preventDefault();
+        focusableElements[0].focus();
+        return;
+      }
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+      if (event.shiftKey) {
+        if (activeElement === firstElement || !modalNode.contains(activeElement)) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        return;
+      }
+      if (activeElement === lastElement || !modalNode.contains(activeElement)) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+    modalNode.addEventListener("keydown", handleKeyDown);
+    return () => {
+      modalNode.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showMapModal]);
+
   }, [showMapModal, showWelcome, showHints]);
+
   return /* @__PURE__ */ jsxDEV(
     "div",
     {
@@ -148,6 +204,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             MAP_EDITOR_ENABLED && /* @__PURE__ */ jsxDEV(
               "button",
               {
+                ref: mapButtonRef,
                 onClick: () => setShowMapModal(true),
                 className: "bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200",
                 children: MAP_BUTTON_LABEL
@@ -214,6 +271,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
               /* @__PURE__ */ jsxDEV(
                 "div",
                 {
+                  ref: mapModalContentRef,
                   className: "relative border-2 border-yellow-600 rounded-xl shadow-2xl overflow-hidden bg-black",
                   style: {
                     width: `${MAP_MODAL_WIDTH_PCT}vw`,
@@ -223,6 +281,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
                     /* @__PURE__ */ jsxDEV("div", { className: "absolute top-2 right-2 z-10", children: /* @__PURE__ */ jsxDEV(
                       "button",
                       {
+                        ref: mapCloseButtonRef,
                         onClick: () => setShowMapModal(false),
                         className: "px-3 py-1 rounded bg-black/70 text-white border border-gray-400 hover:bg-black/80",
                         title: "Close map editor (Esc)",
