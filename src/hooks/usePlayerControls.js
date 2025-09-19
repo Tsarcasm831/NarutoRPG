@@ -42,20 +42,38 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
 
             const togglePanel = (setter, key) => {
                 setter(prev => {
-                    const isOpen = !prev;
-                    if (isOpen && gameState === 'Playing') {
-                        if (key !== 'c') setShowCharacter(false);
-                        if (key !== 'i') setShowInventory(false);
-                        if (key !== 'm') setShowWorldMap(false);
-                        if (key !== 'p') setShowSettings(false);
-                        if (key !== 'b') setShowAnimations(false);
-                        if (key !== 'j' && typeof setShowJutsuModal === 'function') setShowJutsuModal(false);
-                        if (key !== 'y' && setShowKakashi) setShowKakashi(false);
-                    } else if (isOpen && gameState !== 'Playing' && key !== 'p') {
-                        // In main menu, only allow settings to open
-                        return false;
+                    const willOpen = !prev;
+
+                    if (willOpen) {
+                        if (gameState !== 'Playing' && key !== 'p') {
+                            // In main menu, only allow settings to open
+                            return false;
+                        }
+
+                        if (gameState === 'Playing') {
+                            if (key !== 'c') setShowCharacter(false);
+                            if (key !== 'i') setShowInventory(false);
+                            if (key !== 'm') setShowWorldMap(false);
+                            if (key !== 'p') setShowSettings(false);
+                            if (key !== 'b') setShowAnimations(false);
+                            if (key !== 'j' && typeof setShowJutsuModal === 'function') setShowJutsuModal(false);
+                            if (key !== 'y' && setShowKakashi) setShowKakashi(false);
+                        }
+
+                        // Opening a panel should free the cursor if pointer lock is active
+                        if (typeof document.exitPointerLock === 'function') {
+                            const isPointerLocked = document.pointerLockElement != null;
+                            if (isPointerLocked) {
+                                try {
+                                    document.exitPointerLock();
+                                } catch (error) {
+                                    // Some browsers throw if pointer lock isn't actually engaged
+                                }
+                            }
+                        }
                     }
-                    return isOpen;
+
+                    return willOpen;
                 });
             };
 
