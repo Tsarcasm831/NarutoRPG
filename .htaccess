@@ -1,0 +1,43 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Preflight OPTIONS for static hosting
+  RewriteCond %{REQUEST_METHOD} =OPTIONS
+  RewriteRule ^ - [R=204,L]
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Correct MIME types for 3D and related assets
+AddType model/gltf-binary .glb
+AddType model/gltf+json  .gltf
+AddType application/octet-stream .bin
+AddType text/javascript .jsx
+
+
+# CORS for preflight OPTIONS responses (make sure headers are present on 204)
+<IfModule mod_headers.c>
+  # Flag OPTIONS requests
+  SetEnvIfNoCase Request_Method "OPTIONS" OPTIONS_OK=1
+  # Respond with CORS headers on preflight
+  Header always set Access-Control-Allow-Origin "*" env=OPTIONS_OK
+  Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS" env=OPTIONS_OK
+  Header always set Access-Control-Allow-Headers "Origin, Range, Accept, Content-Type" env=OPTIONS_OK
+  Header always set Access-Control-Max-Age "86400" env=OPTIONS_OK
+  # Help caches vary by Origin
+  Header merge Vary Origin env=OPTIONS_OK
+</IfModule>
+
+# CORS for static assets (LiteSpeed/Apache compatible)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(glb|gltf|bin|png|jpg|jpeg|gif|webp|mp3|mp4|wav|ogg|js|css|json|wasm)$">
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Origin, Range, Accept, Content-Type"
+    Header always set Access-Control-Expose-Headers "Content-Length, Content-Range"
+    Header merge Vary Origin
+  </FilesMatch>
+</IfModule>
