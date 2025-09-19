@@ -32,10 +32,24 @@ const LoadingScreen = ({ progress }) => {
         {
           className: "bg-yellow-500 h-full rounded-full text-center text-black font-bold leading-8 transition-all duration-500 ease-out",
           style: { width: `${progress}%` },
-          children: [
-            progress,
-            "%"
-          ]
+          children: /* @__PURE__ */ jsxDEV(
+            "span",
+            {
+              role: "status",
+              "aria-live": "polite",
+              children: [
+                progress,
+                "%"
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "<stdin>",
+              lineNumber: 21,
+              columnNumber: 25
+            }
+          )
         },
         void 0,
         true,
