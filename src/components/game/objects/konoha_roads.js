@@ -51,7 +51,7 @@ const ROAD_COLOR = '#d9c3a3';
 const ROAD_OPACITY = 0.85;
 const ROAD_BASE_WIDTH = 6; // pixels when r.width == 3
 /* road textures (project-root paths) */
-const ROAD_TEX_SECONDARY = '/secondary_road_texture.png';
+const ROAD_TEX_SECONDARY = '/dirt_path_texture.png';
 
 // Cached image/pattern for road texture strokes
 let __roadTexImg = null;
@@ -95,20 +95,39 @@ async function ensureRoadPattern(ctx){
  */
 export async function drawRoads(ctx, scale, cx, cy, options = {}) {
   const { roads } = await loadKonohaRoads();
-  const opt = {
-    color: options.primaryColor || ROAD_COLOR,
-    alpha: typeof options.alpha === 'number' ? options.alpha : ROAD_OPACITY,
-    baseWidth: options.wPrimary || ROAD_BASE_WIDTH
-  };
+  const alpha = typeof options.alpha === 'number' ? options.alpha : ROAD_OPACITY;
+  const widthPrimary = typeof options.wPrimary === 'number' ? options.wPrimary : ROAD_BASE_WIDTH;
+  const widthSecondary = typeof options.wSecondary === 'number' ? options.wSecondary : widthPrimary * 0.75;
+  const widthTertiary = typeof options.wTertiary === 'number' ? options.wTertiary : widthSecondary * 0.75;
+  const colorPrimary = options.primaryColor || ROAD_COLOR;
+  const colorSecondary = options.secondaryColor || colorPrimary;
+  const colorTertiary = options.tertiaryColor || colorSecondary;
 
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.globalAlpha = opt.alpha;
   const roadPattern = await ensureRoadPattern(ctx);
+
+  const pickColor = (roadWidth = 3) => {
+    if (roadWidth >= 6) return colorPrimary;
+    if (roadWidth >= 4) return colorSecondary;
+    return colorTertiary;
+  };
+
+  const pickWidth = (roadWidth = 3) => {
+    const w = Math.max(1, roadWidth);
+    if (w >= 6) {
+      return widthPrimary * (w / 6);
+    }
+    if (w >= 4) {
+      return widthSecondary * (w / 4);
+    }
+    return widthTertiary * (w / 3);
+  };
 
   for (const r of roads.all) {
     if (!r.points || r.points.length < 2) continue;
+    ctx.save();
     ctx.beginPath();
     r.points.forEach(([x, y], idx) => {
       const wx = (x / 100) * WORLD_SIZE - WORLD_SIZE / 2;
@@ -117,18 +136,28 @@ export async function drawRoads(ctx, scale, cx, cy, options = {}) {
       const py = cy + wz * scale;
       if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     });
-    const widthFactor = (r.width || 3) / 3;
-    ctx.lineWidth = opt.baseWidth * widthFactor;
-    // Use texture for non-canal roads; fall back to color when pattern missing
+
+    ctx.lineWidth = pickWidth(r.width);
+    ctx.globalAlpha = alpha;
+
     const rtype = (r.type || '').toLowerCase();
     if (rtype === 'canal') {
       ctx.strokeStyle = options.canalColor || '#38bdf8';
-    } else if (roadPattern) {
-      ctx.strokeStyle = roadPattern;
+      ctx.stroke();
     } else {
-      ctx.strokeStyle = opt.color;
+      const roadColor = pickColor(r.width);
+      ctx.strokeStyle = roadColor;
+      ctx.stroke();
+      if (roadPattern) {
+        const previousComposite = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = roadPattern;
+        ctx.stroke();
+        ctx.globalCompositeOperation = previousComposite;
+      }
     }
-    ctx.stroke();
+    ctx.restore();
   }
 
   ctx.restore();
