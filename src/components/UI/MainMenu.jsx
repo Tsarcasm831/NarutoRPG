@@ -126,8 +126,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-
-  }, []);
+  }, [showMapModal, showWelcome, showHints]);
   React.useEffect(() => {
     if (showMapModal) {
       if (mapCloseButtonRef.current) mapCloseButtonRef.current.focus();
@@ -136,48 +135,6 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     }
     mapModalWasOpenRef.current = showMapModal;
   }, [showMapModal]);
-  React.useEffect(() => {
-    if (!showMapModal || !mapModalContentRef.current) return;
-    const modalNode = mapModalContentRef.current;
-    const handleKeyDown = (event) => {
-      if (event.key !== "Tab") return;
-      const focusableSelectors = "button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex='-1'])";
-      const focusableElements = Array.from(modalNode.querySelectorAll(focusableSelectors)).filter((element) => {
-        if (element.hasAttribute("disabled")) return false;
-        if (element.getAttribute("tabindex") === "-1") return false;
-        return element.getAttribute("aria-hidden") !== "true";
-      });
-      if (!focusableElements.length) {
-        event.preventDefault();
-        return;
-      }
-      if (focusableElements.length === 1) {
-        event.preventDefault();
-        focusableElements[0].focus();
-        return;
-      }
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-      const activeElement = document.activeElement;
-      if (event.shiftKey) {
-        if (activeElement === firstElement || !modalNode.contains(activeElement)) {
-          event.preventDefault();
-          lastElement.focus();
-        }
-        return;
-      }
-      if (activeElement === lastElement || !modalNode.contains(activeElement)) {
-        event.preventDefault();
-        firstElement.focus();
-      }
-    };
-    modalNode.addEventListener("keydown", handleKeyDown);
-    return () => {
-      modalNode.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [showMapModal]);
-
-  }, [showMapModal, showWelcome, showHints]);
 
   return /* @__PURE__ */ jsxDEV(
     "div",

@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "primaryBaseName": "Building",
+    "varietyRatio": 0.2,
+    "source": "mixed",
+    "paletteIndex": 0
+  },
+  "entries": [
+    {
+      "baseName": "Kitbash-15",
+      "pos": [
+        491.4617218250436,
+        295.1870915471034
+      ],
+      "rotY": 1.9242365571465692,
+      "scale": 8.4
+    }
+  ]
+}
