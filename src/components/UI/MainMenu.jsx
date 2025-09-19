@@ -12,11 +12,22 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showHints, setShowHints] = React.useState(false);
   React.useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key === "Escape") setShowMapModal(false);
+      if (e.key !== "Escape") return;
+      if (showMapModal) {
+        setShowMapModal(false);
+        return;
+      }
+      if (showWelcome) {
+        setShowWelcome(false);
+        return;
+      }
+      if (showHints) {
+        setShowHints(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [showMapModal, showWelcome, showHints]);
   return /* @__PURE__ */ jsxDEV(
     "div",
     {
