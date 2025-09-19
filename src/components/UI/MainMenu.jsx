@@ -33,6 +33,77 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const mapButtonRef = React.useRef(null);
   const mapCloseButtonRef = React.useRef(null);
   const mapModalContentRef = React.useRef(null);
+  const previouslyFocusedElementRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!showMapModal || !mapModalContentRef.current) return;
+    const modalNode = mapModalContentRef.current;
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      previouslyFocusedElementRef.current = activeElement;
+    } else {
+      previouslyFocusedElementRef.current = null;
+    }
+    if (mapCloseButtonRef.current) {
+      mapCloseButtonRef.current.focus();
+    }
+    const focusableSelectors = "button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex='-1'])";
+    const getFocusableElements = () => {
+      return Array.from(modalNode.querySelectorAll(focusableSelectors)).filter((element) => {
+        if (element.hasAttribute("disabled")) return false;
+        if (element.getAttribute("tabindex") === "-1") return false;
+        return element.getAttribute("aria-hidden") !== "true";
+      });
+    };
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") return;
+      const focusableElements = getFocusableElements();
+      if (!focusableElements.length) {
+        event.preventDefault();
+        return;
+      }
+      if (focusableElements.length === 1) {
+        event.preventDefault();
+        focusableElements[0].focus();
+        return;
+      }
+      const [firstElement] = focusableElements;
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const currentFocus = document.activeElement;
+      if (event.shiftKey) {
+        if (currentFocus === firstElement || !modalNode.contains(currentFocus)) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        return;
+      }
+      if (currentFocus === lastElement || !modalNode.contains(currentFocus)) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setShowMapModal(false);
+      }
+    };
+    modalNode.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      modalNode.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleEscape);
+      const mapButton = mapButtonRef.current;
+      const previouslyFocused = previouslyFocusedElementRef.current;
+      previouslyFocusedElementRef.current = null;
+      if (mapButton && typeof mapButton.focus === "function") {
+        mapButton.focus();
+        return;
+      }
+      if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+        previouslyFocused.focus();
+      }
+    };
+  }, [showMapModal]);
   const mapModalWasOpenRef = React.useRef(false);
   const dismissWelcome = React.useCallback(() => {
     setShowWelcome(false);
