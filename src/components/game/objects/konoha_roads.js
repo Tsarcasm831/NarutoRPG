@@ -7,6 +7,7 @@ const DEFAULT_DISTRICTS = (MAP_DEFAULT_MODEL?.districts) || {};
 import { parseGridLabel, posForCell } from '../../../game/objects/utils/gridLabel.js';
 /* @tweakable world size used to convert percent map coordinates into world units */
 import { WORLD_SIZE } from '/src/scene/terrain.js';
+const ROAD_TEX_SECONDARY = new URL('../../../assets/textures/dirt_path_texture.png', import.meta.url).href;
 
 /**
  * Load roads and districts from the map defaults.
@@ -51,7 +52,6 @@ const ROAD_COLOR = '#d9c3a3';
 const ROAD_OPACITY = 0.85;
 const ROAD_BASE_WIDTH = 6; // pixels when r.width == 3
 /* road textures (project-root paths) */
-const ROAD_TEX_SECONDARY = '/dirt_path_texture.png';
 
 // Cached image/pattern for road texture strokes
 let __roadTexImg = null;
