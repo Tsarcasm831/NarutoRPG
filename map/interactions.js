@@ -137,7 +137,7 @@ export function drawGhost(isRoad=false,isWall=false){
   clearLayer(hLayer);
   const kind = state.drawing?.kind;
   const el = isWall || kind==='wall'
-    ? mkEl('circle',{class:'wall ghost',cx:state.drawing.center[0]*W/100,cy:state.drawing.center[1]*H/100,r:state.drawing.r*W/100,strokeWidth:8})
+    ? mkEl('circle',{class:'wall ghost',cx:state.drawing.center[0]*W/100,cy:state.drawing.center[1]*H/100,r:state.drawing.r*W/100,'stroke-width':8})
     : (kind==='mountain' && state.drawing?.center && state.brush.mountain.shape==='triangle')
     ? (()=>{ const [cx,cy]=state.drawing.center, r=state.drawing.r;
         const tri=trianglePts(cx,cy,r).map(([px,py])=>[px*W/100,py*H/100].join(',')).join(' ');
@@ -145,7 +145,7 @@ export function drawGhost(isRoad=false,isWall=false){
       })()
     : (isRoad || kind==='road' || kind==='river' || kind==='mountain')
     ? mkEl('polyline',{class:(kind==='river'?'river':'mountain')+' ghost',
-        points:pts,strokeWidth:(kind==='river'? (state.brush.river.width||7)
+        points:pts,'stroke-width':(kind==='river'? (state.brush.river.width||7)
                                : kind==='mountain'? (state.brush.mountain.width||10)
                                : (state.brush.road.width||3))})
     : mkEl('polygon',{class: (kind==='forest' ? 'forest-area ghost' : 'district ghost'), points:pts});

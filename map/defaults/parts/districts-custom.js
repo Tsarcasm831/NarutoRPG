@@ -5,15 +5,17 @@ export const DEFAULT_DISTRICTS = {
     "desc": "Walled compounds and courtyards in the northeast wards.",
     "points": [
       [60.23,15.46],[58.76,23.15],[60.66,31.07],[67.48,37.06],[80.21,28.62],[74.65,22.93],[70.71,19.6],[65.51,16.79]
-    ]
+    ],
+    "color": "#ffffff"
   },
   "district-1": {
     "id": "district-1",
-    "name": "",
-    "desc": "",
+    "name": "Inuzuka District",
+    "desc": "Kennels and clan training grounds bordering the northern woods.",
     "points": [
       [71.91,40.16],[82.11,31.43],[84.78,36.39],[85.97,39.72],[87.59,47.93],[76.48,49.26]
-    ]
+    ],
+    "color": "#9ca3af"
   },
   "Nara": {
     "id": "Nara",
@@ -21,7 +23,8 @@ export const DEFAULT_DISTRICTS = {
     "desc": "Scholarly quarter and archives in the south-east.",
     "points": [
       [65.58,73.67],[69.59,67.16],[73.46,65.38],[82.39,70.93],[79.36,74.93],[76.76,78.18],[72.61,81.58],[69.59,83.28]
-    ]
+    ],
+    "color": "#14532d"
   },
   "Akimichi": {
     "id": "Akimichi",
@@ -29,7 +32,8 @@ export const DEFAULT_DISTRICTS = {
     "desc": "South-east residential and storehouse blocks.",
     "points": [
       [75.28,56.95],[80.42,57.84],[81.26,65.16],[79.08,68.57],[70.99,63.54]
-    ]
+    ],
+    "color": "#32cd32"
   },
   "district-2": {
     "id": "district-2",
@@ -79,30 +83,33 @@ export const DEFAULT_DISTRICTS = {
   },
   "district-8": {
     "id": "district-8",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [52.96,40.27],[53.17,47.16],[55.29,47.16],[55.5,50.28],[62.48,50.28]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-10": {
     "id": "district-10",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [53.81,53.39],[58.78,61.74],[64.91,53.28]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-11": {
     "id": "district-11",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [40.9,52.61],[48.41,52.5],[48.52,51.84],[50,51.95],[50.53,50.39],[52.33,49.83],[52.33,40.71]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-12": {
     "id": "district-12",
@@ -242,30 +249,33 @@ export const DEFAULT_DISTRICTS = {
   },
   "district-27": {
     "id": "district-27",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [40.9,53.5],[43.23,57.17],[50.74,53.39]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-28": {
     "id": "district-28",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [41.96,59.73],[43.12,58.06],[51.27,54.39],[52.54,55.06],[53.17,62.96],[52.43,62.63],[51.9,61.4],[50,60.96],[49.26,59.96],[44.92,58.95]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-29": {
     "id": "district-29",
-    "name": "",
-    "desc": "",
+    "name": "Market District",
+    "desc": "Market District",
     "tags": [],
     "points": [
       [53.28,54.73],[53.7,62.85],[58.36,63.96],[58.14,62.07]
-    ]
+    ],
+    "color": "#ef4444"
   },
   "district-30": {
     "id": "district-30",
@@ -275,16 +285,6 @@ export const DEFAULT_DISTRICTS = {
     "points": [
       [37.84,71.75],[45.35,79.09],[52.01,72.41]
     ]
-  },
-  "district-31": {
-    "id": "district-31",
-    "name": "",
-    "desc": "",
-    "tags": [],
-    "points": [
-      [40.32,85.68],[53.28,88.38],[53.17,83.76],[51.59,83.54],[51.48,81.31],[52.86,81.09],[52.86,72.75]
-    ],
-    "color": "#22d3ee"
   },
   "district-32": {
     "id": "district-32",
@@ -356,7 +356,7 @@ export const DEFAULT_DISTRICTS = {
     "points": [
       [54.55,87.61],[66.21,76.04],[69.38,83.43],[61.36,86.68]
     ],
-    "color": "#22d3ee"
+    "color": "#fbb6ce"
   },
   "Cemetery": {
     "id": "Cemetery",
@@ -397,9 +397,11 @@ export const DEFAULT_DISTRICTS = {
   },
   "residential1": {
     "id": "residential1",
-    "name": "residential1",
-    "desc": "",
-    "points": [[25.96,28.23],[30.54,30.18],[39.46,20.21],[35.22,19.75],[30.87,22.75]]
+    "name": "Uchiha District",
+    "desc": "Historic Uchiha clan compound in the southwest, centered on the Nakano Shrine plaza.",
+    "tags": ["Uchiha"],
+    "points": [[25.96,28.23],[30.54,30.18],[39.46,20.21],[35.22,19.75],[30.87,22.75]],
+    "color": "#1d4ed8"
   },
   "residential2": {
     "id": "residential2",
@@ -419,6 +421,42 @@ export const DEFAULT_DISTRICTS = {
     "desc": "",
     "points": [[47.55,19.81],[47.59,21.95],[49.75,22.97],[52.21,23.02],[53.83,22.21],[55.9,20.97],[57.81,18.74],[56.67,18.47],[56.5,17.67],[55.27,17.89],[55.1,18.87],[54.59,19.85],[53.53,20.79],[52.38,21.41],[50.52,21.59],[49.8,20.83]],
     "color": "#ef4444"
+  },
+  "residential5": {
+    "id": "residential5",
+    "name": "residential5",
+    "desc": "",
+    "points": [[52.89,72.5],[46.26,79.34],[53.04,86.91],[52.81,83.65],[51.64,83.49],[51.18,82.78],[51.15,81.19],[53.04,81.19]]
+  },
+  "residential6": {
+    "id": "residential6",
+    "name": "residential6",
+    "desc": "",
+    "points": [[44.18,81.55],[40.74,85.13],[44.73,86.52],[51.82,87.84],[52.12,87.22],[46.98,82.25],[46.47,82.91],[44.95,82.79]]
+  },
+  "residential7": {
+    "id": "residential7",
+    "name": "residential7",
+    "desc": "",
+    "points": [[62.82,57.04],[63.18,57.38],[62.08,60.08],[62.04,61.5],[62.45,62.53],[61.72,63.18],[59.27,64.03],[59.02,62.4]]
+  },
+  "residential8": {
+    "id": "residential8",
+    "name": "residential8",
+    "desc": "",
+    "points": [[59.23,64.94],[59.39,65.58],[64.12,63.69],[66.41,61.24],[68,59.23],[69.88,57.21],[75.43,53.73],[75.92,53.26],[73.47,53.3],[72.98,54.12],[72,55.19],[69.96,55.83],[69.59,56.52],[69.39,57.17],[68.04,57.9],[66.16,58.88],[65.02,61.97],[64.78,62.45],[63.59,63],[63.06,63.73],[61.96,64.12]]
+  },
+  "residential9": {
+    "id": "residential9",
+    "name": "residential9",
+    "desc": "",
+    "points": [[66.98,53.22],[72.29,53.3],[71.27,54.59],[69.39,54.89]]
+  },
+  "residential10": {
+    "id": "residential10",
+    "name": "residential10",
+    "desc": "",
+    "points": [[62.65,50.43],[64.7,52.44],[56.53,52.49],[56.37,51.03],[55.47,51.37],[54.98,50.34]]
   },
   "park-district-west": {
     "id": "park-district-west",

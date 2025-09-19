@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "primaryBaseName": "Building",
+    "varietyRatio": 0.2,
+    "source": "mixed",
+    "paletteIndex": 0
+  },
+  "entries": [
+    {
+      "baseName": "Building",
+      "pos": [
+        312.04648406736214,
+        374.0915372119357
+      ],
+      "rotY": -0.954085396460358,
+      "scale": 0.28
+    },
+    {
+      "baseName": "Building",
+      "pos": [
+        344.3863104073416,
+        348.9019316312965
+      ],
+      "rotY": 1.5989578937827955,
+      "scale": 0.28
+    }
+  ]
+}

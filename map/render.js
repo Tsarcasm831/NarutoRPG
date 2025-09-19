@@ -45,8 +45,8 @@ function drawRoads(){
   for(let i=0;i<MODEL.roads.length;i++){
     const r=MODEL.roads[i];
     const d=r.points.map(p=>[p[0]*W/100,p[1]*H/100].join(',')).join(' ');
-    const baseWidth = Math.max(4, r.width ?? 4);
-    const attrs = {class:`road ${r.type} ${drawMode?'draw-mode ':''}${isSelected('road',i)?'selected':''}`.trim(),'data-i':i,points:d,strokeWidth:drawMode ? baseWidth + 4 : baseWidth};
+    const baseWidth = Math.max(4, Number(r.width ?? 4) || 4);
+    const attrs = {class:`road ${r.type} ${drawMode?'draw-mode ':''}${isSelected('road',i)?'selected':''}`.trim(),'data-i':i,points:d,'stroke-width':drawMode ? baseWidth + 4 : baseWidth};
     // Use secondary road texture for 'street' and 'avenue' types when not in draw focus
     const rtype = (r.type||'').toLowerCase();
     if(!drawMode && (rtype==='street' || rtype==='avenue')){
@@ -90,7 +90,7 @@ function drawGrass(){
   layer.append(mk('rect',{class:'grass-base',x:0,y:0,width:W,height:H}));
   for(const g of MODEL.grass){
     const d=g.points.map(p=>[p[0]*W/100,p[1]*H/100].join(',')).join(' ');
-    layer.append(mk('polyline',{class:'grass',points:d,strokeWidth:g.width||50}));
+    layer.append(mk('polyline',{class:'grass',points:d,'stroke-width':g.width||50}));
   }
 }
 
@@ -113,7 +113,7 @@ function drawMountains(){
     if(m.shape==='triangle'){
       layer.append(mk('polygon',{class:'mountain-tri',points:d}));
     }else{
-      layer.append(mk('polyline',{class:'mountain',points:d,strokeWidth:m.width||10}));
+      layer.append(mk('polyline',{class:'mountain',points:d,'stroke-width':m.width||10}));
     }
   }
 }
@@ -123,7 +123,7 @@ function drawWalls(){
   if(!getToggle('toggleWalls') || !Array.isArray(MODEL.walls)) return;
   for(let i=0;i<MODEL.walls.length;i++){
     const w=MODEL.walls[i], c=mk('circle',{class:`wall ${isSelected('wall',i)?'selected':''}`,'data-i':i,
-      cx:w.cx*W/100, cy:w.cy*H/100, r:w.r*W/100, strokeWidth:w.width||8});
+      cx:w.cx*W/100, cy:w.cy*H/100, r:w.r*W/100, 'stroke-width':w.width||8});
     c.addEventListener('mouseenter',e=>showTip(e,{name:w.name||w.id||'Wall',desc:w.desc||''}));
     c.addEventListener('mousemove',moveTip); c.addEventListener('mouseleave',hideTip);
     c.addEventListener('mousedown',e=>{ e.stopPropagation(); if(state.mode==='select'){ select('wall',i); if(e.altKey){ startDragWhole(e,'wall',i);} }});
