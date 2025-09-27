@@ -24,7 +24,7 @@ export const DISTRICT_ROT_JITTER = 0.6;
 // max total attempts per placement loop
 export const DISTRICT_MAX_ATTEMPTS = 2400;
 // persist placements to localStorage to avoid recomputing
-export const DISTRICT_ENABLE_LOCALSTORAGE = false;
+export const DISTRICT_ENABLE_LOCALSTORAGE = true;
 export const DISTRICT_PERSIST_KEY_PREFIX = 'konoha-district-layout:';
 // default share of non-primary building templates (0..1)
 export const DISTRICT_DEFAULT_VARIETY_RATIO = 0.2;

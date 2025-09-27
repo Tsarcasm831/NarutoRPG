@@ -3,14 +3,15 @@ import { buildKitbashSet } from '../../../../components/game/objects/kitbash.bui
 import { DISTRICT_DEFAULT_VARIETY_RATIO } from './constants.js';
 import { hash32 } from './utils.js';
 
-export function makeTemplatePool(THREE, { source = 'mixed', paletteIndex = 0 } = {}) {
+export function makeTemplatePool(THREE, { source = 'mixed', paletteIndex = 0, seed } = {}) {
   const pool = [];
   if (source === 'slice' || source === 'mixed') {
     const { builds } = getBuildsForVariant(THREE, { variant: 'default', basicPaletteIndex: paletteIndex });
     pool.push(...builds);
   }
   if (source === 'kitbash' || source === 'mixed') {
-    const kb = buildKitbashSet(THREE, { count: 28, paletteIndex });
+    // Pass a deterministic seed so kitbash-derived templates are reproducible per district
+    const kb = buildKitbashSet(THREE, { count: 28, paletteIndex, seed });
     pool.push(...kb);
   }
   return pool;
@@ -36,14 +37,14 @@ export function choosePrimaryTemplate(templates, districtId) {
   return { tpl, name: getTemplateBaseName(tpl) };
 }
 
-export function pickTemplateWithPrimary(templates, primaryName, varietyRatio = DISTRICT_DEFAULT_VARIETY_RATIO) {
+export function pickTemplateWithPrimary(templates, primaryName, varietyRatio = DISTRICT_DEFAULT_VARIETY_RATIO, rng = Math.random) {
   if (!templates || templates.length === 0) return null;
   const map = buildTemplateNameMap(templates);
   const primaryTpl = map.get(primaryName) || templates[0];
-  const roll = Math.random();
+  const roll = rng();
   if (roll >= (varietyRatio || 0)) return primaryTpl; // majority primary
   // Pick a different template for variety
   const others = templates.filter(t => getTemplateBaseName(t) !== getTemplateBaseName(primaryTpl));
   if (others.length === 0) return primaryTpl;
-  return others[(Math.random() * others.length) | 0];
+  return others[(rng() * others.length) | 0];
 }

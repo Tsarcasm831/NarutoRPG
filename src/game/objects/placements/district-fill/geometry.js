@@ -7,11 +7,11 @@ export function bboxOfPoly(poly) {
   }), { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity });
 }
 
-export function randomPointInPoly(poly, centroid) {
+export function randomPointInPoly(poly, centroid, rng = Math.random) {
   const bbox = bboxOfPoly(poly);
   for (let t = 0; t < 140; t++) {
-    const x = bbox.minX + Math.random() * (bbox.maxX - bbox.minX);
-    const z = bbox.minZ + Math.random() * (bbox.maxZ - bbox.minZ);
+    const x = bbox.minX + rng() * (bbox.maxX - bbox.minX);
+    const z = bbox.minZ + rng() * (bbox.maxZ - bbox.minZ);
     if (pointInPolyXZ({ x, z }, poly)) return { x, z };
   }
   return { x: centroid.x, z: centroid.z };

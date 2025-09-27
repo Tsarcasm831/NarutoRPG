@@ -6,7 +6,7 @@ import { recolorGroup, footprintRadius } from './helpers.js';
 import { getBox } from './geometry.js';
 
 export function makeBuilding(rng, pal) {
-  const mats = makeMats(pal);
+  const mats = makeMats(pal, rng);
   const g = new THREE.Group();
   const design = pick(['rect', 'rect', 'L', 'cyl', 'oct', 'courtyard', 'twinBridge', 'stilt', 'terraced', 'drumOnBox', 'boxOnDrum'], rng);
 
@@ -118,9 +118,9 @@ export function makeBuilding(rng, pal) {
   plinth.position.y = 0.03; plinth.receiveShadow = true; g.add(plinth);
   const door = new THREE.Mesh(getBox(0.5, 0.75, 0.05), mats.trim); tagRole(door, 'trim');
   door.position.set(0, 0.38, -size.z / 2 + 0.05); g.add(door);
-  g.rotation.y = (Math.random() * Math.PI * 2);
+  // Final random twist should also be deterministic
+  g.rotation.y = (rng() * Math.PI * 2);
   g.userData = { isBuilding: true, recolor: (p) => recolorGroup(g, p), paletteName: pal.name };
   g.userData.radius = footprintRadius(g);
   return g;
 }
-

@@ -28,6 +28,7 @@ import { randomPointInPoly, signedArea, distPointSeg } from './district-fill/geo
 import { tryPlaceAlongEdge, tryPlaceBuilding } from './district-fill/placementCore.js';
 import { loadExternalLayout, loadSavedLayout, saveLayout, downloadLayoutAsJson } from './district-fill/persist.js';
 import { buildRoadSegments, ensureNotOnRoad, obbOverlapsAnyRoad } from './shared/roadCollision.js';
+import { hash32, makeRng } from './district-fill/utils.js';
 
 // Public: place buildings inside a specific district without overlaps or boundary leakage
 export function fillDistrict(scene, objectGrid, { districtId = '', source = DISTRICT_FILL_SOURCE, paletteIndex = 0, shadows = false } = {}) {
@@ -49,7 +50,11 @@ export function fillDistrict(scene, objectGrid, { districtId = '', source = DIST
     ? source
     : (lowId.startsWith('hyuuga') ? 'hyuuga' : source);
 
-  const templates = makeTemplatePool(THREE, { source: effectiveSource, paletteIndex });
+  // Deterministic RNG per district for reproducibility across reloads
+  const seed = hash32(String(districtId), 0xC0FFEE);
+  const rng = makeRng(seed);
+
+  const templates = makeTemplatePool(THREE, { source: effectiveSource, paletteIndex, seed });
   if (!templates || templates.length === 0) return root;
 
   // Build road segments once; provide a closure used by placementCore to avoid roads
@@ -80,7 +85,7 @@ export function fillDistrict(scene, objectGrid, { districtId = '', source = DIST
         let tpl = map.get(baseName);
         if (!tpl || baseName === 'Building') {
           // Choose primary by default, allow some variety
-          tpl = pickTemplateWithPrimary(templates, primaryName, varietyRatio) || templates[0];
+          tpl = pickTemplateWithPrimary(templates, primaryName, varietyRatio, rng) || templates[0];
         }
 
         // Order candidate relative scales by closeness to saved absolute scale ratio, then try smaller for fitting
@@ -175,11 +180,11 @@ export function fillDistrict(scene, objectGrid, { districtId = '', source = DIST
   }
   // Shuffle samples to avoid clumping per-edge
   for (let i = edgeSamples.length - 1; i > 0; i--) {
-    const j = (Math.random() * (i + 1)) | 0; [edgeSamples[i], edgeSamples[j]] = [edgeSamples[j], edgeSamples[i]];
+    const j = (rng() * (i + 1)) | 0; [edgeSamples[i], edgeSamples[j]] = [edgeSamples[j], edgeSamples[i]];
   }
   for (let si = 0; si < edgeSamples.length; si++) {
     const s = edgeSamples[si];
-    const tpl = pickTemplateWithPrimary(templates, primary.name, varietyRatio) || templates[0];
+    const tpl = pickTemplateWithPrimary(templates, primary.name, varietyRatio, rng) || templates[0];
     if (!tpl) break;
     const baseName = tpl.name || 'Building';
         const res = tryPlaceAlongEdge({ tpl, edgeA: s.a, edgeB: s.b, t: s.t, inwardNormal: s.inward, scales: DISTRICT_SCALES, poly, root, placedOBBs, clearance: DISTRICT_ALLEY_CLEARANCE, avoidRoad });
@@ -198,10 +203,10 @@ export function fillDistrict(scene, objectGrid, { districtId = '', source = DIST
   const FAIL_STREAK_LIMIT = 200;
   while (guard < DISTRICT_MAX_ATTEMPTS && failStreak < FAIL_STREAK_LIMIT) {
     guard++;
-    const tpl = pickTemplateWithPrimary(templates, primary.name, varietyRatio) || templates[0];
+    const tpl = pickTemplateWithPrimary(templates, primary.name, varietyRatio, rng) || templates[0];
     if (!tpl) break;
     // rejection sample with bias: accept point if within band or with probability proportional to 1/(1+d)
-    const pos = randomPointInPoly(poly, centroid);
+    const pos = randomPointInPoly(poly, centroid, rng);
     // Align rotation to nearest edge tangent (no random jitter)
     let best = { d: Infinity, rot: 0 };
     for (let i = 0; i < poly.length; i++) {

@@ -11,8 +11,8 @@ function gabledRoof({ w, d, h = 0.6, mats }) {
   return g;
 }
 
-function makeCourtyardHouse({ pal, seed = Math.random }) {
-  const mats = makeMats(pal);
+function makeCourtyardHouse({ pal, rng = Math.random }) {
+  const mats = makeMats(pal, rng);
   const g = new THREE.Group();
   const w = 3.4, d = 3.1, gap = 1.5;
   const wings = [
@@ -34,8 +34,8 @@ function makeCourtyardHouse({ pal, seed = Math.random }) {
   return g;
 }
 
-function makeDojoHall({ pal }) {
-  const mats = makeMats(pal);
+function makeDojoHall({ pal, rng = Math.random }) {
+  const mats = makeMats(pal, rng);
   const g = new THREE.Group();
   const w = 4.2, d = 1.4, h = 1.0;
   const posts = Kit.posts({ w: w * 1.1, d: d * 1.05, h: 0.55, mats, spacing: 1.1 }); g.add(posts);
@@ -47,8 +47,8 @@ function makeDojoHall({ pal }) {
   return g;
 }
 
-function makeSmallPagoda({ pal }) {
-  const mats = makeMats(pal);
+function makeSmallPagoda({ pal, rng = Math.random }) {
+  const mats = makeMats(pal, rng);
   const g = new THREE.Group();
   const r = 0.9;
   const lv1 = Kit.cylLevel({ r: r * 1.15, h: 0.95, mats, sides: 10 }); lv1.position.y = 0.95 / 2; g.add(lv1);
@@ -59,8 +59,8 @@ function makeSmallPagoda({ pal }) {
   return g;
 }
 
-function makeGatehouse({ pal }) {
-  const mats = makeMats(pal);
+function makeGatehouse({ pal, rng = Math.random }) {
+  const mats = makeMats(pal, rng);
   const g = new THREE.Group();
   const w = 3.2, d = 1.6, h = 1.0;
   // Perimeter wall slab
@@ -82,4 +82,3 @@ export function buildHyuugaOriginals(THREE, pal, rng) {
   }
   return out;
 }
-
