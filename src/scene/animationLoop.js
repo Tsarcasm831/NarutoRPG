@@ -1,5 +1,6 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { updatePlayer } from '../game/player/index.js';
+import { updateWanderFree } from '/src/game/npcs/behaviors/wanderFree.js';
 import { INTERACTION_DISTANCE } from '../game/constants.js';
 
 /**
@@ -97,8 +98,11 @@ export function startAnimationLoop({
                 // Entering FPV: mirror model yaw into camera orbit
                 cameraOrbitRef.current = model.rotation.y || 0;
             } else if (!isLocked && model && cameraOrbitRef) {
-                // Leaving FPV: mirror camera orbit back into model yaw
-                model.rotation.y = cameraOrbitRef.current || 0;
+                // Leaving FPV: keep player facing where they looked in FPV,
+                // and place third-person camera behind the player (add PI)
+                const yaw = cameraOrbitRef.current || 0;
+                model.rotation.y = yaw;
+                cameraOrbitRef.current = normalizeAngle(yaw + Math.PI);
             }
         } catch (_) {}
     };
@@ -257,9 +261,13 @@ export function startAnimationLoop({
                 try {
                     const model = playerRef.current?.userData?.model;
                     if (entering && model && cameraOrbitRef) {
+                        // Entering FPV: align camera to current player facing
                         cameraOrbitRef.current = model.rotation.y || 0;
                     } else if (!entering && model && cameraOrbitRef) {
-                        model.rotation.y = cameraOrbitRef.current || 0;
+                        // Leaving FPV: preserve facing and place camera behind
+                        const yaw = cameraOrbitRef.current || 0;
+                        model.rotation.y = yaw;
+                        cameraOrbitRef.current = normalizeAngle(yaw + Math.PI);
                     }
                 } catch (_) {}
             }
@@ -279,7 +287,7 @@ export function startAnimationLoop({
 
         const delta = clockRef.current.getDelta();
 
-        // Update simple NPC idles if present
+        // Update NPCs (Shikamaru wanders; others idle)
         try {
             const npcs = sceneRef.current?.userData?.npcs;
             if (Array.isArray(npcs)) {
@@ -295,7 +303,9 @@ export function startAnimationLoop({
                             }
                         }
                     } catch (_) {}
-                    // Advance idle animation
+                    // Per-NPC behavior (free wander attached to Shikamaru only)
+                    try { updateWanderFree(g, delta, objectGridRef.current); } catch (_) {}
+                    // Ensure mixer advances regardless
                     try { g?.userData?.mixer?.update(delta); } catch (_) {}
                 }
             }

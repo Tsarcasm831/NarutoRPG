@@ -1,11 +1,13 @@
 {
-    "files": [
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Arise_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_BeHit_FlyUp_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Casual_Walk_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Dead_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_RunFast_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Running_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Walking_withSkin.glb"
-    ]
+  "files": [
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Idle_11_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Walking_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Running_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Casual_Walk_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Arise_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Dead_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Listening_Gesture_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Stand_and_Chat_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Naruto_Uzumaki/Animation_Charged_Ground_Slam_withSkin.glb"
+  ]
 }

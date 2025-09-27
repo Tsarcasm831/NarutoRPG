@@ -3,6 +3,7 @@ import * as THREE from 'three';
 
 // Minimal set of filenames to prefer when spawning idle NPCs
 const DEFAULT_ESSENTIAL = [
+  'Animation_Idle_12_withSkin.glb',
   'Animation_Idle_11_withSkin.glb',
   'Animation_Idle_withSkin.glb',
   'Animation_Casual_Walk_withSkin.glb',
@@ -22,6 +23,7 @@ function getAnimationName(url) {
 
 function chooseDefaultAnimation(availableNames) {
   const order = [
+    'idle12',
     'idle11',
     'idle',
     'casualWalk',
@@ -48,7 +50,7 @@ function localBaseFor(name) {
     case 'sasuke':
       return 'temp/Sasuke/';
     case 'sakura':
-      return 'temp/Sakura/';
+      return 'temp/Sakura/biped/';
     case 'shikamaru':
       return 'temp/Shikamaru/';
     default:
@@ -112,14 +114,19 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
   const defaultAsset = assets[0];
   const model = defaultAsset.gltf.scene;
   const clips = {};
+  let defaultClipName = null;
   for (const a of assets) {
     const clip = a.gltf?.animations?.[0];
     if (clip) {
-      clips[getAnimationName(a.url)] = clip;
+      const key = getAnimationName(a.url);
+      clips[key] = clip;
+      if (!defaultClipName && a === defaultAsset) {
+        defaultClipName = key;
+      }
     }
   }
 
-  return { model, clips };
+  return { model, clips, defaultClipName };
 }
 
 export function createNpcRig({ scene, settings, name, manifestPath, position, scale = 4 }) {
@@ -130,7 +137,7 @@ export function createNpcRig({ scene, settings, name, manifestPath, position, sc
   // Add a simple spherical collider around the NPC for player collision
   group.userData.collider = { type: 'sphere', radius: 2.5 };
 
-  return loadCharacterAssetsFromManifest(manifestPath, undefined, name).then(({ model, clips }) => {
+  return loadCharacterAssetsFromManifest(manifestPath, undefined, name).then(({ model, clips, defaultClipName }) => {
     model.scale.set(scale, scale, scale);
     model.traverse((child) => {
       try {
@@ -140,6 +147,8 @@ export function createNpcRig({ scene, settings, name, manifestPath, position, sc
         }
       } catch (_) {}
     });
+    // Save reference for behaviors that need to rotate the visible model
+    try { group.userData.model = model; } catch (_) {}
     group.add(model);
 
     const mixer = new THREE.AnimationMixer(model);
@@ -149,7 +158,9 @@ export function createNpcRig({ scene, settings, name, manifestPath, position, sc
       actions[n] = mixer.clipAction(clips[n]);
     }
 
-    const defaultName = chooseDefaultAnimation(names);
+    // Prefer the clip from the same GLB as the model to ensure binding works
+    const preferred = defaultClipName && names.includes(defaultClipName) ? defaultClipName : null;
+    const defaultName = preferred || chooseDefaultAnimation(names);
     if (defaultName && actions[defaultName]) {
       actions[defaultName].setLoop(THREE.LoopRepeat).reset().play();
       group.userData.currentAnimation = defaultName;

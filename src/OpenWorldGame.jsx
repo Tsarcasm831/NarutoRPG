@@ -17,6 +17,7 @@ import { InventoryPanel } from "./components/UI/InventoryPanel.jsx";
 import { WorldMapPanel } from "./components/UI/WorldMapPanel.jsx";
 import { HUD } from "./components/UI/HUD.jsx";
 import { WorldEventOverlay } from "./components/UI/world/WorldEventOverlay.jsx";
+import NpcInteractionModal from "./components/UI/NpcInteractionModal.jsx";
 import QuestLogPanel from "./components/UI/QuestLogPanel.jsx";
 import { createInitialQuests } from "./game/quests.js";
 import SettingsPanel from "./components/UI/SettingsPanel.jsx";
@@ -137,6 +138,8 @@ const OpenWorldGame = () => {
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: useCallback(() => setGameReady(true), []), worldState, timeOfDayHours });
   const musicWasPlayingRef = useRef(false);
+  const [showNpcDialog, setShowNpcDialog] = useState(false);
+  const [npcDialogData, setNpcDialogData] = useState(null);
   const releasePauseMenu = useCallback(() => {
     const wasPausedBefore = window.__pauseMenuWasPausedBefore;
     delete window.__pauseMenuActive;
@@ -166,9 +169,17 @@ const OpenWorldGame = () => {
       setShowKitbashModal(true);
     };
     window.addEventListener("open-kitbash-building", openKit);
+    const openNpc = (e) => {
+      // Do not pause the game or music for NPC dialog
+      setNpcDialogData(e?.detail || null);
+      setShowNpcDialog(true);
+      try { if (document.pointerLockElement) document.exitPointerLock(); } catch (_) {}
+    };
+    window.addEventListener("open-npc-dialog", openNpc);
     return () => {
       window.removeEventListener("open-hokage-office", open);
       window.removeEventListener("open-kitbash-building", openKit);
+      window.removeEventListener("open-npc-dialog", openNpc);
     };
   }, []);
   const handleStartGame = async () => {
@@ -383,6 +394,14 @@ const OpenWorldGame = () => {
     } }, void 0, false),
     /* NEW: Jutsu Modal */
     gameState === "Playing" && showJutsuModal && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(JutsuModal, { onClose: () => setShowJutsuModal(false) }, void 0, false) }, void 0, false),
+    /* NEW: NPC Interaction Modal */
+    gameState === "Playing" && showNpcDialog && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(NpcInteractionModal, { onClose: () => {
+      // Close NPC dialog without touching global pause/music
+      setShowNpcDialog(false);
+      setNpcDialogData(null);
+      // Release interaction lock if set
+      try { if (window.__npcInteracting) { window.__npcInteracting.userData.interacting = false; delete window.__npcInteracting; } } catch (_) {}
+    }, npcName: (npcDialogData == null ? void 0 : npcDialogData.npc) || "NPC", npcImage: (npcDialogData == null ? void 0 : npcDialogData.npcImage) || "", playerName: (npcDialogData == null ? void 0 : npcDialogData.player) || "You", playerImage: (npcDialogData == null ? void 0 : npcDialogData.playerImage) || "", lines: (npcDialogData == null ? void 0 : npcDialogData.lines) || [] }, void 0, false) }, void 0, false),
     eventOverlay && /* @__PURE__ */ jsxDEV(WorldEventOverlay, { overlay: eventOverlay, onConfirm: acknowledgeEvent, onDismiss: dismissEventOverlay }, void 0, false)
   ] }, void 0, true, {
     fileName: "<stdin>",

@@ -1,5 +1,5 @@
-import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
+
 // Derive latest version from the HTML title or file name, mirroring MainMenu logic.
 // Returns a version string WITHOUT the leading 'v' so that other UI can prefix it as needed.
 const deriveLatestVersion = () => {
@@ -19,33 +19,49 @@ const deriveLatestVersion = () => {
   // Fallback to previous default if nothing found
   return "0.009.000 [Alpha]";
 };
-const LATEST_VERSION = deriveLatestVersion();
-const LATEST_DATE = "2025-09-19";
-const LATEST_CHANGES = [
-  "Defaulted controls and UI to desktop-first experience.",
-  "Switched Hospital model to local asset to resolve CORS issues.",
-  "Updated version labels across UI for consistency.",
-  "Pause menu Backquote toggle now exits pointer lock, sets a global pause flag, and suppresses gameplay input while paused.",
-  "Map: Named and color-coded Market/Guard districts; added several residential presets.",
-  "Map: Increased street widths (3 → 4) and corrected SVG attribute usage (stroke-width).",
-  "Map: Secondary road pattern now uses dirt path texture (rotated) for better visual flow.",
-  "Roads (Canvas): Dynamic width/color mapping by road tier; texture overlay blended for depth.",
-  "Assets: Added src/assets/textures/dirt_path_texture.png and new district building JSON files.",
-  ".htaccess: SPA routing fallback and CORS headers for common static assets and preflight.",
-  "Inventory: New inventoryUtils computes live total weight/value and average condition.",
-  "Inventory: Equipment/Storage slots show invalid-drop feedback (shake + red glow); better DnD handling.",
-  "Inventory: Weight bar and currency formatting improved; quality/condition display added.",
-  "Potions: Left-click now uses a potion (keyboard accessible via Enter/Space).",
-  "HUD: Controls hint visibility persists via localStorage; auto-hide respects current state.",
-  "Main Menu: Welcome dismissal persists; Map modal gains focus trap, Escape behavior, and focus restore.",
-  "Loading: Respects prefers-reduced-motion; progress bar transitions are reduced when requested.",
-  "Controls: Opening panels releases pointer lock to free the cursor in gameplay.",
-  "Styles: Added inventory-slot-shake keyframes and invalid-drop-shake utility class.",
-  "Misc: Minor UI polish and consistency updates across panels."
 
-];
-const changelogData = [
-  { version: LATEST_VERSION, date: LATEST_DATE, changes: LATEST_CHANGES },
+const LATEST_VERSION = deriveLatestVersion();
+
+// Keep newest entry first so OpenWorldGame can read the latest version
+export const changelogData = [
+  // Today (new): 2025-09-27
+  {
+    version: "0.011.000",
+    date: "2025-09-27",
+    changes: [
+      "NPC Models: Updated assets/rigging; standardized scale and origin for consistent placement.",
+      "NPC Interactions: Improved context-sensitive prompts and fixed cases where prompts failed to appear/dismiss.",
+      "NPC Wander: Added/refined idle→roam→pause states with smoother pathing and waypoint jitter reduction; area bounds to keep NPCs in-zone.",
+      "Camera: Fixed rotation when exiting FPV so the camera no longer snaps ~180° off the expected facing."
+    ]
+  },
+  // Previous (kept intact): 2025-09-19
+  {
+    version: LATEST_VERSION,
+    date: "2025-09-19",
+    changes: [
+      "Defaulted controls and UI to desktop-first experience.",
+      "Switched Hospital model to local asset to resolve CORS issues.",
+      "Updated version labels across UI for consistency.",
+      "Pause menu Backquote toggle now exits pointer lock, sets a global pause flag, and suppresses gameplay input while paused.",
+      "Map: Named and color-coded Market/Guard districts; added several residential presets.",
+      "Map: Increased street widths (3 → 4) and corrected SVG attribute usage (stroke-width).",
+      "Map: Secondary road pattern now uses dirt path texture (rotated) for better visual flow.",
+      "Roads (Canvas): Dynamic width/color mapping by road tier; texture overlay blended for depth.",
+      "Assets: Added src/assets/textures/dirt_path_texture.png and new district building JSON files.",
+      ".htaccess: SPA routing fallback and CORS headers for common static assets and preflight.",
+      "Inventory: New inventoryUtils computes live total weight/value and average condition.",
+      "Inventory: Equipment/Storage slots show invalid-drop feedback (shake + red glow); better DnD handling.",
+      "Inventory: Weight bar and currency formatting improved; quality/condition display added.",
+      "Potions: Left-click now uses a potion (keyboard accessible via Enter/Space).",
+      "HUD: Controls hint visibility persists via localStorage; auto-hide respects current state.",
+      "Main Menu: Welcome dismissal persists; Map modal gains focus trap, Escape behavior, and focus restore.",
+      "Loading: Respects prefers-reduced-motion; progress bar transitions are reduced when requested.",
+      "Controls: Opening panels releases pointer lock to free the cursor in gameplay.",
+      "Styles: Added inventory-slot-shake keyframes and invalid-drop-shake utility class.",
+      "Misc: Minor UI polish and consistency updates across panels."
+    ]
+  },
   { version: "0.007.5", date: "2025-08-16", changes: [
     "Version set to 0.007.5.",
     "Changelog updated with latest changes.",
@@ -61,7 +77,7 @@ const changelogData = [
   { version: "0.006.1", date: "2025-08-14", changes: [
     "Walls: South opening cut cleanly and Konoha Gates placed; sealed stray gaps on the East side.",
     "Movement: WASD made camera-relative in both 3rd and 1st person; right-click drag (desktop) and cam pad (mobile) control yaw/pitch.",
-    "Feature: First\u2011person view toggle (V) with pointer lock; auto-hide player model in FPV.",
+    "Feature: First-person view toggle (V) with pointer lock; auto-hide player model in FPV.",
     "UX: Nearby object tooltips (pooled sprites) and on-screen interaction prompt (F).",
     "Performance: Grid labels virtualized, bound to terrain, fixed 5u cells; wall details instanced; FPS limit + render scale cap.",
     "Assets: Loader caches only essential player animations and core images for faster startup.",
@@ -73,18 +89,18 @@ const changelogData = [
     "Movement: A and D are strafe-only and no longer rotate the player.",
     "Movement: Player now faces the direction of travel; fixed D moving opposite/right issues.",
     "Camera: Player rotation and camera orbit are unified to feel consistent.",
-    "Feature: First\u2011person view toggle (V). Uses pointer lock with mouse\u2011look.",
-    "UX: Interaction prompt shows \u201CPress F to interact (Name)\u201D for nearby objects.",
+    "Feature: First-person view toggle (V). Uses pointer lock with mouse-look.",
+    "UX: Interaction prompt shows ‘Press F to interact (Name)’ for nearby objects.",
     "World: Ichiraku Ramen is now placed in the world at LF480 (with collider).",
     "World: Hokage Palace placed at KN182 with detailed colliders.",
     "World: Hokage Monument GLB placed at KN129 and scaled up."
   ] },
   { version: "0.003.9", date: "2025-08-11", changes: [
     "Version bump to 0.003.9.",
-    "Added Ichiraku Ramen shop prototype (ichiraku.js) \u2014 file only, not yet integrated into the world."
+    "Added Ichiraku Ramen shop prototype (ichiraku.js) — file only, not yet integrated into the world."
   ] },
   { version: "0.002.51", date: "2025-08-09", changes: [
-    "Performance: Capped renderer pixel ratio via Settings \u2192 Render Scale (default 1.25x).",
+    "Performance: Capped renderer pixel ratio via Settings → Render Scale (default 1.25x).",
     "Performance: Minimap/HUD updates throttled to ~12 FPS.",
     "Performance: Central wall details (crenellations, buttresses) converted to InstancedMesh (massive draw-call reduction).",
     "Performance: Slightly reduced wall segment count for smoother rendering.",
@@ -98,92 +114,121 @@ const changelogData = [
     "Prevented scene re-initialization when moving (no reload on movement).",
     "Updated splash and main menu backgrounds; added Credits modal."
   ] },
-  { version: "0.002.1", date: "Upcoming", changes: ["Added basic combat moves: Attack (F) and Dodge (Ctrl).", "Animation system now handles one-shot actions, preventing movement during attacks/dodges.", "Integrated a wider range of animations to make the player more dynamic."] },
-  { version: "0.001.6", date: "Upcoming", changes: ["Added Main Menu with game start, options, and changelog.", "Implemented asset pre-loading for smoother game start."] },
-  { version: "0.001.5", date: "2024-05-22", changes: ["Implemented asset downloader and caching system.", "Added diverse terrain types (sand, snow, rocky, forest).", "Player can now jump with Spacebar and gravity feels more responsive."] },
-  { version: "0.001.4", date: "2024-05-21", changes: ["Added mobile joystick controls (toggle with Z key).", "Unified movement speed for both keyboard and joystick.", "Fixed inverted vertical axis on joystick."] },
-  { version: "0.001.3", date: "2024-05-20", changes: ["Renamed MP to Chakra across all UI elements.", "Added character panel (C), inventory (I), map (M), and settings (P) panels."] }
+  { version: "0.002.1", date: "Upcoming", changes: [
+    "Added basic combat moves: Attack (F) and Dodge (Ctrl).",
+    "Animation system now handles one-shot actions, preventing movement during attacks/dodges.",
+    "Integrated a wider range of animations to make the player more dynamic."
+  ] },
+  { version: "0.001.6", date: "Upcoming", changes: [
+    "Added Main Menu with game start, options, and changelog.",
+    "Implemented asset pre-loading for smoother game start."
+  ] },
+  { version: "0.001.5", date: "2024-05-22", changes: [
+    "Implemented asset downloader and caching system.",
+    "Added diverse terrain types (sand, snow, rocky, forest).",
+    "Player can now jump with Spacebar and gravity feels more responsive."
+  ] },
+  { version: "0.001.4", date: "2024-05-21", changes: [
+    "Added mobile joystick controls (toggle with Z key).",
+    "Unified movement speed for both keyboard and joystick.",
+    "Fixed inverted vertical axis on joystick."
+  ] },
+  { version: "0.001.3", date: "2024-05-20", changes: [
+    "Renamed MP to Chakra across all UI elements.",
+    "Added character panel (C), inventory (I), map (M), and settings (P) panels."
+  ] }
 ];
+
 const ChangelogPanel = ({ onClose }) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-98 border-2 border-gray-600 rounded-lg shadow-2xl z-50 w-[90vw] max-w-[500px] text-white", children: [
-    /* @__PURE__ */ jsxDEV("div", { className: "bg-gray-700 px-4 py-2 rounded-t-lg border-b border-gray-600 flex justify-between items-center", children: [
-      /* @__PURE__ */ jsxDEV("h2", { className: "text-yellow-400 font-bold text-lg", children: "Changelog" }, void 0, false, {
-        fileName: "<stdin>",
-        lineNumber: 80,
-        columnNumber: 17
-      }),
-      /* @__PURE__ */ jsxDEV(
-        "button",
+  const h = React.createElement;
+
+  // Partition changelog into Today (latest date) and Earlier
+  const latestDate = changelogData?.[0]?.date || "";
+  const todayEntries = (changelogData || []).filter(e => e.date === latestDate);
+  const olderEntries = (changelogData || []).filter(e => e.date !== latestDate);
+
+  const getItems = (entry) => entry.items || entry.changes || [];
+
+  const renderEntry = (entry, idxPrefix = "") =>
+    h(
+      "section",
+      { key: `${idxPrefix}${entry.version}-${entry.date}`, className: "bg-gray-800/50 rounded-lg border border-yellow-700 p-4" },
+      [
+        h(
+          "div",
+          { key: "head", className: "flex items-center justify-between mb-2" },
+          [
+            h("h3", { key: "ver", className: "text-yellow-300 font-semibold" }, `v${entry.version}`),
+            h("span", { key: "date", className: "text-xs text-gray-300" }, entry.date)
+          ]
+        ),
+        h(
+          "ul",
+          { key: "list", className: "list-disc list-inside text-sm text-gray-200 space-y-1" },
+          getItems(entry).map((it, i) => h("li", { key: `i-${i}` }, it))
+        )
+      ]
+    );
+
+  return h(
+    "div",
+    { className: "fixed inset-0 z-50 flex items-center justify-center" },
+    [
+      h("div", { key: "backdrop", className: "absolute inset-0 bg-black bg-opacity-60", onClick: onClose }),
+      h(
+        "div",
         {
-          onClick: onClose,
-          className: "text-red-400 hover:text-red-300 text-xl font-bold w-10 h-10 -mr-2 flex items-center justify-center",
-          children: "\xD7"
+          key: "panel",
+          className:
+            "relative bg-gray-900 text-white border-2 border-yellow-600 rounded-xl shadow-2xl overflow-hidden w-[95vw] max-w-[720px] h-[80vh]"
         },
-        void 0,
-        false,
-        {
-          fileName: "<stdin>",
-          lineNumber: 81,
-          columnNumber: 17
-        }
+        [
+          h(
+            "div",
+            { key: "header", className: "flex items-center justify-between px-5 py-3 bg-gray-800 border-b border-gray-700" },
+            [
+              h("h2", { key: "title", className: "text-yellow-400 font-bold text-xl" }, "Changelog"),
+              h(
+                "button",
+                {
+                  key: "close",
+                  onClick: onClose,
+                  className: "text-red-400 hover:text-red-300 text-2xl font-bold w-10 h-10 -mr-2 flex items-center justify-center",
+                  "aria-label": "Close changelog",
+                  title: "Close"
+                },
+                "\u00D7"
+              )
+            ]
+          ),
+          h(
+            "div",
+            { key: "content", className: "p-5 h-[calc(80vh-56px)] overflow-y-auto space-y-6" },
+            [
+              todayEntries.length > 0 &&
+                h(
+                  "div",
+                  { key: "today", className: "space-y-3" },
+                  [
+                    h("h3", { key: "t-h", className: "text-lg font-semibold text-yellow-200" }, "Today"),
+                    ...todayEntries.map(e => renderEntry(e, "t-"))
+                  ]
+                ),
+              olderEntries.length > 0 &&
+                h(
+                  "div",
+                  { key: "earlier", className: "space-y-3" },
+                  [
+                    h("h3", { key: "e-h", className: "text-lg font-semibold text-yellow-200" }, "Earlier"),
+                    ...olderEntries.map(e => renderEntry(e, "e-"))
+                  ]
+                )
+            ]
+          )
+        ]
       )
-    ] }, void 0, true, {
-      fileName: "<stdin>",
-      lineNumber: 79,
-      columnNumber: 13
-    }),
-    /* @__PURE__ */ jsxDEV("div", { className: "px-4 pt-2 text-xs text-gray-300", children: "by Lord Tsarcasm" }, void 0, false, {
-      fileName: "<stdin>",
-      lineNumber: 89,
-      columnNumber: 13
-    }),
-    /* @__PURE__ */ jsxDEV("div", { className: "p-4 space-y-4 max-h-[80vh] overflow-y-auto", children: changelogData.map((entry) => /* @__PURE__ */ jsxDEV("div", { className: "bg-gray-900 p-3 rounded-lg border border-gray-700", children: [
-      /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between items-baseline mb-2", children: [
-        /* @__PURE__ */ jsxDEV("h3", { className: "text-yellow-300 font-bold text-md", children: [
-          "Version ",
-          entry.version
-        ] }, void 0, true, {
-          fileName: "<stdin>",
-          lineNumber: 95,
-          columnNumber: 30
-        }),
-        /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-gray-400", children: entry.date }, void 0, false, {
-          fileName: "<stdin>",
-          lineNumber: 96,
-          columnNumber: 30
-        })
-      ] }, void 0, true, {
-        fileName: "<stdin>",
-        lineNumber: 94,
-        columnNumber: 25
-      }),
-      /* @__PURE__ */ jsxDEV("ul", { className: "list-disc list-inside text-sm space-y-1 text-gray-300", children: entry.changes.map((change, index) => /* @__PURE__ */ jsxDEV("li", { children: change }, index, false, {
-        fileName: "<stdin>",
-        lineNumber: 101,
-        columnNumber: 33
-      })) }, void 0, false, {
-        fileName: "<stdin>",
-        lineNumber: 99,
-        columnNumber: 25
-      })
-    ] }, entry.version, true, {
-      fileName: "<stdin>",
-      lineNumber: 93,
-      columnNumber: 21
-    })) }, void 0, false, {
-      fileName: "<stdin>",
-      lineNumber: 91,
-      columnNumber: 13
-    })
-  ] }, void 0, true, {
-    fileName: "<stdin>",
-    lineNumber: 77,
-    columnNumber: 9
-  });
+    ]
+  );
 };
-var stdin_default = ChangelogPanel;
-export {
-  ChangelogPanel,
-  changelogData,
-  stdin_default as default
-};
+
+export default ChangelogPanel;

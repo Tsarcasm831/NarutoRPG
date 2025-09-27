@@ -1,13 +1,14 @@
 {
-    "files": [
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Arise_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_BeHit_FlyUp_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Boxing_Practice_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Casual_Walk_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Dead_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_RunFast_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Running_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Skill_01_withSkin.glb",
-        "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Walking_withSkin.glb"
-    ]
+  "files": [
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Idle_12_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Walking_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Running_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Casual_Walk_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Arise_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Dead_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Listening_Gesture_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Stand_and_Chat_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Charged_Ground_Slam_withSkin.glb",
+    "https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Sakura_Haruno/Animation_Charged_Spell_Cast_withSkin.glb"
+  ]
 }

@@ -112,6 +112,8 @@ export function resolveCollisions(newPos, playerRadius, objectGrid) {
 
         for (let i = 0; i < nearby.length; i++) {
             const obj = nearby[i];
+            // Allow callers to mark an object to be skipped (e.g., ignore self)
+            if (obj?.userData?.__ignoreCollision) continue;
             const col = obj.userData && obj.userData.collider;
             if (!col) continue;
 
