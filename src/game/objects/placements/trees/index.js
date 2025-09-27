@@ -12,7 +12,7 @@ const DEFAULT_TREE_LABEL = 'LI300';
 /* @tweakable default biome if none provided */
 const DEFAULT_BIOME = 'forest';
 /* @tweakable collider radius fallback (used if builder doesn’t provide one) */
-const DEFAULT_COLLIDER_RADIUS = 7.0;
+const DEFAULT_COLLIDER_RADIUS = 1.6;
 
 const BIOME_BUILDERS = {
   forest: FOREST_BUILDERS,

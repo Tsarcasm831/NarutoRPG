@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from '../common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from '../common.js';
 
 // Birch: pale trunk, lighter airy canopy
 export function buildBirchTree(settings) {
@@ -18,5 +18,6 @@ export function buildBirchTree(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '7cb342', height, colliderRadius: 6.6 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '7cb342', height, colliderRadius };
 }

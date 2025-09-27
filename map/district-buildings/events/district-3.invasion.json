@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "primaryBaseName": "Defense Works",
+    "varietyRatio": 0.4,
+    "source": "mixed",
+    "paletteIndex": 0
+  },
+  "entries": [
+    {
+      "baseName": "Sandbag Line",
+      "pos": [-12.4, -58.2],
+      "rotY": 0.05,
+      "scale": 0.28
+    },
+    {
+      "baseName": "Supply Crate Cluster",
+      "pos": [8.6, -42.1],
+      "rotY": -0.33,
+      "scale": 0.18
+    },
+    {
+      "baseName": "Watch Post",
+      "pos": [22.1, -71.5],
+      "rotY": 1.47,
+      "scale": 0.26
+    }
+  ]
+}

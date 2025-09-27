@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createTerrain } from './terrain.js';
 import { setupGridLabels } from './gridLabels.js';
 import { setupObjectTooltips } from './objectTooltips.js';
+import { INTERACTION_DISTANCE } from '../game/constants.js';
 
 /**
  * Initializes the full scene graph, renderer, lights, terrain, grid, and player.
@@ -31,7 +32,8 @@ export function initScene({ mountEl, settings, createPlayer, onReady }) {
     scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    directionalLight.position.set(30, 80, 40);
+    const defaultSunOffset = new THREE.Vector3(30, 80, 40);
+    directionalLight.position.copy(defaultSunOffset);
     directionalLight.castShadow = settings.shadows;
 
     const shadowMapSize = { low: 512, medium: 1024, high: 2048 }[settings.shadowQuality] || 1024;
@@ -44,6 +46,10 @@ export function initScene({ mountEl, settings, createPlayer, onReady }) {
     directionalLight.shadow.camera.right = frustumSize;
     directionalLight.shadow.camera.top = frustumSize;
     directionalLight.shadow.camera.bottom = -frustumSize;
+
+    directionalLight.userData.defaultOffset = defaultSunOffset.clone();
+    directionalLight.userData.sunOffset = defaultSunOffset.clone();
+    directionalLight.userData.horizontalRadius = Math.hypot(defaultSunOffset.x, defaultSunOffset.z);
 
     scene.add(directionalLight);
     directionalLight.target.position.set(0, 0, 0);
@@ -71,14 +77,31 @@ export function initScene({ mountEl, settings, createPlayer, onReady }) {
     // Player
     const player = createPlayer(scene, settings, onReady);
 
-    // Object tooltips (nearby objects)
-    const { group: objectTooltipsGroup, update: updateObjectTooltips } = setupObjectTooltips(scene, { maxVisible: 20, distance: 45 });
+    // Object tooltips
+    // - General objects (exclude NPCs)
+    const { group: objectTooltipsGroup, update: updateGeneralTooltips } = setupObjectTooltips(
+        scene,
+        { maxVisible: 20, distance: 45, filter: (o) => (o?.userData?.type !== 'npc') }
+    );
+
+    // - NPC nameplates (match interaction distance)
+    const { update: updateNpcNameplates } = setupObjectTooltips(
+        scene,
+        { maxVisible: 10, distance: INTERACTION_DISTANCE, filter: (o) => (o?.userData?.type === 'npc') }
+    );
+
+    // Combined updater so the animation loop can call one function
+    const updateObjectTooltips = (playerPosition, objectGrid, allObjects) => {
+        updateGeneralTooltips(playerPosition, objectGrid, allObjects);
+        updateNpcNameplates(playerPosition, objectGrid, allObjects);
+    };
 
     return {
         scene,
         renderer,
         camera,
         light: directionalLight,
+        ambientLight,
         groundContainer,
         gridHelper,
         gridLabelsGroup,

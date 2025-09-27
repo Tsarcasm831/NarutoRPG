@@ -248,9 +248,16 @@ export function updatePlayer(player, keys, camera, light, throttledSetPlayerPosi
     
     // Update light and shadows
     if (light) {
+        const userData = light.userData || (light.userData = {});
+        if (!userData.defaultOffset || !userData.defaultOffset.isVector3) {
+            userData.defaultOffset = new THREE.Vector3(30, 80, 40);
+        }
+        const offset = (userData.sunOffset && userData.sunOffset.isVector3)
+            ? userData.sunOffset
+            : userData.defaultOffset;
         // The light's shadow camera should follow the player's position
         // to ensure shadows are always rendered around the player.
-        light.position.copy(playerPosition).add(new THREE.Vector3(30, 80, 40));
+        light.position.copy(playerPosition).add(offset);
         light.target.position.copy(playerPosition);
         light.target.updateMatrixWorld();
 

@@ -142,22 +142,12 @@ export function createTerrain(scene, settings) {
                 if (!octx) return;
                 // Draw terrain-sized roads/river centered at (worldSize/2, worldSize/2), 1px == 1 world unit
                 const scale = 1, cx = worldSize / 2, cy = worldSize / 2;
-                // Districts then walls then roads
+                // District outlines render beneath roads
                 await drawDistricts(octx, scale, cx, cy, {
                     alpha: 0.15,
                     stroke: '#ffffff',
                     lineWidth: 1,
                     fill: '#ffffff'
-                });
-                // NEW: walls on terrain overlay
-                const { drawWalls } = await import('../components/game/objects/konoha_roads.js');
-                await drawWalls(octx, scale, cx, cy, {
-                    /* @tweakable terrain overlay wall opacity (0..1) */
-                    alpha: 0.85,
-                    /* @tweakable terrain overlay wall thickness scale */
-                    strokeScale: 2.0,
-                    /* @tweakable terrain overlay wall color */
-                    color: '#bfc0c2'
                 });
                 await drawRoads(octx, scale, cx, cy, {
                     /* @tweakable overwrite primary road width on overworld (pixels) */

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from '../common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from '../common.js';
 
 // Beech: smooth trunk, broad ellipsoid canopy
 export function buildBeechTree(settings) {
@@ -18,5 +18,6 @@ export function buildBeechTree(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '43a047', height, colliderRadius: 7.4 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '43a047', height, colliderRadius };
 }

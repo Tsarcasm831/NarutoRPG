@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from './common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from './common.js';
 
 // Spring biome: blossoms and fresh greens
 
@@ -19,7 +19,8 @@ export function buildSpringTree1(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: 'ffb7c5', height, colliderRadius: 7.0 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: 'ffb7c5', height, colliderRadius };
 }
 
 // Variant 2: Light blossom with two overlapping spheres
@@ -41,7 +42,8 @@ export function buildSpringTree2(settings) {
 
   const group = makeGroup(trunk, c1, c2);
   const height = computeApproxHeight(group);
-  return { group, colorHex: 'ffc6d9', height, colliderRadius: 6.6 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: 'ffc6d9', height, colliderRadius };
 }
 
 // Variant 3: Fresh spring green, rounded canopy
@@ -60,8 +62,8 @@ export function buildSpringTree3(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '9edc76', height, colliderRadius: 6.8 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '9edc76', height, colliderRadius };
 }
 
 export const SPRING_BUILDERS = [buildSpringTree1, buildSpringTree2, buildSpringTree3];
-

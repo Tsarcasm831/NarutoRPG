@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import { parseGridLabel, posForCell } from '../utils/gridLabel.js';
-import { WALL_RADIUS } from '../../player/movement/constants.js';
 import { buildKonohaGatesGroup } from '../gates/builder.js';
 
 /**
- * Place the Konoha Gates at the opening between two grid labels on the central wall.
- * The gate will be centered at WALL_RADIUS and oriented so its front faces outward.
+ * Place the Konoha Gates at the perimeter opening between two grid labels.
+ * The gate faces outward along the radial direction from the village centre.
  *
  * @param {THREE.Scene} scene
  * @param {ObjectGrid} objectGrid
@@ -22,21 +21,23 @@ export function placeKonohaGates(scene, objectGrid, worldSize, settings, opts = 
   } = opts;
 
   // Determine opening midpoint angle
+  const { i: i1, j: j1 } = parseGridLabel(gateFromLabel);
+  const { i: i2, j: j2 } = parseGridLabel(gateToLabel);
+  const p1 = posForCell(i1, j1, worldSize);
+  const p2 = posForCell(i2, j2, worldSize);
+  const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+
   let theta;
   if (openingAt) {
     const centers = { north: 3*Math.PI/2, south: Math.PI/2, east: 0, west: Math.PI };
     theta = centers[openingAt] ?? Math.PI/2;
   } else {
-    const { i: i1, j: j1 } = parseGridLabel(gateFromLabel);
-    const { i: i2, j: j2 } = parseGridLabel(gateToLabel);
-    const p1 = posForCell(i1, j1, worldSize);
-    const p2 = posForCell(i2, j2, worldSize);
-    const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
     theta = Math.atan2(mid.z, mid.x);
   }
 
   // World position on wall radius
-  const radius = WALL_RADIUS;
+  const derivedRadius = mid.length();
+  const radius = derivedRadius > 0 ? derivedRadius : worldSize * 0.3561;
   const pos = new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius);
 
   // Build gates group

@@ -5,7 +5,9 @@ import { initialPlayerStats, initialInventory } from "./game/initialState.js";
 import { addExperience, ensureExperienceConsistency, xpForLevel } from "./game/experience.js";
 import { useThreeScene } from "./hooks/useThreeScene.js";
 import { usePlayerControls } from "./hooks/usePlayerControls.js";
+import { useWorldEvents } from "./hooks/useWorldEvents.js";
 import { initializeAssetLoader, startCaching } from "./utils/assetLoader.js";
+import { loadDistrictLayouts } from "./utils/districtLayouts.js";
 import { prefetchLocationAssets } from "../scripts/prefetchLocationAssets.js";
 import { MainMenu } from "./components/UI/MainMenu.jsx";
 import { LoadingScreen } from "./components/UI/LoadingScreen.jsx";
@@ -14,6 +16,9 @@ import CharacterPanel from "./components/UI/CharacterPanel.jsx";
 import { InventoryPanel } from "./components/UI/InventoryPanel.jsx";
 import { WorldMapPanel } from "./components/UI/WorldMapPanel.jsx";
 import { HUD } from "./components/UI/HUD.jsx";
+import { WorldEventOverlay } from "./components/UI/world/WorldEventOverlay.jsx";
+import QuestLogPanel from "./components/UI/QuestLogPanel.jsx";
+import { createInitialQuests } from "./game/quests.js";
 import SettingsPanel from "./components/UI/SettingsPanel.jsx";
 import ChangelogPanel from "./components/UI/ChangelogPanel.jsx";
 import ErrorBoundary from "./components/UI/ErrorBoundary.jsx";
@@ -27,17 +32,44 @@ import HokageOfficeModal from "./components/UI/HokageOfficeModal.jsx";
 import KitbashBuildingModal from "./components/UI/KitbashBuildingModal.jsx";
 import JutsuModal from "./components/UI/JutsuModal.jsx";
 import { preloadMusic, musicPlay, musicPause, musicState } from "./utils/musicManager.js";
+import { useGameTime } from "./hooks/useGameTime.js";
 const VERSION_PREFIX = "v";
 const OVERRIDE_VERSION = null;
 const OpenWorldGame = () => {
   const mountRef = useRef(null);
   const [gameState, setGameState] = useState("MainMenu");
+  const [timeResetKey, setTimeResetKey] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [version, setVersion] = useState("");
   const [gameReady, setGameReady] = useState(false);
   useEffect(() => {
-    const latest = changelogData?.[0]?.version || "";
-    const label = OVERRIDE_VERSION != null && OVERRIDE_VERSION !== "" ? OVERRIDE_VERSION : latest ? `${VERSION_PREFIX}${latest}` : "";
+    // Prefer version derived from the HTML page title (e.g., "Naruto RPG v0.010.000 [Alpha]")
+    let label = "";
+    try {
+      const title = typeof document !== "undefined" ? (document.title || "") : "";
+      // Extract a token that starts with 'v' followed by a digit, and then allow common version suffix characters
+      // Example matches: "v0.010.000", "v0.010.000 [Alpha]", "v1.2.3-beta"
+      let m = title.match(/\bv\d[\w\.\-\s\[\]\(\)]+/i);
+      if (m && m[0]) {
+        label = m[0].trim();
+      } else {
+        // Try to parse from the file name (e.g., Naruto RPG v0.010.000 [Alpha].html)
+        const file = (typeof location !== "undefined" ? (location.pathname.split("/").pop() || "") : "").replace(/\.(html?)$/i, "");
+        m = file.match(/\bv\d[\w\.\-\s\[\]\(\)]+/i);
+        if (m && m[0]) {
+          label = m[0].trim();
+        } else {
+          // Fallback: try to find a bare x.y.z pattern and prefix with 'v'
+          const m2 = (title || file).match(/\d+\.\d+\.\d+(?:[\w\.\-\s\[\]\(\)]*)?/);
+          if (m2 && m2[0]) label = `${VERSION_PREFIX}${m2[0].trim()}`;
+        }
+      }
+    } catch (_) {}
+    if (!label) {
+      // Final fallback: use the latest entry from the changelog (preserves previous behavior)
+      const latest = changelogData?.[0]?.version || "";
+      label = OVERRIDE_VERSION != null && OVERRIDE_VERSION !== "" ? OVERRIDE_VERSION : latest ? `${VERSION_PREFIX}${latest}` : "";
+    }
     setVersion(label);
   }, []);
   const [playerStats, setPlayerStats] = useState(() => ensureExperienceConsistency(initialPlayerStats));
@@ -66,11 +98,16 @@ const OpenWorldGame = () => {
   const [showCredits, setShowCredits] = useState(false);
   const [showAnimations, setShowAnimations] = useState(false);
   const [showKakashi, setShowKakashi] = useState(false);
+  const [showQuests, setShowQuests] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [showHokageOffice, setShowHokageOffice] = useState(false);
   const [showKitbashModal, setShowKitbashModal] = useState(false);
   const [kitbashDetails, setKitbashDetails] = useState(null);
   const [showJutsuModal, setShowJutsuModal] = useState(false);
+  const [quests, setQuests] = useState(() => createInitialQuests());
+  // In-game time must be computed before passing to world events
+  const { timeOfDayHours, formattedTime: gameClock } = useGameTime({ isRunning: gameState === "Playing", initialHour: 8, resetKey: timeResetKey });
+  const { worldState, eventOverlay, acknowledgeEvent, dismissEventOverlay, activeEvent, upcomingEvent, nextEventCountdownMs } = useWorldEvents({ gameState, timeOfDayHours });
   const uiState = {
     setShowCharacter,
     setShowInventory,
@@ -80,21 +117,25 @@ const OpenWorldGame = () => {
     setShowAnimations,
     setShowJutsuModal,
     setShowKakashi,
+    setShowQuests,
     gameState,
     setSettings,
     /* NEW: expose pause setter to controls */
     setShowPause: setShowPauseMenu
   };
+  const xpMultiplier = Math.max(0, Number(worldState?.buffs?.xpMultiplier) || 1);
   const gainExperience = useCallback((amount) => {
+    const effective = Math.max(0, Math.round((Number(amount) || 0) * xpMultiplier));
+    if (effective <= 0) return;
     setPlayerStats((prev) => {
-      const { stats } = addExperience(prev, amount);
+      const { stats } = addExperience(prev, effective);
       return stats;
     });
-  }, []);
+  }, [xpMultiplier]);
   const keysRef = usePlayerControls({ ...uiState, onGainExperience: gainExperience });
   const joystickRef = useRef(null);
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: useCallback(() => setGameReady(true), []) });
+  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: useCallback(() => setGameReady(true), []), worldState, timeOfDayHours });
   const musicWasPlayingRef = useRef(false);
   const releasePauseMenu = useCallback(() => {
     const wasPausedBefore = window.__pauseMenuWasPausedBefore;
@@ -131,6 +172,7 @@ const OpenWorldGame = () => {
     };
   }, []);
   const handleStartGame = async () => {
+    setTimeResetKey((key) => key + 1);
     setGameReady(false);
     setGameState("Loading");
     if (!window.assetLoaderInitialized) {
@@ -143,8 +185,18 @@ const OpenWorldGame = () => {
       setLoadingProgress(mapped);
     };
     setLoadingProgress(0);
-    await prefetchLocationAssets(seg(0, 30));
-    await startCaching(seg(30, 50));
+    try {
+      await prefetchLocationAssets(seg(0, 30));
+    } catch (e) {
+      // Ensure progress advances even if prefetch fails (e.g., no Cache API)
+      try { seg(0, 30)(100); } catch (_) {}
+    }
+    try {
+      await startCaching(seg(30, 50));
+    } catch (e) {
+      // Ensure progress advances even if caching fails
+      try { seg(30, 50)(100); } catch (_) {}
+    }
     try {
       await preloadMusic(seg(80, 20));
     } catch (_) {
@@ -154,37 +206,7 @@ const OpenWorldGame = () => {
         const low = String(id).toLowerCase();
         return low.startsWith("district") || low.startsWith("residential") || low.startsWith("hyuuga");
       });
-      window.__districtLayouts = window.__districtLayouts || {};
-      const tryFetch = async (urls) => {
-        for (const url of urls) {
-          try {
-            const res = await fetch(url, { credentials: "omit" });
-            if (res.ok) return res;
-          } catch (_) {
-          }
-        }
-        return null;
-      };
-      await Promise.all(ids.map(async (id) => {
-        try {
-          const res = await tryFetch([
-            `map/district-buildings/json/${id}.buildings.json`,
-            `/map/district-buildings/json/${id}.buildings.json`,
-            // Legacy fallback locations
-            `map/generated/district-buildings/${id}.json`,
-            `/map/generated/district-buildings/${id}.json`
-          ]);
-          if (res && res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data)) {
-              window.__districtLayouts[id] = { entries: data };
-            } else if (data && typeof data === "object" && Array.isArray(data.entries)) {
-              window.__districtLayouts[id] = data;
-            }
-          }
-        } catch (_) {
-        }
-      }));
+      await loadDistrictLayouts(ids);
     } catch (_) {
     }
     setGameState("Playing");
@@ -199,6 +221,7 @@ const OpenWorldGame = () => {
       lineNumber: 54,
       columnNumber: 9
     }),
+    gameState === "Playing" && showQuests && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(QuestLogPanel, { quests, setQuests, onClose: () => setShowQuests(false), setPlayerStats, setInventory, addExperience: gainExperience }, void 0, false, { fileName: "<stdin>", lineNumber: 65, columnNumber: 44 }) }, void 0, false, { fileName: "<stdin>", lineNumber: 65, columnNumber: 27 }),
     // Show initial asset caching progress
     gameState === "Loading" && /* @__PURE__ */ jsxDEV(LoadingScreen, { progress: loadingProgress }, void 0, false, {
       fileName: "<stdin>",
@@ -221,7 +244,7 @@ const OpenWorldGame = () => {
       lineNumber: 61,
       columnNumber: 27
     }),
-    gameState === "Playing" && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(HUD, { playerStats, playerRef, worldObjects, zoomRef, settings }, void 0, false, {
+    gameState === "Playing" && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(HUD, { playerStats, playerRef, worldObjects, zoomRef, settings, worldState, activeEvent, upcomingEvent, nextEventCountdownMs, timeOfDayHours, gameClock }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 63,
       columnNumber: 38
@@ -359,7 +382,8 @@ const OpenWorldGame = () => {
       setKitbashDetails(null);
     } }, void 0, false),
     /* NEW: Jutsu Modal */
-    gameState === "Playing" && showJutsuModal && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(JutsuModal, { onClose: () => setShowJutsuModal(false) }, void 0, false) }, void 0, false)
+    gameState === "Playing" && showJutsuModal && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(JutsuModal, { onClose: () => setShowJutsuModal(false) }, void 0, false) }, void 0, false),
+    eventOverlay && /* @__PURE__ */ jsxDEV(WorldEventOverlay, { overlay: eventOverlay, onConfirm: acknowledgeEvent, onDismiss: dismissEventOverlay }, void 0, false)
   ] }, void 0, true, {
     fileName: "<stdin>",
     lineNumber: 52,

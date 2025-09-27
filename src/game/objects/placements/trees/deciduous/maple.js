@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from '../common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from '../common.js';
 
 // Maple: slightly flared trunk base, full canopy (warmer green)
 export function buildMapleTree(settings) {
@@ -17,5 +17,6 @@ export function buildMapleTree(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '4caf50', height, colliderRadius: 7.2 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '4caf50', height, colliderRadius };
 }

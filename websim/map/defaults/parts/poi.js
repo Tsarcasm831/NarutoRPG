@@ -1,1 +1,0 @@
-export { DEFAULT_POI } from './poi-full.js';

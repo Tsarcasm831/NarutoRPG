@@ -1,16 +1,12 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React, { useEffect, useRef, useState } from "react";
 import { WORLD_SIZE } from "../../scene/terrain.js";
-import { drawRoads, drawRiver, drawDistricts, drawWalls } from "../../components/game/objects/konoha_roads.js";
+import { drawRoads, drawRiver, drawDistricts } from "../../components/game/objects/konoha_roads.js";
 import { getBiomeAt, getTerrainTextureForBiome, TEXTURE_WORLD_UNITS, TILE_SIZE } from "../../scene/terrain.js";
 const WORLD_MAP_INITIAL_ZOOM = 1;
 const WORLD_MAP_MIN_ZOOM = 0.2;
 const WORLD_MAP_MAX_ZOOM = 20;
 const WORLD_MAP_ZOOM_STEP = 0.1;
-const WORLD_MAP_DRAW_WALLS = true;
-const WORLD_MAP_WALL_ALPHA = 0.9;
-const WORLD_MAP_WALL_STROKE_SCALE = 2;
-const WORLD_MAP_WALL_COLOR = "#bfc0c2";
 const WORLD_MAP_UPDATE_FPS = 12;
 const WORLD_MAP_PRERENDER_OVERLAYS = true;
 const WorldMapPanel = ({ playerPosition, onClose, worldObjects = [] }) => {
@@ -80,9 +76,6 @@ const WorldMapPanel = ({ playerPosition, onClose, worldObjects = [] }) => {
       if (WORLD_MAP_PRERENDER_OVERLAYS) {
         const scale = 1, cx = WORLD_SIZE / 2, cy = WORLD_SIZE / 2;
         await drawDistricts(ctx, scale, cx, cy, { alpha: 0.15, stroke: "#ffffff", lineWidth: 1, fill: "#ffffff" });
-        if (WORLD_MAP_DRAW_WALLS) {
-          await drawWalls(ctx, scale, cx, cy, { alpha: WORLD_MAP_WALL_ALPHA, strokeScale: WORLD_MAP_WALL_STROKE_SCALE, color: WORLD_MAP_WALL_COLOR });
-        }
         await drawRoads(ctx, scale, cx, cy, { alpha: 0.9, wPrimary: 3, wSecondary: 2, wTertiary: 1.2 });
         drawRiver(ctx, scale, cx, cy);
       }
@@ -165,13 +158,6 @@ const WorldMapPanel = ({ playerPosition, onClose, worldObjects = [] }) => {
         lineWidth: 1,
         fill: "#ffffff"
       });
-      if (WORLD_MAP_DRAW_WALLS) {
-        await drawWalls(ctx, scale, cx, cy, {
-          alpha: WORLD_MAP_WALL_ALPHA,
-          strokeScale: WORLD_MAP_WALL_STROKE_SCALE,
-          color: WORLD_MAP_WALL_COLOR
-        });
-      }
       await drawRoads(ctx, scale, cx, cy, {
         /* @tweakable primary road color on world map */
         primaryColor: "#e9d7b8",

@@ -1,5 +1,6 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { updatePlayer } from '../game/player/index.js';
+import { INTERACTION_DISTANCE } from '../game/constants.js';
 
 /**
  * Starts the main animation loop and returns a stop() function.
@@ -42,7 +43,7 @@ export function startAnimationLoop({
     const fpsInterval = fpsIntervals[fpsLimit] || 0;
     let lastFrameTime = 0;
 
-    const interactionDistance = 10; // world units to interact
+    const interactionDistance = INTERACTION_DISTANCE; // world units to interact
     let lastInteractObj = null;
     let promptHideTimeout = null;
 
@@ -277,6 +278,28 @@ export function startAnimationLoop({
         }
 
         const delta = clockRef.current.getDelta();
+
+        // Update simple NPC idles if present
+        try {
+            const npcs = sceneRef.current?.userData?.npcs;
+            if (Array.isArray(npcs)) {
+                for (let i = 0; i < npcs.length; i++) {
+                    const g = npcs[i];
+                    // Ensure NPC is in spatial grid to enable collisions/interactions
+                    try {
+                        const grid = objectGridRef.current;
+                        if (grid && g && g.position) {
+                            if (g.userData.__gridRef !== grid) {
+                                grid.add(g);
+                                g.userData.__gridRef = grid;
+                            }
+                        }
+                    } catch (_) {}
+                    // Advance idle animation
+                    try { g?.userData?.mixer?.update(delta); } catch (_) {}
+                }
+            }
+        } catch (_) {}
 
         // Grid label visibility (virtualized: delegate to update function)
         if (gridLabelsGroupRef.current && gridLabelsGroupRef.current.visible && gridLabelsUpdateRef?.current) {

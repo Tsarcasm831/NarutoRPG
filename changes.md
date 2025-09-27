@@ -34,3 +34,17 @@ Modified
 - src/components/game/objects/konoha_roads.js
 - src/hooks/usePlayerControls.js
 - styles/style.css
+## Quest Log (Keyboard: L)
+
+- Added a Quest Log panel that sits alongside Character (C) and Inventory (I).
+- Toggle with `L` during gameplay. Close with `ESC`.
+- Quests support rewards: Experience, Gold, Item grants, and Equipment upgrades.
+- Initial seed quests:
+  - D-Rank: Help at Ichiraku (Gold + XP)
+  - C-Rank: Patrol the Gates (Gloves item + XP)
+  - B-Rank: Arena Sparring Trial (Weapon upgrade + XP)
+- Claiming rewards updates your stats/inventory:
+  - XP uses existing leveling curve (auto-refills vitals on level-up).
+  - Gold increments `playerStats.gold`.
+  - Items are placed into the first free storage slot (or appended).
+  - Upgrades improve currently equipped item in the specified slot; if empty, an upgraded item is added to storage.

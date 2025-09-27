@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from './common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from './common.js';
 
 // Swamp biome: darker greens, buttressed base
 
@@ -20,7 +20,8 @@ export function buildSwampTree1(settings) {
 
   const group = makeGroup(trunk, ell);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '2d4739', height, colliderRadius: 7.2 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '2d4739', height, colliderRadius };
 }
 
 // Variant 2: Cypress-like with buttress base and layered canopy
@@ -44,7 +45,8 @@ export function buildSwampTree2(settings) {
 
   const group = makeGroup(base, trunk, c1, c2);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '305e4a', height, colliderRadius: 6.8 };
+  const colliderRadius = computeTrunkRadius([base, trunk]);
+  return { group, colorHex: '305e4a', height, colliderRadius };
 }
 
 // Variant 3: Tall with narrow, drooping canopy
@@ -64,8 +66,8 @@ export function buildSwampTree3(settings) {
 
   const group = makeGroup(trunk, top);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '274a3a', height, colliderRadius: 6.0 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '274a3a', height, colliderRadius };
 }
 
 export const SWAMP_BUILDERS = [buildSwampTree1, buildSwampTree2, buildSwampTree3];
-

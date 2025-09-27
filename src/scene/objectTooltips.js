@@ -9,7 +9,7 @@ const TOOLTIP_REQUIRE_COLLIDER = true;
  * - Uses a small sprite pool to show labels for nearest objects to the player.
  * - Updates only when needed and reuses sprites to avoid allocations.
  */
-export function setupObjectTooltips(scene, { maxVisible = 20, distance = 45 } = {}) {
+export function setupObjectTooltips(scene, { maxVisible = 20, distance = 45, filter = null } = {}) {
     const group = new THREE.Group();
     group.renderOrder = 9998;
     scene.add(group);
@@ -85,24 +85,104 @@ export function setupObjectTooltips(scene, { maxVisible = 20, distance = 45 } = 
     function update(playerPosition, objectGrid, allObjects) {
         if (!playerPosition || !objectGrid) return;
 
-        // Gather candidates near player
-        const nearby = objectGrid.getObjectsNear(playerPosition, distance + 10) || [];
+        // Gather candidates near player (expanded radius to account for collider borders)
+        const nearby = objectGrid.getObjectsNear(playerPosition, distance + 80) || [];
 
-        // Score and sort by distance
+        // Geometry helpers for collider-distance checks (match interaction logic)
+        const pointInPolyXZ = (p, poly) => {
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const a = poly[i], b = poly[j];
+                const intersect = ((a.z > p.z) !== (b.z > p.z)) &&
+                    (p.x < ((b.x - a.x) * (p.z - a.z)) / ((b.z - a.z) || 1e-9) + a.x);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        };
+        const distPointSeg2 = (px, pz, ax, az, bx, bz) => {
+            const vx = bx - ax, vz = bz - az;
+            const wx = px - ax, wz = pz - az;
+            const len2 = Math.max(1e-8, vx * vx + vz * vz);
+            const t = Math.max(0, Math.min(1, (wx * vx + wz * vz) / len2));
+            const cx = ax + vx * t, cz = az + vz * t;
+            const dx = px - cx, dz = pz - cz;
+            return dx * dx + dz * dz;
+        };
+        const distToPolygonBorder = (p, poly) => {
+            if (!Array.isArray(poly) || poly.length < 3) return Infinity;
+            if (pointInPolyXZ(p, poly)) return 0;
+            let bestD2 = Infinity;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const a = poly[j], b = poly[i];
+                const d2 = distPointSeg2(p.x, p.z, a.x, a.z, b.x, b.z);
+                if (d2 < bestD2) bestD2 = d2;
+            }
+            return Math.sqrt(bestD2);
+        };
+        const distToAABB = (p, cx, cz, hx, hz) => {
+            const dx = Math.max(0, Math.abs(p.x - cx) - Math.max(0.0001, hx));
+            const dz = Math.max(0, Math.abs(p.z - cz) - Math.max(0.0001, hz));
+            return Math.hypot(dx, dz);
+        };
+        const distToOBB = (p, cx, cz, hx, hz, rotY) => {
+            const cos = Math.cos(-rotY || 0), sin = Math.sin(-rotY || 0);
+            const lx = (p.x - cx) * cos - (p.z - cz) * sin;
+            const lz = (p.x - cx) * sin + (p.z - cz) * cos;
+            return distToAABB({ x: lx, z: lz }, 0, 0, hx, hz);
+        };
+        const distToSphereBorder = (p, cx, cz, r) => {
+            const dx = p.x - cx, dz = p.z - cz;
+            return Math.max(0, Math.hypot(dx, dz) - Math.max(0, r));
+        };
+
+        // Score and sort by border distance
         const scored = [];
         for (let i = 0; i < nearby.length; i++) {
             const o = nearby[i];
             if (!o || !o.position) continue;
+            if (typeof filter === 'function' && !filter(o)) continue;
             // Skip objects without an active collider if required (prevents choosing placeholder proxies)
             if (TOOLTIP_REQUIRE_COLLIDER && !o.userData?.collider) continue;
-            const dx = o.position.x - playerPosition.x;
-            const dz = o.position.z - playerPosition.z;
-            const distSq = dx * dx + dz * dz;
-            if (distSq <= distance * distance) {
-                scored.push({ obj: o, distSq });
+
+            const col = o.userData?.collider;
+            let d = Infinity;
+            if (col) {
+                if (col.type === 'polygon' && Array.isArray(col.points)) {
+                    d = distToPolygonBorder(playerPosition, col.points);
+                } else if (col.type === 'obb' || col.type === 'orientedBox') {
+                    const cx = col.center?.x ?? o.position.x;
+                    const cz = col.center?.z ?? o.position.z;
+                    const hx = col.halfExtents?.x ?? 1;
+                    const hz = col.halfExtents?.z ?? 1;
+                    const a = col.rotationY ?? 0;
+                    d = distToOBB(playerPosition, cx, cz, hx, hz, a);
+                } else if (col.type === 'aabb') {
+                    const cx = col.center?.x ?? o.position.x;
+                    const cz = col.center?.z ?? o.position.z;
+                    const hx = col.halfExtents?.x ?? 8;
+                    const hz = col.halfExtents?.z ?? 6;
+                    d = distToAABB(playerPosition, cx, cz, hx, hz);
+                } else if (col.type === 'sphere') {
+                    const cx = o.position.x, cz = o.position.z;
+                    d = distToSphereBorder(playerPosition, cx, cz, col.radius || 0);
+                } else {
+                    // Unknown collider: fall back to center distance
+                    const dx = o.position.x - playerPosition.x;
+                    const dz = o.position.z - playerPosition.z;
+                    d = Math.hypot(dx, dz);
+                }
+            } else {
+                // No collider: use center distance (legacy)
+                const dx = o.position.x - playerPosition.x;
+                const dz = o.position.z - playerPosition.z;
+                d = Math.hypot(dx, dz);
+            }
+
+            if (d <= distance) {
+                scored.push({ obj: o, dist: d });
             }
         }
-        scored.sort((a, b) => a.distSq - b.distSq);
+        scored.sort((a, b) => a.dist - b.dist);
 
         // Determine desired set
         const desired = new Set();

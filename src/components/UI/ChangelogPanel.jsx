@@ -1,6 +1,25 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
-const LATEST_VERSION = "0.009.000 [Alpha]";
+// Derive latest version from the HTML title or file name, mirroring MainMenu logic.
+// Returns a version string WITHOUT the leading 'v' so that other UI can prefix it as needed.
+const deriveLatestVersion = () => {
+  try {
+    const title = typeof document !== "undefined" ? (document.title || "") : "";
+    // Prefer a token starting with 'v' followed by a digit, then strip the leading 'v'.
+    let m = title.match(/\bv\d[\w\.\-\s\[\]\(\)]+/i);
+    if (m && m[0]) return m[0].replace(/^\s*v/i, "").trim();
+    // Fallback: parse from the file name (e.g., Naruto RPG v0.010.000 [Alpha].html)
+    const file = (typeof location !== "undefined" ? (location.pathname.split("/").pop() || "") : "").replace(/\.(html?)$/i, "");
+    m = file.match(/\bv\d[\w\.\-\s\[\]\(\)]+/i);
+    if (m && m[0]) return m[0].replace(/^\s*v/i, "").trim();
+    // Final attempt: bare x.y.z pattern (plus optional suffixes)
+    const m2 = (title || file).match(/\d+\.\d+\.\d+(?:[\w\.\-\s\[\]\(\)]*)?/);
+    if (m2 && m2[0]) return m2[0].trim();
+  } catch (_) {}
+  // Fallback to previous default if nothing found
+  return "0.009.000 [Alpha]";
+};
+const LATEST_VERSION = deriveLatestVersion();
 const LATEST_DATE = "2025-09-19";
 const LATEST_CHANGES = [
   "Defaulted controls and UI to desktop-first experience.",

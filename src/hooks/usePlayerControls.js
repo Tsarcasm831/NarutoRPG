@@ -1,38 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { exitPointerLockSafely, openPauseGate, closePauseGate } from '../utils/pauseState.js';
 
-export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowWorldMap, setShowSettings, setShowMobileControls, setShowAnimations, setShowJutsuModal, setShowKakashi, gameState, setSettings, setShowPause }) => {
+export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowWorldMap, setShowSettings, setShowMobileControls, setShowAnimations, setShowJutsuModal, setShowKakashi, setShowQuests, gameState, setSettings, setShowPause }) => {
     const keysRef = useRef({});
 
     useEffect(() => {
-        const exitPointerLockSafely = () => {
-            if (typeof document.exitPointerLock !== 'function') return;
-            const isPointerLocked = document.pointerLockElement != null;
-            if (!isPointerLocked) return;
-            try {
-                document.exitPointerLock();
-            } catch (_) {
-                // Some browsers throw if pointer lock isn't actually engaged
-            }
-        };
-
-        const applyPauseState = (shouldPause) => {
-            if (shouldPause) {
-                const wasPausedBefore = !!window.__gamePaused;
-                window.__pauseMenuWasPausedBefore = wasPausedBefore;
-                window.__pauseMenuActive = true;
-                window.__gamePaused = true;
-                keysRef.current = {};
-                exitPointerLockSafely();
-            } else {
-                const wasPausedBefore = window.__pauseMenuWasPausedBefore;
-                delete window.__pauseMenuActive;
-                delete window.__pauseMenuWasPausedBefore;
-                if (!wasPausedBefore) {
-                    window.__gamePaused = false;
-                }
-            }
-        };
-
         const handleKeyDown = (event) => {
             // Prevent panel toggling if an input field is focused
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
@@ -43,7 +15,12 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                 if (typeof setShowPause === 'function' && gameState === 'Playing') {
                     setShowPause(prev => {
                         const next = !prev;
-                        applyPauseState(next);
+                        if (next) {
+                            openPauseGate();
+                            keysRef.current = {};
+                        } else {
+                            closePauseGate();
+                        }
                         return next;
                     });
                 }
@@ -76,6 +53,7 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                 setShowCharacter(false);
                 setShowInventory(false);
                 setShowWorldMap(false);
+                if (typeof setShowQuests === 'function') setShowQuests(false);
                 if (typeof setShowJutsuModal === 'function') setShowJutsuModal(false);
                 if (gameState === 'Playing') { // Only close settings in-game with Esc
                     setShowSettings(false);
@@ -98,6 +76,7 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                             if (key !== 'c') setShowCharacter(false);
                             if (key !== 'i') setShowInventory(false);
                             if (key !== 'm') setShowWorldMap(false);
+                            if (key !== 'l' && typeof setShowQuests === 'function') setShowQuests(false);
                             if (key !== 'p') setShowSettings(false);
                             if (key !== 'b') setShowAnimations(false);
                             if (key !== 'j' && typeof setShowJutsuModal === 'function') setShowJutsuModal(false);
@@ -121,6 +100,9 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
                     break;
                 case 'KeyM':
                     togglePanel(setShowWorldMap, 'm');
+                    break;
+                case 'KeyL':
+                    if (typeof setShowQuests === 'function') togglePanel(setShowQuests, 'l');
                     break;
                 case 'KeyP':
                     togglePanel(setShowSettings, 'p');

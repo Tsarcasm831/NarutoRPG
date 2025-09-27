@@ -13,6 +13,14 @@ const getPrefersReducedMotion = () => {
 const LoadingScreen = ({ progress }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(getPrefersReducedMotion);
 
+  const clampedProgress = useMemo(() => {
+    const numeric = typeof progress === "string" ? parseFloat(progress) : progress;
+    if (!Number.isFinite(numeric)) {
+      return 0;
+    }
+    return Math.max(0, Math.min(100, Math.round(numeric)));
+  }, [progress]);
+
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return;
@@ -45,20 +53,21 @@ const LoadingScreen = ({ progress }) => {
     return classes.join(" ");
   }, [prefersReducedMotion]);
 
-  const progressBarStyle = useMemo(
-    () => ({
-      width: `${progress}%`,
-      ...(prefersReducedMotion ? { transition: "none" } : {})
-    }),
-    [prefersReducedMotion, progress]
-  );
+  const progressBarStyle = useMemo(() => {
+    const style = { width: `${clampedProgress}%` };
+    if (prefersReducedMotion || clampedProgress === 100) {
+      style.transition = "none";
+    }
+    return style;
+  }, [clampedProgress, prefersReducedMotion]);
 
   return React.createElement(
     "div",
     { className: "w-full h-full relative" },
     React.createElement("div", {
       className: "absolute inset-0 bg-cover bg-center",
-      style: { backgroundImage: "url('/loading1.png')" }
+      // Use relative path so this works when hosted under a subpath
+      style: { backgroundImage: "url('./loading1.png')" }
     }),
     React.createElement("div", { className: "absolute inset-0 bg-black bg-opacity-60" }),
     React.createElement(
@@ -84,7 +93,7 @@ const LoadingScreen = ({ progress }) => {
           React.createElement(
             "span",
             { role: "status", "aria-live": "polite" },
-            `${progress}%`
+            `${clampedProgress}%`
           )
         )
       ),

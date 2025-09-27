@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from '../common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from '../common.js';
 
 // Elm: layered canopy with slight offsets
 export function buildElmTree(settings) {
@@ -22,5 +22,6 @@ export function buildElmTree(settings) {
 
   const group = makeGroup(trunk, c1, c2, c3);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '388e3c', height, colliderRadius: 6.8 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '388e3c', height, colliderRadius };
 }

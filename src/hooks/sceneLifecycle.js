@@ -1,5 +1,10 @@
 import { initScene } from '../scene/initScene.js';
 import { createPlayer } from '../game/player/index.js';
+import * as THREE from 'three';
+import { createNaruto } from '../game/npcs/naruto.js';
+import { createSasuke } from '../game/npcs/sasuke.js';
+import { createSakura } from '../game/npcs/sakura.js';
+import { createShikamaru } from '../game/npcs/shikamaru.js';
 
 export function initThreeScene({
   mountRef,
@@ -9,6 +14,7 @@ export function initThreeScene({
   rendererRef,
   cameraRef,
   lightRef,
+  ambientLightRef,
   groundContainerRef,
   gridHelperRef,
   gridLabelsGroupRef,
@@ -25,6 +31,7 @@ export function initThreeScene({
     renderer,
     camera,
     light,
+    ambientLight,
     groundContainer,
     gridHelper,
     gridLabelsGroup,
@@ -42,6 +49,27 @@ export function initThreeScene({
     },
     createPlayer,
     onReady: () => {
+      try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
+      // Spawn party near the player once the player is ready
+      try {
+        const p = player?.position || new THREE.Vector3();
+        const base = new THREE.Vector3(p.x, p.y, p.z);
+        const offsets = [
+          new THREE.Vector3(6, 0, 0),   // Naruto to the +X
+          new THREE.Vector3(-6, 0, 0),  // Sasuke to the -X
+          new THREE.Vector3(0, 0, 6),   // Sakura to the +Z
+          new THREE.Vector3(0, 0, -6),  // Shikamaru to the -Z
+        ];
+        // Create NPCs (no movement controllers attached)
+        Promise.all([
+          createNaruto(scene, { shadows: settings.shadows }, base.clone().add(offsets[0])),
+          createSasuke(scene, { shadows: settings.shadows }, base.clone().add(offsets[1])),
+          createSakura(scene, { shadows: settings.shadows }, base.clone().add(offsets[2])),
+          createShikamaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[3])),
+        ]).then((npcs) => {
+          try { scene.userData.npcs = npcs; } catch (_) {}
+        }).catch(() => {});
+      } catch (_) {}
       try {
         onReadyRef.current && onReadyRef.current();
       } catch (_) {}
@@ -52,6 +80,7 @@ export function initThreeScene({
   rendererRef.current = renderer;
   cameraRef.current = camera;
   lightRef.current = light;
+  ambientLightRef.current = ambientLight;
   groundContainerRef.current = groundContainer;
   gridHelperRef.current = gridHelper;
   gridLabelsGroupRef.current = gridLabelsGroup;
@@ -85,6 +114,7 @@ export function cleanupThreeScene({
   sceneRef,
   animationStopRef,
   interactPromptRef,
+  ambientLightRef,
   groundContainerRef,
   gridLabelsGroupRef,
   gridLabelsArrayRef,
@@ -104,6 +134,10 @@ export function cleanupThreeScene({
     mountRef.current.removeChild(interactPromptRef.current);
   }
   interactPromptRef.current = null;
+
+  if (ambientLightRef) {
+    ambientLightRef.current = null;
+  }
 
   if (rendererRef.current) {
     rendererRef.current.dispose();

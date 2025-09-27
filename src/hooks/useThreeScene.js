@@ -5,14 +5,16 @@ import { resetPlayerState } from '../game/player/index.js';
 import { updateObjects } from '../game/objects.js';
 import { startAnimationLoop } from '../scene/animationLoop.js';
 import { initThreeScene, cleanupThreeScene } from './sceneLifecycle.js';
+import { applyDayNightCycle } from '../scene/dayNightCycle.js';
 
-export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady }) => {
+export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady, worldState, timeOfDayHours }) => {
     const sceneRef = useRef(null);
     const rendererRef = useRef(null);
     const cameraRef = useRef(null);
     const playerRef = useRef(null);
     const animationStopRef = useRef(null);
     const lightRef = useRef(null);
+    const ambientLightRef = useRef(null);
     const randomObjectsRef = useRef([]);
     const objectGridRef = useRef(null);
     const gridHelperRef = useRef(null);
@@ -50,6 +52,7 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             sceneRef,
             animationStopRef,
             interactPromptRef,
+            ambientLightRef,
             groundContainerRef,
             gridLabelsGroupRef,
             gridLabelsArrayRef,
@@ -71,6 +74,7 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             rendererRef,
             cameraRef,
             lightRef,
+            ambientLightRef,
             groundContainerRef,
             gridHelperRef,
             gridLabelsGroupRef,
@@ -123,6 +127,16 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
         return cleanupScene;
     }, [isPlaying, initialize, cleanupScene, settings.fpsLimit, keysRef, joystickRef, throttledSetPlayerPosition]);
 
+    useEffect(() => {
+        if (!sceneRef.current || !lightRef.current) return;
+        applyDayNightCycle({
+            scene: sceneRef.current,
+            directionalLight: lightRef.current,
+            ambientLight: ambientLightRef.current,
+            timeOfDayHours
+        });
+    }, [timeOfDayHours]);
+
     // Settings updates (no full reinit)
     useEffect(() => {
         if (!rendererRef.current || !lightRef.current || !playerRef.current || !gridHelperRef.current || !groundContainerRef.current) return;
@@ -159,7 +173,7 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
     useEffect(() => {
         if (!sceneRef.current || !isPlaying) return;
         resetPlayerState();
-        const { objects, grid } = updateObjects(sceneRef.current, randomObjectsRef.current, settings);
+        const { objects, grid } = updateObjects(sceneRef.current, randomObjectsRef.current, settings, worldState);
         randomObjectsRef.current = objects;
         objectGridRef.current = grid;
         if (setWorldObjects) {
@@ -223,7 +237,7 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             }
             setWorldObjects(items);
         }
-    }, [settings.objectDensity, isPlaying, setWorldObjects]);
+    }, [settings.objectDensity, isPlaying, setWorldObjects, worldState?.version]);
 
     // Resize
     useEffect(() => {

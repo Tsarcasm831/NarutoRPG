@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from './common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from './common.js';
 
 // Forest biome: deeper greens
 
@@ -19,7 +19,8 @@ export function buildForestTree1(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '2e7d32', height, colliderRadius: 7.5 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '2e7d32', height, colliderRadius };
 }
 
 // Variant 2: Tall pine (conical canopy)
@@ -38,7 +39,8 @@ export function buildForestTree2(settings) {
 
   const group = makeGroup(trunk, cone);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '1b5e20', height, colliderRadius: 7.0 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '1b5e20', height, colliderRadius };
 }
 
 // Variant 3: Layered canopy (three spheres)
@@ -62,8 +64,8 @@ export function buildForestTree3(settings) {
 
   const group = makeGroup(trunk, c1, c2, c3);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '33691e', height, colliderRadius: 6.8 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '33691e', height, colliderRadius };
 }
 
 export const FOREST_BUILDERS = [buildForestTree1, buildForestTree2, buildForestTree3];
-

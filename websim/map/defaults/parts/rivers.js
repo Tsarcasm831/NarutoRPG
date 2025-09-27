@@ -1,1 +1,0 @@
-export { DEFAULT_RIVERS } from './rivers-data.js';

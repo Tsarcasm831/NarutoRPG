@@ -72,6 +72,11 @@ const ControlsInfo = () => /* @__PURE__ */ jsxDEV("div", { className: "bg-black 
       lineNumber: 18,
       columnNumber: 13
     }),
+    /* @__PURE__ */ jsxDEV("div", { children: "L: Quest Log" }, void 0, false, {
+      fileName: "<stdin>",
+      lineNumber: 18,
+      columnNumber: 13
+    }),
     /* @__PURE__ */ jsxDEV("div", { children: "M: World Map" }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 19,

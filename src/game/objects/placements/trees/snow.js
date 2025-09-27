@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, snowMaterial, makeGroup, computeApproxHeight } from './common.js';
+import { applyShadow, trunkMaterial, snowMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from './common.js';
 
 // Snow biome: pale trunk and snow-covered canopy
 
@@ -19,7 +19,8 @@ export function buildSnowTree1(settings) {
 
   const group = makeGroup(trunk, fir);
   const height = computeApproxHeight(group);
-  return { group, colorHex: 'e8f0f5', height, colliderRadius: 6.6 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: 'e8f0f5', height, colliderRadius };
 }
 
 // Variant 2: Snow dome on rounded canopy
@@ -38,7 +39,8 @@ export function buildSnowTree2(settings) {
 
   const group = makeGroup(trunk, dome);
   const height = computeApproxHeight(group);
-  return { group, colorHex: 'f0f4f8', height, colliderRadius: 7.0 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: 'f0f4f8', height, colliderRadius };
 }
 
 // Variant 3: Layered snowy lumps
@@ -62,8 +64,8 @@ export function buildSnowTree3(settings) {
 
   const group = makeGroup(trunk, c1, c2, c3);
   const height = computeApproxHeight(group);
-  return { group, colorHex: 'e3edf5', height, colliderRadius: 6.4 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: 'e3edf5', height, colliderRadius };
 }
 
 export const SNOW_BUILDERS = [buildSnowTree1, buildSnowTree2, buildSnowTree3];
-

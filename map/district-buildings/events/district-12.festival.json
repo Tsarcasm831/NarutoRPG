@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "primaryBaseName": "Festival Stall",
+    "varietyRatio": 0.6,
+    "source": "mixed",
+    "paletteIndex": 0
+  },
+  "entries": [
+    {
+      "baseName": "Festival Stall",
+      "pos": [34.5, -18.2],
+      "rotY": 0.35,
+      "scale": 0.22
+    },
+    {
+      "baseName": "Market Booth",
+      "pos": [28.1, 6.4],
+      "rotY": -0.12,
+      "scale": 0.24
+    },
+    {
+      "baseName": "Lantern Cart",
+      "pos": [12.8, -4.6],
+      "rotY": 1.12,
+      "scale": 0.2
+    }
+  ]
+}

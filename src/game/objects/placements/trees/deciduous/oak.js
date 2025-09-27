@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight } from '../common.js';
+import { applyShadow, trunkMaterial, leafMaterial, makeGroup, computeApproxHeight, computeTrunkRadius } from '../common.js';
 
 // Broad oak: sturdy trunk with rounded dense canopy
 export function buildOakTree(settings) {
@@ -17,5 +17,6 @@ export function buildOakTree(settings) {
 
   const group = makeGroup(trunk, canopy);
   const height = computeApproxHeight(group);
-  return { group, colorHex: '2e7d32', height, colliderRadius: 7.6 };
+  const colliderRadius = computeTrunkRadius(trunk);
+  return { group, colorHex: '2e7d32', height, colliderRadius };
 }

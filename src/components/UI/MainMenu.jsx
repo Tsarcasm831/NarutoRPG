@@ -140,7 +140,8 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     "div",
     {
       className: "w-full h-full bg-cover bg-center flex flex-col items-center justify-center text-white",
-      style: { backgroundImage: "url('/menu.png')" },
+      // Use relative path so hosting under subpaths works
+      style: { backgroundImage: "url('./menu.png')" },
       children: [
         /* @__PURE__ */ jsxDEV(
           "button",
@@ -148,7 +149,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             onClick: () => setShowHints(true),
             "aria-label": "Open hints",
             className: "absolute bottom-6 left-6 cursor-pointer",
-            children: /* @__PURE__ */ jsxDEV("img", { src: "/devs.png", alt: "Developers", className: "w-28 opacity-95 select-none hover:opacity-100 transition" }, void 0, false, {
+            children: /* @__PURE__ */ jsxDEV("img", { src: "./devs.png", alt: "Developers", className: "w-28 opacity-95 select-none hover:opacity-100 transition" }, void 0, false, {
               fileName: "<stdin>",
               lineNumber: 35,
               columnNumber: 15

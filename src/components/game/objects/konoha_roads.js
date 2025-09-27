@@ -201,49 +201,6 @@ export async function drawDistricts(ctx, scale, cx, cy, options = {}) {
   ctx.restore();
 }
 
-// Fallback walls when map/ is absent
-const DEFAULT_WALLS = [];
-
-/* @tweakable wall stroke color on overlays (minimap/world/terrain) */
-const WALL_COLOR = '#bfc0c2';
-/* @tweakable wall stroke opacity on overlays (0..1) */
-const WALL_ALPHA = 0.9;
-/* @tweakable multiplier applied to wall "width" from map data to compute stroke thickness */
-const WALL_STROKE_SCALE = 2.0;
-
-/**
- * Draw circular walls based on DEFAULT_WALLS.
- * Each wall entry uses percentage-based center (cx,cy) and radius r (0..100 of map),
- * which we convert into world units like roads/districts.
- */
-export async function drawWalls(ctx, scale, cx, cy, options = {}) {
-  const color = options.color || WALL_COLOR;
-  const alpha = typeof options.alpha === 'number' ? options.alpha : WALL_ALPHA;
-  const strokeScale = typeof options.strokeScale === 'number' ? options.strokeScale : WALL_STROKE_SCALE;
-
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.globalAlpha = alpha;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  for (const w of DEFAULT_WALLS) {
-    const wx = (w.cx / 100) * WORLD_SIZE - WORLD_SIZE / 2;
-    const wz = (w.cy / 100) * WORLD_SIZE - WORLD_SIZE / 2;
-    const rr = (w.r / 100) * WORLD_SIZE;
-    const px = cx + wx * scale;
-    const py = cy + wz * scale;
-    const pr = rr * scale;
-
-    ctx.beginPath();
-    ctx.lineWidth = (w.width || 8) * strokeScale;
-    ctx.arc(px, py, pr, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  ctx.restore();
-}
-
 /* River rendering re-used from previous implementation */
 /* @tweakable river start grid label */
 const RIVER_START_LABEL = 'WB88';

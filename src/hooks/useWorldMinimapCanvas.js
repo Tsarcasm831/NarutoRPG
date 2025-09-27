@@ -8,11 +8,7 @@ import {
     MINIMAP_ROAD_ALPHA,
     MINIMAP_W_PRIMARY,
     MINIMAP_W_SECONDARY,
-    MINIMAP_W_TERTIARY,
-    MINIMAP_DRAW_WALLS,
-    MINIMAP_WALL_ALPHA,
-    MINIMAP_WALL_STROKE_SCALE,
-    MINIMAP_WALL_COLOR
+    MINIMAP_W_TERTIARY
 } from './minimapConstants.js';
 
 // NEW: live map model (null fallback when /map is absent)
@@ -118,15 +114,6 @@ export const useWorldMinimapCanvas = () => {
                     stroke: '#ffffff',
                     lineWidth: 1,
                     fill: '#ffffff'
-                });
-            }
-            // NEW: draw walls
-            if (MINIMAP_DRAW_WALLS) {
-                const { drawWalls } = await import('../components/game/objects/konoha_roads.js');
-                await drawWalls(ctx, scale, cx, cy, {
-                    alpha: MINIMAP_WALL_ALPHA,
-                    strokeScale: MINIMAP_WALL_STROKE_SCALE,
-                    color: MINIMAP_WALL_COLOR
                 });
             }
             if (MINIMAP_DRAW_ROADS) {
