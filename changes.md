@@ -53,3 +53,5 @@ Recent
 - Player/NPC: Reduced character model scale by 30% (4 → 2.8) for a tighter world feel.
 - FPV: Lowered first-person eye height to match the smaller player.
 - Collision: Scaled player and NPC collider radii to stay consistent with visual size.
+ - Docs: Overhauled README with setup, features, sub‑apps, and contributor workflow.
+ - Versioning: Clarified `index.html` title `v…` token and changelog fallback behavior.
