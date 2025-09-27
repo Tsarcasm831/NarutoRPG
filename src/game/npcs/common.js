@@ -135,7 +135,8 @@ export function createNpcRig({ scene, settings, name, manifestPath, position, sc
   group.userData.type = 'npc';
   group.position.copy(position || new THREE.Vector3());
   // Add a simple spherical collider around the NPC for player collision
-  group.userData.collider = { type: 'sphere', radius: 2.5 };
+  // Keep collider roughly proportional to visual scale (2.5 @ scale 4 -> 0.625 per scale unit)
+  group.userData.collider = { type: 'sphere', radius: 0.625 * (scale || 4) };
 
   return loadCharacterAssetsFromManifest(manifestPath, undefined, name).then(({ model, clips, defaultClipName }) => {
     model.scale.set(scale, scale, scale);

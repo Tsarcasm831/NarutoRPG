@@ -9,7 +9,8 @@ export function createNaruto(scene, settings, position = new THREE.Vector3()) {
     name: 'Naruto',
     manifestPath: './src/components/json/narutoAnimations.json',
     position,
-    scale: 4,
+    // 30% smaller overall
+    scale: 2.8,
   }).then((group) => {
     try {
       group.userData.label = 'Naruto';

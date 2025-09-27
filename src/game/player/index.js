@@ -49,7 +49,8 @@ export function createPlayer(scene, settings, onReady) {
     player.userData.actionLocked = false;
 
     loadPlayerAssets().then(({ model, animations }) => {
-        model.scale.set(4, 4, 4);
+        // 30% smaller overall (4 -> 2.8)
+        model.scale.set(2.8, 2.8, 2.8);
         model.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = settings.shadows;
@@ -216,7 +217,7 @@ export function updatePlayer(player, keys, camera, light, throttledSetPlayerPosi
 
     if (isFirstPerson) {
         // First-person: place camera at player's head and look forward based on yaw/pitch
-        const headHeight = 7.5; // approximate eye height for our scaled model
+        const headHeight = 5.25; // 30% lower to match new scale
         const eyePos = new THREE.Vector3(playerPosition.x, playerPosition.y + headHeight, playerPosition.z);
 
         // Forward vector from yaw/pitch

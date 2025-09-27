@@ -8,4 +8,4 @@ export const JUMP_FORCE = 70;
 export const BASE_GROUND_Y = 0;
 
 // Player collision radius on XZ plane
-export const PLAYER_RADIUS = 2;
+export const PLAYER_RADIUS = 1.4; // 30% smaller to match new player scale

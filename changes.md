@@ -48,3 +48,8 @@ Modified
   - Gold increments `playerStats.gold`.
   - Items are placed into the first free storage slot (or appended).
   - Upgrades improve currently equipped item in the specified slot; if empty, an upgraded item is added to storage.
+
+Recent
+- Player/NPC: Reduced character model scale by 30% (4 → 2.8) for a tighter world feel.
+- FPV: Lowered first-person eye height to match the smaller player.
+- Collision: Scaled player and NPC collider radii to stay consistent with visual size.

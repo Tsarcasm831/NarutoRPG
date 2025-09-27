@@ -9,7 +9,8 @@ export function createShikamaru(scene, settings, position = new THREE.Vector3())
     name: 'Shikamaru',
     manifestPath: './src/components/json/shikamaruAnimations.json',
     position,
-    scale: 4,
+    // 30% smaller overall
+    scale: 2.8,
   }).then((group) => {
     try {
       group.userData.label = 'Shikamaru';

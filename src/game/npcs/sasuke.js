@@ -9,7 +9,8 @@ export function createSasuke(scene, settings, position = new THREE.Vector3()) {
     name: 'Sasuke',
     manifestPath: './src/components/json/sasukeAnimations.json',
     position,
-    scale: 4,
+    // 30% smaller overall
+    scale: 2.8,
   }).then((group) => {
     try {
       group.userData.label = 'Sasuke';

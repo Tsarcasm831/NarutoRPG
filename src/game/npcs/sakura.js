@@ -9,7 +9,8 @@ export function createSakura(scene, settings, position = new THREE.Vector3()) {
     name: 'Sakura',
     manifestPath: './src/components/json/sakuraAnimations.json',
     position,
-    scale: 4,
+    // 30% smaller overall
+    scale: 2.8,
   }).then((group) => {
     try {
       group.userData.label = 'Sakura';
