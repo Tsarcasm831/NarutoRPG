@@ -63,7 +63,7 @@ export async function loadPlayerAssets() {
     const { model, clips } = await loadCharacterAssetsFromManifest(
         character.manifest,
         animationConfig.essential,
-        character.name
+        character.key || character.name
     );
 
     const animations = { ...clips };

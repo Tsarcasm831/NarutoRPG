@@ -1,4 +1,7 @@
 Recent
+- Main Menu: Added a Showcase gallery modal that surfaces src/assets/images/showcase/ images (auto-detected, no manifest needed) and opens them full size.
+- Neji: Force his model materials to write depth so the ground no longer shows through.
+- NPC Dialog: Use local mugshots for Neji and Orochimaru during interactions instead of remote URLs.
 - Main Menu: clicking the devs.png now shows a download link to the GitHub repo instead of dev hints.
 - FPV: Interacting with NPCs no longer exits first-person or unlocks pointer; dialog is keyboard-friendly.
 - NPCs: Wander now includes longer, natural pauses (2–7s) for more casual pacing.
@@ -19,3 +22,7 @@ Recent
 - Main Menu: Start Game now opens a shinobi picker and loads in as Kakashi, Naruto, Sasuke, Sakura, or Shikamaru before the world boots.
 - Loading: Shrunk the progress overlay typography so the staged notes stay compact over the background art.
 - NPC Dialog: Squad conversations now reference the chosen player name and mugshot instead of always assuming Kakashi.
+- Player: Fixed the character catalog import so starter stats load without a missing file error.
+- UI: Rebuilt the character select modal without JSX so the browser can load it without a bundle step.
+- Player Loader: Pointed manifest fallbacks at the local temp bundles so non-Kakashi picks use available GLBs instead of 404s.
+- World: Skip spawning the chosen hero as an NPC and expose squad roster info so loading progress stays accurate when the roster changes.

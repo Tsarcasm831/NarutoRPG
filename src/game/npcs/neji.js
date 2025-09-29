@@ -14,6 +14,24 @@ export function createNeji(scene, settings, position = new THREE.Vector3()) {
     autoAdd: false,
   }).then((group) => {
     try {
+      const model = group?.userData?.model;
+      if (model) {
+        // Force Neji's materials to participate in depth testing so the ground doesn't render through him
+        model.traverse((child) => {
+          if (!child?.isMesh) return;
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          for (const material of materials) {
+            if (!material) continue;
+            material.depthWrite = true;
+            material.depthTest = true;
+            if (material.transparent && material.opacity >= 0.99) {
+              material.transparent = false;
+              material.opacity = 1;
+              material.needsUpdate = true;
+            }
+          }
+        });
+      }
       group.userData.label = 'Neji';
       group.userData.onInteract = (self) => {
         try {
@@ -27,7 +45,7 @@ export function createNeji(scene, settings, position = new THREE.Vector3()) {
           window.dispatchEvent(new CustomEvent('open-npc-dialog', {
             detail: {
               npc: 'Neji',
-              npcImage: 'https://static.wikia.nocookie.net/naruto/images/6/6b/Neji_Part_I.png',
+              npcImage: '/src/assets/images/mugshots/neji.png',
               player: playerName,
               playerImage,
               lines: [

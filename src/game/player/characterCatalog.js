@@ -1,4 +1,4 @@
-import { initialPlayerStats, initialInventory } from './initialState.js';
+import { initialPlayerStats, initialInventory } from '../initialState.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 

@@ -159,18 +159,23 @@ const OpenWorldGame = () => {
   const joystickRef = useRef(null);
   const reportBootStatus = useCallback((stepId, status, payload) => {
     if (stepId !== 'squad') return;
+    const fallbackRoster = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'];
+    const roster = Array.isArray(payload?.roster) && payload.roster.length ? payload.roster : fallbackRoster;
     if (status === 'active') {
-      updateLoadingStep('squad', { status: 'active', note: 'Summoning Naruto, Sasuke, Sakura, Shikamaru, Neji, and Orochimaru...' });
+      const note = roster.length
+        ? `Summoning ${roster.join(', ')} nearby...`
+        : 'Deploying support squad...';
+      updateLoadingStep('squad', { status: 'active', note });
       setLoadingProgress((prev) => Math.max(prev, 99));
       return;
     }
     if (status === 'done') {
-      updateLoadingStep('squad', { status: 'done', note: 'Squad assembled.' });
+      const note = roster.length ? 'Squad assembled.' : 'Ready for deployment.';
+      updateLoadingStep('squad', { status: 'done', note });
       setLoadingProgress((prev) => Math.max(prev, 100));
       return;
     }
     if (status === 'error') {
-      const roster = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'];
       const rejected = Array.isArray(payload?.rejected) ? payload.rejected : [];
       const failed = rejected.map(({ index }) => roster[index] || `NPC ${index + 1}`).filter(Boolean);
       const note = failed.length ? `Failed to spawn: ${failed.join(', ')}.` : 'One or more squad members failed to spawn.';

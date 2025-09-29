@@ -7,6 +7,7 @@ import { createSakura } from '../game/npcs/sakura.js';
 import { createShikamaru } from '../game/npcs/shikamaru.js';
 import { createNeji } from '../game/npcs/neji.js';
 import { createOrochimaru } from '../game/npcs/orochimaru.js';
+import { getPlayerIdentity } from '../game/player/identity.js';
 
 export function initThreeScene({
   mountRef,
@@ -56,26 +57,45 @@ export function initThreeScene({
         try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
         let npcs = [];
         try {
-          reportBootStatus?.('squad', 'active');
           const p = player?.position || new THREE.Vector3();
           const base = new THREE.Vector3(p.x, p.y, p.z);
-          const offsets = [
-            new THREE.Vector3(6, 0, 0),     // Naruto to the +X
-            new THREE.Vector3(-6, 0, 0),    // Sasuke to the -X
-            new THREE.Vector3(0, 0, 6),     // Sakura to the +Z
-            new THREE.Vector3(0, 0, -6),    // Shikamaru to the -Z
-            new THREE.Vector3(8, 0, 8),     // Neji near the +X/+Z quadrant
-            new THREE.Vector3(-8, 0, 8),    // Orochimaru near the -X/+Z quadrant
+          let identityKey = '';
+          try {
+            const identity = getPlayerIdentity?.();
+            const raw = identity?.key || identity?.name || '';
+            identityKey = String(raw).toLowerCase().split(/\s+/)[0] || '';
+          } catch (_) {
+            identityKey = '';
+          }
+
+          const spawnEntries = [
+            { key: 'naruto', label: 'Naruto', offset: new THREE.Vector3(6, 0, 0), create: createNaruto },
+            { key: 'sasuke', label: 'Sasuke', offset: new THREE.Vector3(-6, 0, 0), create: createSasuke },
+            { key: 'sakura', label: 'Sakura', offset: new THREE.Vector3(0, 0, 6), create: createSakura },
+            { key: 'shikamaru', label: 'Shikamaru', offset: new THREE.Vector3(0, 0, -6), create: createShikamaru },
+            { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
+            { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
           ];
 
-          const spawnPromises = [
-            createNaruto(scene, { shadows: settings.shadows }, base.clone().add(offsets[0])),
-            createSasuke(scene, { shadows: settings.shadows }, base.clone().add(offsets[1])),
-            createSakura(scene, { shadows: settings.shadows }, base.clone().add(offsets[2])),
-            createShikamaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[3])),
-            createNeji(scene, { shadows: settings.shadows }, base.clone().add(offsets[4])),
-            createOrochimaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[5])),
-          ];
+          const activeEntries = spawnEntries.filter((entry) => entry.key !== identityKey);
+          const roster = activeEntries.map((entry) => entry.label);
+
+          if (roster.length) {
+            reportBootStatus?.('squad', 'active', { roster });
+          } else {
+            reportBootStatus?.('squad', 'active', { roster: [] });
+          }
+
+          const spawnPromises = activeEntries.map((entry) => {
+            const targetPosition = base.clone().add(entry.offset.clone());
+            return entry.create(scene, { shadows: settings.shadows }, targetPosition);
+          });
+
+          if (!spawnPromises.length) {
+            reportBootStatus?.('squad', 'done', { roster: [] });
+            npcs = [];
+            return;
+          }
 
           const results = await Promise.allSettled(spawnPromises);
           const fulfilled = [];
@@ -85,7 +105,7 @@ export function initThreeScene({
             if (result.status === 'fulfilled') {
               fulfilled.push(result.value);
             } else {
-              rejected.push({ index, reason: result.reason });
+              rejected.push({ index, reason: result.reason, label: roster[index] });
             }
           });
 
@@ -99,13 +119,13 @@ export function initThreeScene({
           }
 
           if (rejected.length) {
-            reportBootStatus?.('squad', 'error', { rejected });
-            rejected.forEach(({ index, reason }) => {
-              const name = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'][index] || 'Unknown';
+            reportBootStatus?.('squad', 'error', { rejected, roster });
+            rejected.forEach(({ index, reason, label }) => {
+              const name = label || roster[index] || `NPC ${index + 1}`;
               console.error(`[NPC] Failed to spawn ${name}:`, reason);
             });
           } else {
-            reportBootStatus?.('squad', 'done');
+            reportBootStatus?.('squad', 'done', { roster });
           }
         } catch (err) {
           reportBootStatus?.('squad', 'error', { err });

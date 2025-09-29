@@ -28,7 +28,7 @@ export function createOrochimaru(scene, settings, position = new THREE.Vector3()
           window.dispatchEvent(new CustomEvent('open-npc-dialog', {
             detail: {
               npc: 'Orochimaru',
-              npcImage: 'https://static.wikia.nocookie.net/naruto/images/3/32/Orochimaru_Part_I.png',
+              npcImage: '/src/assets/images/mugshots/orochimaru.png',
               player: playerName,
               playerImage,
               lines: [

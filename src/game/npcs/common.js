@@ -44,7 +44,8 @@ function toFileNames(urls) {
 }
 
 function localBaseFor(name) {
-  switch ((name || '').toLowerCase()) {
+  const normalized = (name || '').toLowerCase().split(/\s+/)[0];
+  switch (normalized) {
     case 'naruto':
       return 'temp/Naruto/biped/';
     case 'sasuke':
@@ -62,6 +63,8 @@ function localBaseFor(name) {
   }
 }
 
+const ABSOLUTE_URL_REGEX = /^(?:https?:)?\/\//i;
+
 export async function loadCharacterAssetsFromManifest(manifestPath, essential = DEFAULT_ESSENTIAL, characterName = '') {
   const loader = new GLTFLoader();
 
@@ -71,11 +74,24 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
   const urls = Array.isArray(data?.files) ? data.files : [];
   if (!urls.length) throw new Error(`No files in manifest: ${manifestPath}`);
 
+  const localBase = localBaseFor(characterName);
+  const normalizeUrl = (value) => {
+    const url = typeof value === 'string' ? value.trim() : '';
+    if (!url) return url;
+    if (ABSOLUTE_URL_REGEX.test(url) || url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (url.startsWith('/')) return url;
+    if (url.startsWith('temp/')) return url;
+    if (url.startsWith('./') || url.startsWith('../')) return url;
+    const fileName = url.substring(url.lastIndexOf('/') + 1);
+    return `${localBase}${fileName}`;
+  };
+
   const essentials = urls.filter((u) => essential.some((m) => u.endsWith(m)));
   const toLoad = essentials.length ? essentials : [urls[0]];
+  const normalizedTargets = toLoad.map((url) => normalizeUrl(url));
 
   let assets = (await Promise.all(
-    toLoad.map((url) =>
+    normalizedTargets.map((url) =>
       new Promise((resolve) =>
         loader.load(
           url,
@@ -91,7 +107,6 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
   if (!assets.length) {
     try {
       const fileNames = toFileNames(urls);
-      const localBase = localBaseFor(characterName);
       const localUrls = fileNames.map((fn) => `${localBase}${fn}`);
       const localEssentials = localUrls.filter((u) => essential.some((m) => u.endsWith(m)));
       const localToLoad = localEssentials.length ? localEssentials : localUrls;
