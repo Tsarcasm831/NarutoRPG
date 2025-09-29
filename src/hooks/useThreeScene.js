@@ -6,6 +6,7 @@ import { updateObjects } from '../game/objects.js';
 import { startAnimationLoop } from '../scene/animationLoop.js';
 import { initThreeScene, cleanupThreeScene } from './sceneLifecycle.js';
 import { applyDayNightCycle } from '../scene/dayNightCycle.js';
+import { spawnRemotePlayer, updateRemotePlayerTransform, removeRemotePlayer } from '../game/player/remotePlayers.js';
 
 export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady, worldState, timeOfDayHours, reportBootStatus }) => {
     const sceneRef = useRef(null);
@@ -36,6 +37,9 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
     const cameraPitchRef = useRef(0);
     // NEW: first-person view toggle ref
     const firstPersonRef = useRef(false);
+    const remotePlayersRef = useRef(new Map());
+    const remotePlayerPromisesRef = useRef(new Map());
+    const remoteGenerationRef = useRef(0);
 
     // Keep a stable ref to onReady to avoid re-initializing the scene on every render
     const onReadyRef = useRef(onReady);
@@ -45,7 +49,20 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
 
     const throttledSetPlayerPosition = useThrottle(setPlayerPosition, 250);
 
+    const clearRemotePlayers = useCallback(() => {
+        const scene = sceneRef.current;
+        for (const holder of remotePlayersRef.current.values()) {
+            try {
+                removeRemotePlayer({ scene, rig: holder?.rig });
+            } catch (_) {}
+        }
+        remotePlayersRef.current.clear();
+        remotePlayerPromisesRef.current.clear();
+        remoteGenerationRef.current += 1;
+    }, [sceneRef]);
+
     const cleanupScene = useCallback(() => {
+        clearRemotePlayers();
         cleanupThreeScene({
             mountRef,
             rendererRef,
@@ -60,7 +77,7 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             randomObjectsRef,
             objectGridRef
         });
-    }, [mountRef]);
+    }, [mountRef, clearRemotePlayers]);
 
     // Initialize should only change (and thus cause a re-init) when absolutely necessary.
     // Antialiasing requires a fresh renderer, so we keep it as a dependency.
@@ -86,6 +103,71 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             reportBootStatus
         });
     }, [mountRef, settings.antialiasing, reportBootStatus]); // NOTE: intentionally excludes onReady to prevent re-init on movement-driven re-renders
+
+    const syncRemotePlayers = useCallback(async (players = []) => {
+        const scene = sceneRef.current;
+        if (!scene) return;
+        const list = Array.isArray(players) ? players : [];
+        const seen = new Set();
+
+        for (const player of list) {
+            if (!player || !player.sessionId) continue;
+            const sessionId = player.sessionId;
+            seen.add(sessionId);
+
+            const existing = remotePlayersRef.current.get(sessionId);
+            if (existing?.rig) {
+                updateRemotePlayerTransform(existing.rig, player);
+                existing.data = player;
+                continue;
+            }
+
+            if (remotePlayerPromisesRef.current.has(sessionId)) {
+                try {
+                    await remotePlayerPromisesRef.current.get(sessionId);
+                    const holder = remotePlayersRef.current.get(sessionId);
+                    if (holder?.rig) {
+                        updateRemotePlayerTransform(holder.rig, player);
+                        holder.data = player;
+                    }
+                } catch (_) {}
+                continue;
+            }
+
+            const generation = remoteGenerationRef.current;
+            const creation = spawnRemotePlayer({ scene, settings, player })
+                .then((rig) => {
+                    remotePlayerPromisesRef.current.delete(sessionId);
+                    if (remoteGenerationRef.current !== generation) {
+                        if (rig) {
+                            removeRemotePlayer({ scene, rig });
+                        }
+                        return null;
+                    }
+                    if (!rig) return null;
+                    remotePlayersRef.current.set(sessionId, { rig, data: player });
+                    updateRemotePlayerTransform(rig, player);
+                    return rig;
+                })
+                .catch((error) => {
+                    remotePlayerPromisesRef.current.delete(sessionId);
+                    console.error('[RemotePlayer] spawn error', error);
+                    return null;
+                });
+
+            remotePlayerPromisesRef.current.set(sessionId, creation);
+            try {
+                await creation;
+            } catch (_) {}
+        }
+
+        for (const [sessionId, holder] of remotePlayersRef.current.entries()) {
+            if (!seen.has(sessionId)) {
+                removeRemotePlayer({ scene, rig: holder?.rig });
+                remotePlayersRef.current.delete(sessionId);
+            }
+        }
+    }, [sceneRef, settings]);
 
     useEffect(() => {
         if (!isPlaying) {
@@ -409,5 +491,11 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
     // @tweakable maximum camera zoom multiplier (applies to wheel, pinch, and sensitivity calcs)
     const MAX_CAMERA_ZOOM = 50;
 
-    return { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef };
+    const remotePlayersApi = React.useMemo(() => ({
+        sync: syncRemotePlayers,
+        clear: clearRemotePlayers,
+        getPlayers: () => remotePlayersRef.current
+    }), [clearRemotePlayers, syncRemotePlayers]);
+
+    return { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef, remotePlayersApi };
 };

@@ -1,4 +1,9 @@
 Recent
+- Server: Added a Node-based session API that caps concurrent players at four and cleans up inactive slots.
+- Main Menu: Reserve a multiplayer slot before loading and show a friendly message if the server is full.
+- Multiplayer: Stream fellow players into the scene via WebSocket updates so everyone can see each other move around Konoha.
+- Character Select: Lock each shinobi to a single active player and surface "Taken" status when someone else has deployed them.
+- Multiplayer: Added live status badge in-game plus verbose server logging/console hooks to confirm WebSocket connectivity and squad presence.
 - Main Menu: Added a Showcase gallery modal that surfaces src/assets/images/showcase/ images (auto-detected, no manifest needed) and opens them full size.
 - Neji: Force his model materials to write depth so the ground no longer shows through.
 - NPC Dialog: Use local mugshots for Neji and Orochimaru during interactions instead of remote URLs.

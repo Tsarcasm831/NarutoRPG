@@ -1,7 +1,15 @@
 import React from "react";
 
-const CharacterSelectModal = ({ options = [], selectedKey, onSelect, onConfirm, onCancel }) => {
+const CharacterSelectModal = ({ options = [], selectedKey, lockedKeys = [], errorMessage = null, onSelect, onConfirm, onCancel }) => {
   const selected = options.find((option) => option.key === selectedKey);
+  const lockedSet = React.useMemo(() => {
+    if (!Array.isArray(lockedKeys)) return new Set();
+    return new Set(
+      lockedKeys
+        .filter((key) => typeof key === "string" && key.trim().length)
+        .map((key) => key.toLowerCase())
+    );
+  }, [lockedKeys]);
   const handleSelect = (key) => {
     if (typeof onSelect === "function") {
       onSelect(key);
@@ -30,18 +38,24 @@ const CharacterSelectModal = ({ options = [], selectedKey, onSelect, onConfirm, 
 
   const optionCards = options.map((option) => {
     const isSelected = option.key === selectedKey;
+    const normalizedKey = typeof option.key === "string" ? option.key.toLowerCase() : "";
+    const isLocked = lockedSet.has(normalizedKey) && !isSelected;
     const portrait = option.mugshot || "/src/assets/images/mugshots/kakashi.png";
     const baseClasses = "group flex h-full items-start gap-4 rounded-xl border p-4 text-left transition";
     const stateClass = isSelected
       ? "border-yellow-400/80 bg-yellow-500/10 shadow-lg"
-      : "border-gray-700 bg-gray-900/60 hover:border-yellow-600 hover:bg-gray-900/80";
+      : `border-gray-700 bg-gray-900/60 ${isLocked ? "opacity-60 cursor-not-allowed" : "hover:border-yellow-600 hover:bg-gray-900/80"}`;
 
     return React.createElement(
       "button",
       {
         key: option.key,
         type: "button",
-        onClick: () => handleSelect(option.key),
+        onClick: () => {
+          if (isLocked) return;
+          handleSelect(option.key);
+        },
+        disabled: isLocked,
         className: `${baseClasses} ${stateClass}`
       },
       React.createElement("img", {
@@ -71,7 +85,16 @@ const CharacterSelectModal = ({ options = [], selectedKey, onSelect, onConfirm, 
           { className: "text-sm leading-snug text-gray-300" },
           option.description
         ),
-        renderTags(option)
+        renderTags(option),
+        isLocked
+          ? React.createElement(
+              "span",
+              {
+                className: "inline-flex w-fit items-center gap-1 rounded-full border border-red-500/60 bg-red-500/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-red-200"
+              },
+              "Taken"
+            )
+          : null
       )
     );
   });
@@ -117,8 +140,15 @@ const CharacterSelectModal = ({ options = [], selectedKey, onSelect, onConfirm, 
         { className: "mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between" },
         React.createElement(
           "div",
-          { className: "text-xs text-gray-400" },
-          footerText
+          { className: "flex flex-col gap-1 text-xs text-gray-400" },
+          footerText,
+          errorMessage
+            ? React.createElement(
+                "span",
+                { className: "text-sm font-semibold text-red-300" },
+                errorMessage
+              )
+            : null
         ),
         React.createElement(
           "div",
