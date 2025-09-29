@@ -10,7 +10,7 @@ const getPrefersReducedMotion = () => {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 };
 
-const LoadingScreen = ({ progress }) => {
+const LoadingScreen = ({ progress, steps = [] }) => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(getPrefersReducedMotion);
 
   const clampedProgress = useMemo(() => {
@@ -20,6 +20,12 @@ const LoadingScreen = ({ progress }) => {
     }
     return Math.max(0, Math.min(100, Math.round(numeric)));
   }, [progress]);
+
+  const stepList = useMemo(() => (Array.isArray(steps) ? steps : []), [steps]);
+  const activeStep = useMemo(() => {
+    if (!stepList.length) return null;
+    return stepList.find((step) => step?.status === "active") || stepList.find((step) => step?.status === "pending");
+  }, [stepList]);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -43,7 +49,7 @@ const LoadingScreen = ({ progress }) => {
 
   const progressBarClasses = useMemo(() => {
     const classes = [
-      "bg-yellow-500 h-full rounded-full text-center text-black font-bold leading-8"
+      "bg-yellow-500 h-full rounded-full text-center text-black font-semibold leading-6 text-sm"
     ];
 
     if (!prefersReducedMotion) {
@@ -78,33 +84,76 @@ const LoadingScreen = ({ progress }) => {
       },
       React.createElement(
         "h2",
-        { className: "text-4xl font-bold text-yellow-400 mb-4" },
+        { className: "text-3xl font-bold text-yellow-400 mb-2" },
         "Loading Game Assets..."
       ),
       React.createElement(
         "div",
         {
           className:
-            "w-1/2 max-w-2xl bg-gray-700 rounded-full h-8 border-2 border-gray-600"
+            "w-11/12 max-w-2xl bg-gray-700 rounded-full h-6 border border-gray-600"
         },
         React.createElement(
           "div",
           { className: progressBarClasses, style: progressBarStyle },
           React.createElement(
             "span",
-            { role: "status", "aria-live": "polite" },
+            { className: "text-xs", role: "status", "aria-live": "polite" },
             `${clampedProgress}%`
           )
         )
       ),
       React.createElement(
         "p",
-        { className: "mt-4 text-gray-200" },
-        "Please wait, this may take a moment."
+        { className: "mt-3 text-xs text-gray-200" },
+        activeStep ? `Current: ${activeStep.label}` : "Preparing systems..."
       ),
+      activeStep && activeStep.note ? React.createElement(
+        "p",
+        { className: "text-[11px] text-yellow-200 mt-1" },
+        activeStep.note
+      ) : null,
+      stepList.length > 0 ? React.createElement(
+        "div",
+        { className: "mt-4 w-11/12 max-w-3xl space-y-2 text-left" },
+        stepList.map((step, idx) => {
+          const status = step?.status || "pending";
+          const icon = status === "done" ? "[OK]" : status === "error" ? "[!!]" : status === "active" ? "[...]" : "[  ]";
+          const iconClass = status === "done" ? "text-green-400" : status === "error" ? "text-red-400" : status === "active" ? "text-yellow-300" : "text-gray-400";
+          const headingClass = status === "done" ? "text-green-200" : status === "error" ? "text-red-200" : status === "active" ? "text-yellow-200" : "text-gray-200";
+          return React.createElement(
+            "div",
+            { key: step?.id || step?.label || `step-${idx}`, className: "flex items-start gap-3" },
+            React.createElement(
+              "span",
+              { className: "text-base font-semibold " + iconClass },
+              icon
+            ),
+            React.createElement(
+              "div",
+              { className: "flex-1" },
+              React.createElement(
+                "p",
+                { className: "text-xs font-semibold " + headingClass },
+                step?.label || "Loading task"
+              ),
+              step?.description ? React.createElement(
+                "p",
+                { className: "text-[11px] text-gray-300" },
+                step.description
+              ) : null,
+              step?.note ? React.createElement(
+                "p",
+                { className: "text-[11px] text-gray-400" },
+                step.note
+              ) : null
+            )
+          );
+        })
+      ) : null,
       React.createElement(
         "p",
-        { className: "text-xs text-gray-300 mt-2 opacity-80" },
+        { className: "text-[10px] text-gray-400 mt-5 opacity-85" },
         "Tip: If performance is low, lower Render Scale in Settings."
       )
     )

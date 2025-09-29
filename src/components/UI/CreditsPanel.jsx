@@ -88,7 +88,7 @@ const CreditsPanel = ({ onClose }) => {
                 columnNumber: 13
               }),
               /* @__PURE__ */ jsxDEV("ul", { className: "list-disc list-inside text-sm text-gray-200 space-y-1", children: [
-                /* @__PURE__ */ jsxDEV("li", { children: "Animations: meshy" }, void 0, false, {
+                /* @__PURE__ */ jsxDEV("li", { children: "Animations: meshy, LP - H" }, void 0, false, {
                   fileName: "<stdin>",
                   lineNumber: 42,
                   columnNumber: 15
@@ -99,6 +99,11 @@ const CreditsPanel = ({ onClose }) => {
                   columnNumber: 15
                 }),
                 /* @__PURE__ */ jsxDEV("li", { children: "Iconography: gpt5" }, void 0, false, {
+                  fileName: "<stdin>",
+                  lineNumber: 44,
+                  columnNumber: 15
+                }),
+                /* @__PURE__ */ jsxDEV("li", { children: "Assets: LP - H" }, void 0, false, {
                   fileName: "<stdin>",
                   lineNumber: 44,
                   columnNumber: 15

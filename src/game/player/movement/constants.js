@@ -9,3 +9,5 @@ export const BASE_GROUND_Y = 0;
 
 // Player collision radius on XZ plane
 export const PLAYER_RADIUS = 1.4; // 30% smaller to match new player scale
+// Scale factor for lateral (strafe) movement to reduce "ice skating" feel
+export const STRAFE_SCALE = 0.85;

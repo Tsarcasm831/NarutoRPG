@@ -53,6 +53,10 @@ function localBaseFor(name) {
       return 'temp/Sakura/biped/';
     case 'shikamaru':
       return 'temp/Shikamaru/';
+    case 'neji':
+      return 'temp/Neji/biped/';
+    case 'orochimaru':
+      return 'temp/Orochimaru/biped/';
     default:
       return 'temp/';
   }
@@ -129,7 +133,7 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
   return { model, clips, defaultClipName };
 }
 
-export function createNpcRig({ scene, settings, name, manifestPath, position, scale = 4 }) {
+export function createNpcRig({ scene, settings, name, manifestPath, position, scale = 4, autoAdd = true }) {
   const group = new THREE.Group();
   group.name = name;
   group.userData.type = 'npc';
@@ -170,7 +174,9 @@ export function createNpcRig({ scene, settings, name, manifestPath, position, sc
     group.userData.mixer = mixer;
     group.userData.animations = actions;
 
-    scene.add(group);
+    if (autoAdd) {
+      scene.add(group);
+    }
     return group;
   }).catch((err) => {
     console.error(`[NPC] Failed to spawn ${name} from ${manifestPath}:`, err);

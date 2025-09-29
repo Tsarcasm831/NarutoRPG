@@ -123,6 +123,9 @@ export function initScene(mountEl, onLockedChange){
             nearest.open = !nearest.open;
             nearest.target = nearest.open ? nearest.openDir * Math.PI*0.7 : 0;
             if (nearest === state.doors[0] && nearest.open) {
+              // Transitioning from the hall to the office: release pointer lock
+              try { if (document.pointerLockElement) document.exitPointerLock(); } catch {}
+              try { controls?.unlock?.(); } catch {}
               try { window.parent?.postMessage({ type: 'openHokageInterior' }, '*'); } catch {}
             }
             nearest.autoCloseAt = nearest.open ? performance.now() + 4500 : 0;

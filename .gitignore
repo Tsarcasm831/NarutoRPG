@@ -1,5 +1,4 @@
 .env
-temp
-node_modules
+
 
 *.zip 

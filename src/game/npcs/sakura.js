@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
 import { attachWanderFree } from './behaviors/wanderFree.js';
+import { getPlayerIdentity } from '../player/identity.js';
 
 export function createSakura(scene, settings, position = new THREE.Vector3()) {
   return createNpcRig({
@@ -11,6 +12,7 @@ export function createSakura(scene, settings, position = new THREE.Vector3()) {
     position,
     // 30% smaller overall
     scale: 2.8,
+    autoAdd: false,
   }).then((group) => {
     try {
       group.userData.label = 'Sakura';
@@ -19,12 +21,16 @@ export function createSakura(scene, settings, position = new THREE.Vector3()) {
           const npc = self || group;
           npc.userData.interacting = true;
           try { window.__npcInteracting = npc; } catch (_) {}
+          const identity = getPlayerIdentity();
+          const playerName = identity?.name || 'Kakashi Hatake';
+          const playerImage = identity?.mugshot || '/src/assets/images/mugshots/kakashi.png';
+
           window.dispatchEvent(new CustomEvent('open-npc-dialog', {
             detail: {
               npc: 'Sakura',
               npcImage: '/src/assets/images/mugshots/sakura.png',
-              player: 'Kakashi',
-              playerImage: '/src/assets/images/mugshots/kakashi.png',
+              player: playerName,
+              playerImage,
               lines: [
                 { speaker: 'npc', text: 'Need medical supplies? I\'ve got some ready.' },
                 { speaker: 'player', text: 'Always prepared. Good work, Sakura.' },

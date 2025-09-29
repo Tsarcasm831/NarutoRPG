@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { playAnimation } from '../animations.js';
-import { walkSpeed, runSpeed, flySpeed, GRAVITY, JUMP_FORCE, PLAYER_RADIUS } from './constants.js';
+import { walkSpeed, runSpeed, flySpeed, GRAVITY, JUMP_FORCE, PLAYER_RADIUS, STRAFE_SCALE } from './constants.js';
 import { getGroundYAt } from './ground.js';
 import { resolveCollisions } from './collision.js';
 
@@ -138,6 +138,8 @@ export function updatePlayerMovement(player, keys, joystick, delta, objectGrid, 
             inputDirection.set(keyMoveX, keyMoveZ).normalize();
         }
         if (inputDirection.lengthSq() > 0) {
+            // Slightly reduce lateral (strafe) component to avoid over-sliding look
+            inputDirection.x *= STRAFE_SCALE;
             const cosYaw = Math.cos(cameraYaw);
             const sinYaw = Math.sin(cameraYaw);
             // Camera-relative basis on XZ; invert forward in 3rd person so W pushes "into" the screen
@@ -179,11 +181,16 @@ export function updatePlayerMovement(player, keys, joystick, delta, objectGrid, 
 
     const dx = player.position.x - prevX;
     const dz = player.position.z - prevZ;
-    moved = (dx * dx + dz * dz) > 1e-6 || (verticalFromCamera * verticalFromCamera) > 1e-6;
+    const planarMoved = (dx * dx + dz * dz) > 1e-6;
+    moved = planarMoved || (verticalFromCamera * verticalFromCamera) > 1e-6;
 
-    if (moved && player.userData.model && moveDirection.lengthSq() > 0) {
-        const angle = Math.atan2(moveDirection.x, moveDirection.y);
+    // Face the direction actually moved on XZ to avoid side-sliding visuals
+    if (planarMoved && player.userData.model) {
+        const angle = Math.atan2(dx, dz);
         player.userData.model.rotation.y = angle;
+        player.userData.lastWorldMoveAngle = angle;
+    } else if (!planarMoved) {
+        player.userData.lastWorldMoveAngle = null;
     }
 
     player.userData.movedLastFrame = moved;

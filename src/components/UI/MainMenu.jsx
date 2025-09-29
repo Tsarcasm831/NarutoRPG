@@ -447,7 +447,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
           }),
           /* @__PURE__ */ jsxDEV("div", { className: "relative bg-gray-900 text-white border-2 border-yellow-600 rounded-xl shadow-2xl w-[90vw] max-w-[520px] p-5", children: [
             /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between mb-2", children: [
-              /* @__PURE__ */ jsxDEV("h2", { id: "hints-dialog-title", className: "text-yellow-400 font-bold", children: "Hints" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("h2", { id: "hints-dialog-title", className: "text-yellow-400 font-bold", children: "Download" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 146,
                 columnNumber: 75
@@ -463,26 +463,19 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
               columnNumber: 19
             }),
             /* @__PURE__ */ jsxDEV("div", { className: "text-sm text-gray-200 space-y-3", children: [
-              /* @__PURE__ */ jsxDEV("p", { className: "text-yellow-300 font-semibold pt-2 border-t border-gray-700", children: "Dev tips" }, void 0, false, {
+              /* @__PURE__ */ jsxDEV("p", { children: "You can download NarutoRPG at:" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 147,
                 columnNumber: 68
               }),
-              /* @__PURE__ */ jsxDEV("ul", { className: "space-y-1 list-disc pl-5", children: [
-                /* @__PURE__ */ jsxDEV("li", { children: "Keep repos lean: store large asset URLs in a JSON manifest; fetch/cache them at runtime." }, void 0, false, {
-                  fileName: "<stdin>",
-                  lineNumber: 147,
-                  columnNumber: 196
-                }),
-                /* @__PURE__ */ jsxDEV("li", { children: "Use GitHub for versioning/PRs/Issues; pair with GPT Codex and Windsurf for rapid iteration." }, void 0, false, {
-                  fileName: "<stdin>",
-                  lineNumber: 147,
-                  columnNumber: 293
-                })
-              ] }, void 0, true, {
+              /* @__PURE__ */ jsxDEV("p", { children: /* @__PURE__ */ jsxDEV("a", { href: "https://github.com/Tsarcasm831/NarutoRPG", target: "_blank", rel: "noreferrer", className: "text-yellow-300 hover:text-yellow-200 underline", children: "https://github.com/Tsarcasm831/NarutoRPG" }, void 0, false, {
                 fileName: "<stdin>",
                 lineNumber: 147,
-                columnNumber: 155
+                columnNumber: 118
+              }) }, void 0, false, {
+                fileName: "<stdin>",
+                lineNumber: 147,
+                columnNumber: 100
               })
             ] }, void 0, true, {
               fileName: "<stdin>",

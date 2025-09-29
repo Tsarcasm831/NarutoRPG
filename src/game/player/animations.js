@@ -1,111 +1,78 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
+import { loadCharacterAssetsFromManifest } from '../npcs/common.js';
+import { getPlayerIdentity } from './identity.js';
 
-const ANIMATION_PATH_PREFIX = 'https://www.lordtsarcasm.com/bucket/Naruto/LandofFire/Kakashi_Jonin/';
 export const DEFAULT_ANIMATION = 'idle11';
 
-// NEW: Load only a minimal set of clips needed for gameplay to reduce lag
-const ESSENTIAL_ANIMATION_FILES = [
-    'Animation_Idle_11_withSkin.glb',
-    'Animation_Walking_withSkin.glb',
-    'Animation_RunFast_withSkin.glb',
-    'Animation_Running_withSkin.glb',
-    'Animation_Regular_Jump_withSkin.glb',
-    'Animation_Fall1_withSkin.glb',
-    'Animation_Punch_Combo_1_withSkin.glb',
-    'Animation_Roll_Dodge_withSkin.glb'
-];
+const BASE_ANIMATION_FALLBACKS = {
+    idle11: ['idle12', 'idle'],
+    walking: ['casualWalk'],
+    running: ['runFast', 'casualWalk', 'walking'],
+    regularJump: ['arise', 'idle11'],
+    fall1: ['idle11'],
+    punchCombo1: ['chargedGroundSlam', 'standAndChat', 'running'],
+    rollDodge: ['running', 'walking'],
+    runFast: ['running']
+};
+
+const mergeFallbacks = (base, overrides = {}) => {
+    const merged = { ...base };
+    for (const [key, value] of Object.entries(overrides)) {
+        if (!Array.isArray(value)) {
+            continue;
+        }
+        merged[key] = value;
+    }
+    return merged;
+};
+
+const ensureRequiredAnimations = (animations, fallbacks) => {
+    for (const [target, candidates] of Object.entries(fallbacks)) {
+        if (animations[target]) continue;
+        for (const candidate of candidates) {
+            if (candidate && animations[candidate]) {
+                animations[target] = animations[candidate];
+                break;
+            }
+        }
+    }
+};
+
+const pickDefaultAnimation = (animations, preferred) => {
+    if (preferred && animations[preferred]) return preferred;
+    if (animations[DEFAULT_ANIMATION]) return DEFAULT_ANIMATION;
+    const idleFallbacks = ['idle12', 'idle'];
+    for (const name of idleFallbacks) {
+        if (animations[name]) return name;
+    }
+    const keys = Object.keys(animations);
+    return keys.length ? keys[0] : DEFAULT_ANIMATION;
+};
 
 /**
- * Parses a clean, camelCase animation name from a GLB file URL.
- * @param {string} url - The full URL of the animation file.
- * @returns {string} A camelCase name for the animation.
- */
-function getAnimationName(url) {
-    const fileName = url.substring(url.lastIndexOf('/') + 1);
-    // e.g., Animation_Idle_11_withSkin.glb
-    let name = fileName.replace('Animation_', '').replace('_withSkin.glb', '');
-    // e.g., Idle_11
-    
-    // Convert to camelCase
-    return name
-        .toLowerCase()
-        .split('_')
-        .map((part, index) => {
-            if (index === 0) return part;
-            return part.charAt(0).toUpperCase() + part.slice(1);
-        })
-        .join('');
-}
-
-
-/**
- * Loads all player animations from the JSON file.
- * This function loads the GLB files, extracts animation clips, and one model with skin.
- * Optimized to load only essential animations to avoid heavy CPU/GPU usage and memory spikes.
- * @returns {Promise<{model: THREE.Group, animations: Object}>} A promise that resolves with the player model and an object containing all animation clips.
+ * Loads the active player character model and animations based on the runtime identity.
+ * @returns {Promise<{model: THREE.Group, animations: Object, defaultAnimation: string}>}
  */
 export async function loadPlayerAssets() {
-    const loader = new GLTFLoader();
-    
-    const response = await fetch('./src/components/json/kakashiAnimations.json');
-    const { files: animationUrls } = await response.json();
-
-    if (!animationUrls || animationUrls.length === 0) {
-        throw new Error("No animation files found in JSON.");
+    const character = getPlayerIdentity();
+    if (!character) {
+        throw new Error('Player identity not set before loading assets.');
     }
 
-    // Filter URLs to essential files only
-    const essentialUrls = animationUrls.filter(url =>
-        ESSENTIAL_ANIMATION_FILES.some(name => url.endsWith(name))
+    const animationConfig = character.animation || {};
+    const { model, clips } = await loadCharacterAssetsFromManifest(
+        character.manifest,
+        animationConfig.essential,
+        character.name
     );
 
-    if (essentialUrls.length === 0) {
-        // Fallback to at least idle if filter failed
-        const idle = animationUrls.find(u => u.includes('Animation_Idle_11_withSkin.glb'));
-        if (idle) essentialUrls.push(idle);
-    }
-    
-    let model = null;
-    const animations = {};
+    const animations = { ...clips };
+    const fallbackMap = mergeFallbacks(BASE_ANIMATION_FALLBACKS, animationConfig.remap);
+    ensureRequiredAnimations(animations, fallbackMap);
 
-    const assetPromises = essentialUrls.map(url => {
-        return new Promise((resolve, reject) => {
-            loader.load(
-                url,
-                gltf => resolve({ gltf, url }),
-                undefined,
-                error => {
-                    console.error(`Failed to load asset from ${url}:`, error);
-                    resolve(null); // Resolve with null to not fail the whole batch
-                }
-            );
-        });
-    });
+    const defaultAnimation = pickDefaultAnimation(animations, animationConfig.default);
 
-    const loadedAssets = (await Promise.all(assetPromises)).filter(a => a);
-
-    // Find the default animation to get the model from
-    const defaultAssetUrl = essentialUrls.find(url => getAnimationName(url) === DEFAULT_ANIMATION)
-        || essentialUrls[0];
-    const defaultAsset = loadedAssets.find(a => a.url === defaultAssetUrl) || loadedAssets[0];
-
-    if (defaultAsset) {
-        model = defaultAsset.gltf.scene;
-    } else {
-        throw new Error("Could not load any model from the animation files.");
-    }
-
-    // Extract all animation clips that were loaded
-    loadedAssets.forEach(({ gltf, url }) => {
-        const clip = gltf.animations[0];
-        if (clip) {
-            const name = getAnimationName(url);
-            animations[name] = clip;
-        }
-    });
-
-    return { model, animations };
+    return { model, animations, defaultAnimation };
 }
 
 /**
@@ -155,7 +122,10 @@ export function playAnimation(player, name) {
                 player.userData.actionLocked = false;
 
                 // If we're in the air (from a jump), go to falling. Otherwise, go to idle.
-                const nextAnim = name === 'regularJump' ? 'fall1' : 'idle11';
+                const defaultAnim = player.userData.defaultAnimation || DEFAULT_ANIMATION;
+                const nextAnim = name === 'regularJump'
+                    ? (animations['fall1'] ? 'fall1' : defaultAnim)
+                    : defaultAnim;
                 playAnimation(player, nextAnim);
             }
         };
@@ -168,7 +138,8 @@ export function playAnimation(player, name) {
         player.userData.actionFinishListener = (e) => {
             if (e.action === newAction) {
                 // Return to idle (movement system will immediately override to walk/run if moving)
-                playAnimation(player, 'idle11');
+                const defaultAnim = player.userData.defaultAnimation || DEFAULT_ANIMATION;
+                playAnimation(player, defaultAnim);
             }
         };
         mixer.addEventListener('finished', player.userData.actionFinishListener);

@@ -1,7 +1,6 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DEFAULT_MODEL as MAP_DEFAULT_MODEL } from "/map/defaults/full-default-model.js";
-import { initialPlayerStats, initialInventory } from "./game/initialState.js";
 import { addExperience, ensureExperienceConsistency, xpForLevel } from "./game/experience.js";
 import { useThreeScene } from "./hooks/useThreeScene.js";
 import { usePlayerControls } from "./hooks/usePlayerControls.js";
@@ -34,6 +33,9 @@ import KitbashBuildingModal from "./components/UI/KitbashBuildingModal.jsx";
 import JutsuModal from "./components/UI/JutsuModal.jsx";
 import { preloadMusic, musicPlay, musicPause, musicState } from "./utils/musicManager.js";
 import { useGameTime } from "./hooks/useGameTime.js";
+import CharacterSelectModal from "./components/UI/CharacterSelectModal.jsx";
+import { PLAYER_CHARACTERS, getCharacterByKey, getDefaultCharacter, buildStatsForCharacter, buildInventoryForCharacter } from "./game/player/characterCatalog.js";
+import { setPlayerIdentity } from "./game/player/identity.js";
 const VERSION_PREFIX = "v";
 const OVERRIDE_VERSION = null;
 const OpenWorldGame = () => {
@@ -41,8 +43,13 @@ const OpenWorldGame = () => {
   const [gameState, setGameState] = useState("MainMenu");
   const [timeResetKey, setTimeResetKey] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingSteps, setLoadingSteps] = useState([]);
   const [version, setVersion] = useState("");
   const [gameReady, setGameReady] = useState(false);
+  const defaultCharacter = React.useMemo(() => getDefaultCharacter(), []);
+  const [selectedCharacterKey, setSelectedCharacterKey] = useState(defaultCharacter.key);
+  const [characterChoice, setCharacterChoice] = useState(defaultCharacter.key);
+  const [showCharacterSelect, setShowCharacterSelect] = useState(false);
   useEffect(() => {
     // Prefer version derived from the HTML page title (e.g., "Naruto RPG v0.010.000 [Alpha]")
     let label = "";
@@ -73,8 +80,11 @@ const OpenWorldGame = () => {
     }
     setVersion(label);
   }, []);
-  const [playerStats, setPlayerStats] = useState(() => ensureExperienceConsistency(initialPlayerStats));
-  const [inventory, setInventory] = useState(initialInventory);
+  useEffect(() => {
+    setPlayerIdentity(defaultCharacter);
+  }, [defaultCharacter]);
+  const [playerStats, setPlayerStats] = useState(() => ensureExperienceConsistency(buildStatsForCharacter(defaultCharacter.key)));
+  const [inventory, setInventory] = useState(() => buildInventoryForCharacter(defaultCharacter.key));
   const [playerPosition, setPlayerPosition] = useState({ x: 0, z: 0 });
   const [worldObjects, setWorldObjects] = useState([]);
   const [settings, setSettings] = useState({
@@ -124,6 +134,18 @@ const OpenWorldGame = () => {
     /* NEW: expose pause setter to controls */
     setShowPause: setShowPauseMenu
   };
+  const updateLoadingStep = useCallback((id, partial = {}) => {
+    setLoadingSteps((steps) => {
+      if (!Array.isArray(steps) || steps.length === 0) return steps;
+      let changed = false;
+      const next = steps.map((step) => {
+        if (step.id !== id) return step;
+        changed = true;
+        return { ...step, ...partial };
+      });
+      return changed ? next : steps;
+    });
+  }, []);
   const xpMultiplier = Math.max(0, Number(worldState?.buffs?.xpMultiplier) || 1);
   const gainExperience = useCallback((amount) => {
     const effective = Math.max(0, Math.round((Number(amount) || 0) * xpMultiplier));
@@ -135,8 +157,32 @@ const OpenWorldGame = () => {
   }, [xpMultiplier]);
   const keysRef = usePlayerControls({ ...uiState, onGainExperience: gainExperience });
   const joystickRef = useRef(null);
+  const reportBootStatus = useCallback((stepId, status, payload) => {
+    if (stepId !== 'squad') return;
+    if (status === 'active') {
+      updateLoadingStep('squad', { status: 'active', note: 'Summoning Naruto, Sasuke, Sakura, Shikamaru, Neji, and Orochimaru...' });
+      setLoadingProgress((prev) => Math.max(prev, 99));
+      return;
+    }
+    if (status === 'done') {
+      updateLoadingStep('squad', { status: 'done', note: 'Squad assembled.' });
+      setLoadingProgress((prev) => Math.max(prev, 100));
+      return;
+    }
+    if (status === 'error') {
+      const roster = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'];
+      const rejected = Array.isArray(payload?.rejected) ? payload.rejected : [];
+      const failed = rejected.map(({ index }) => roster[index] || `NPC ${index + 1}`).filter(Boolean);
+      const note = failed.length ? `Failed to spawn: ${failed.join(', ')}.` : 'One or more squad members failed to spawn.';
+      updateLoadingStep('squad', { status: 'error', note });
+      setLoadingProgress((prev) => Math.max(prev, 100));
+    }
+  }, [updateLoadingStep, setLoadingProgress]);
+  const handleSceneReady = useCallback(() => {
+    setGameReady(true);
+  }, []);
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: useCallback(() => setGameReady(true), []), worldState, timeOfDayHours });
+  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: handleSceneReady, worldState, timeOfDayHours, reportBootStatus });
   const musicWasPlayingRef = useRef(false);
   const [showNpcDialog, setShowNpcDialog] = useState(false);
   const [npcDialogData, setNpcDialogData] = useState(null);
@@ -171,9 +217,9 @@ const OpenWorldGame = () => {
     window.addEventListener("open-kitbash-building", openKit);
     const openNpc = (e) => {
       // Do not pause the game or music for NPC dialog
+      // Keep FPV active: do NOT release pointer lock here so interacting in FPV doesn't dump to third-person.
       setNpcDialogData(e?.detail || null);
       setShowNpcDialog(true);
-      try { if (document.pointerLockElement) document.exitPointerLock(); } catch (_) {}
     };
     window.addEventListener("open-npc-dialog", openNpc);
     return () => {
@@ -182,61 +228,154 @@ const OpenWorldGame = () => {
       window.removeEventListener("open-npc-dialog", openNpc);
     };
   }, []);
-  const handleStartGame = async () => {
+  const getInitialLoadingSteps = React.useCallback(() => ([
+    {
+      id: 'prefetch',
+      label: 'Surveying village terrain',
+      description: 'Prefetching location caches and terrain metadata around Konoha.',
+      status: 'pending'
+    },
+    {
+      id: 'cache',
+      label: 'Stocking asset cache',
+      description: 'Streaming character models, props, and textures into local memory.',
+      status: 'pending'
+    },
+    {
+      id: 'audio',
+      label: 'Priming soundtrack',
+      description: 'Buffering key music tracks so the score can start immediately.',
+      status: 'pending'
+    },
+    {
+      id: 'layouts',
+      label: 'Organizing districts',
+      description: 'Loading district layout plans for Hidden Leaf neighborhoods.',
+      status: 'pending'
+    },
+    {
+      id: 'squad',
+      label: 'Summoning your squad',
+      description: 'Positioning Naruto, Sasuke, Sakura, Shikamaru, Neji, and Orochimaru nearby.',
+      status: 'pending'
+    }
+  ]), []);
+
+  const handleStartGameRequest = useCallback(() => {
+    setLoadingSteps(getInitialLoadingSteps());
+    setLoadingProgress(0);
+    setGameReady(false);
+    setCharacterChoice(selectedCharacterKey);
+    setGameState("Loading");
+    setShowCharacterSelect(true);
+  }, [getInitialLoadingSteps, selectedCharacterKey]);
+
+  const runGameLoading = useCallback(async (characterKey) => {
+    setSelectedCharacterKey(characterKey);
     setTimeResetKey((key) => key + 1);
     setGameReady(false);
-    setGameState("Loading");
+    setLoadingProgress(0);
+    setLoadingSteps(getInitialLoadingSteps());
+
     if (!window.assetLoaderInitialized) {
       await initializeAssetLoader();
       window.assetLoaderInitialized = true;
     }
+
     const seg = (start, span) => (p) => {
       const v = Math.max(0, Math.min(100, Number(p) || 0));
       const mapped = Math.round(start + v / 100 * span);
       setLoadingProgress(mapped);
     };
-    setLoadingProgress(0);
+
+    updateLoadingStep('prefetch', { status: 'active', note: 'Prefetching terrain tiles and location caches...' });
     try {
       await prefetchLocationAssets(seg(0, 30));
+      updateLoadingStep('prefetch', { status: 'done', note: 'Terrain caches staged.' });
     } catch (e) {
-      // Ensure progress advances even if prefetch fails (e.g., no Cache API)
       try { seg(0, 30)(100); } catch (_) {}
+      updateLoadingStep('prefetch', { status: 'error', note: 'Unable to prefetch terrain; will stream live.' });
     }
+
+    updateLoadingStep('cache', { status: 'active', note: 'Caching character rigs, props, and textures...' });
     try {
       await startCaching(seg(30, 50));
+      updateLoadingStep('cache', { status: 'done', note: 'Asset cache ready.' });
     } catch (e) {
-      // Ensure progress advances even if caching fails
       try { seg(30, 50)(100); } catch (_) {}
+      updateLoadingStep('cache', { status: 'error', note: 'Asset caching skipped; loading will continue on demand.' });
     }
+
+    updateLoadingStep('audio', { status: 'active', note: 'Buffering soundtrack for immediate playback...' });
     try {
-      await preloadMusic(seg(80, 20));
+      await preloadMusic(seg(80, 15));
+      updateLoadingStep('audio', { status: 'done', note: 'Music primed.' });
     } catch (_) {
+      try { seg(80, 15)(100); } catch (_) {}
+      updateLoadingStep('audio', { status: 'error', note: 'Music will stream as needed.' });
     }
+
+    updateLoadingStep('layouts', { status: 'active', note: 'Deploying Hidden Leaf district layouts...' });
     try {
       const ids = Object.keys(MAP_DEFAULT_MODEL?.districts || {}).filter((id) => {
         const low = String(id).toLowerCase();
         return low.startsWith("district") || low.startsWith("residential") || low.startsWith("hyuuga");
       });
       await loadDistrictLayouts(ids);
+      updateLoadingStep('layouts', { status: 'done', note: 'District plans applied.' });
+      setLoadingProgress((prev) => Math.max(prev, 97));
     } catch (_) {
+      updateLoadingStep('layouts', { status: 'error', note: 'Using fallback district layout.' });
+      setLoadingProgress((prev) => Math.max(prev, 97));
     }
+
     setGameState("Playing");
     try {
       musicPlay();
-    } catch (_) {
+    } catch (_) {}
+  }, [getInitialLoadingSteps, updateLoadingStep]);
+
+  const handleCharacterConfirm = useCallback(async () => {
+    const chosen = getCharacterByKey(characterChoice);
+    const identity = setPlayerIdentity(chosen);
+    setCharacterChoice(identity.key);
+    setPlayerStats(ensureExperienceConsistency(buildStatsForCharacter(identity.key)));
+    setInventory(buildInventoryForCharacter(identity.key));
+    setShowCharacterSelect(false);
+
+    try {
+      await runGameLoading(identity.key);
+    } catch (error) {
+      console.error('Failed to start game', error);
+      setLoadingProgress(0);
+      setLoadingSteps([]);
+      setGameState('MainMenu');
     }
-  };
+  }, [characterChoice, runGameLoading]);
+
+  const handleCharacterCancel = useCallback(() => {
+    setShowCharacterSelect(false);
+    setCharacterChoice(selectedCharacterKey);
+    setLoadingSteps([]);
+    setLoadingProgress(0);
+    setGameState("MainMenu");
+  }, [selectedCharacterKey]);
   return /* @__PURE__ */ jsxDEV("div", { className: "relative w-full h-screen overflow-hidden bg-black", children: [
-    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGame, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true) }, void 0, false, {
+    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGameRequest, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true) }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 54,
       columnNumber: 9
     }),
     gameState === "Playing" && showQuests && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(QuestLogPanel, { quests, setQuests, onClose: () => setShowQuests(false), setPlayerStats, setInventory, addExperience: gainExperience }, void 0, false, { fileName: "<stdin>", lineNumber: 65, columnNumber: 44 }) }, void 0, false, { fileName: "<stdin>", lineNumber: 65, columnNumber: 27 }),
     // Show initial asset caching progress
-    gameState === "Loading" && /* @__PURE__ */ jsxDEV(LoadingScreen, { progress: loadingProgress }, void 0, false, {
+    gameState === "Loading" && /* @__PURE__ */ jsxDEV(LoadingScreen, { progress: loadingProgress, steps: loadingSteps }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 55,
+      columnNumber: 9
+    }),
+    gameState === "Loading" && showCharacterSelect && /* @__PURE__ */ jsxDEV(CharacterSelectModal, { options: PLAYER_CHARACTERS, selectedKey: characterChoice, onSelect: (key) => setCharacterChoice(key), onConfirm: handleCharacterConfirm, onCancel: handleCharacterCancel }, void 0, false, {
+      fileName: "<stdin>",
+      lineNumber: 56,
       columnNumber: 9
     }),
     // Mount the 3D scene
@@ -246,7 +385,7 @@ const OpenWorldGame = () => {
       columnNumber: 9
     }),
     // Keep a second loading overlay visible until the scene/player is fully ready
-    gameState === "Playing" && !gameReady && /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 z-30", children: /* @__PURE__ */ jsxDEV(LoadingScreen, { progress: 100 }, void 0, false, {
+    gameState === "Playing" && !gameReady && /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 z-30", children: /* @__PURE__ */ jsxDEV(LoadingScreen, { progress: loadingProgress, steps: loadingSteps }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 61,
       columnNumber: 62
@@ -286,6 +425,9 @@ const OpenWorldGame = () => {
         setShowInventory(false);
         setShowWorldMap(false);
         setShowAnimations(false);
+        setLoadingSteps([]);
+        setLoadingProgress(0);
+        setGameReady(false);
         setGameState("MainMenu");
       }
     }, void 0, false),

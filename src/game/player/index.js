@@ -3,6 +3,7 @@ import { loadPlayerAssets, playAnimation, DEFAULT_ANIMATION } from './animations
 import { updatePlayerMovement } from './movement/index.js';
 // @tweakable base path anchor for terrain imports (change only if your host serves /src under a different root)
 import { WORLD_SIZE } from '/src/scene/terrain.js';
+import { getPlayerIdentity } from './identity.js';
 
 let lastLightUpdatePosition = new THREE.Vector3();
 let shadowCastingObjects = new Set();
@@ -48,9 +49,10 @@ export function createPlayer(scene, settings, onReady) {
     // New: lock flag to prevent animation changes during one-shot actions (e.g., attack)
     player.userData.actionLocked = false;
 
-    loadPlayerAssets().then(({ model, animations }) => {
-        // 30% smaller overall (4 -> 2.8)
-        model.scale.set(2.8, 2.8, 2.8);
+    loadPlayerAssets().then(({ model, animations, defaultAnimation }) => {
+        const identity = getPlayerIdentity();
+        const scale = identity?.scale || 2.8;
+        model.scale.set(scale, scale, scale);
         model.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = settings.shadows;
@@ -70,7 +72,9 @@ export function createPlayer(scene, settings, onReady) {
             player.userData.animations[name] = mixer.clipAction(clip);
         }
         
-        playAnimation(player, DEFAULT_ANIMATION);
+        const initialAnimation = animations[defaultAnimation] ? defaultAnimation : DEFAULT_ANIMATION;
+        player.userData.defaultAnimation = initialAnimation;
+        playAnimation(player, initialAnimation);
 
         // Notify scene/game that the player (critical asset) is ready
         try { onReady && onReady(); } catch (_) {}
@@ -82,6 +86,7 @@ export function createPlayer(scene, settings, onReady) {
         const fallbackPlayer = new THREE.Mesh(playerGeometry, playerMaterial);
         fallbackPlayer.position.y = 4;
         player.add(fallbackPlayer);
+        player.userData.defaultAnimation = DEFAULT_ANIMATION;
         scene.add(player);
 
         // Even on fallback, signal readiness so the game can proceed
@@ -216,21 +221,26 @@ export function updatePlayer(player, keys, camera, light, throttledSetPlayerPosi
     const pitch = clamp(pitchRaw, -0.9, 0.9);
 
     if (isFirstPerson) {
-        // First-person: place camera at player's head and look forward based on yaw/pitch
-        const headHeight = 5.25; // 30% lower to match new scale
-        const eyePos = new THREE.Vector3(playerPosition.x, playerPosition.y + headHeight, playerPosition.z);
+        // First-person: place camera at player's head and orient using yaw/pitch
+        const headHeight = 5.25; // matches scaled model
+        // Avoid per-frame allocations by using direct component sets
+        const eyeX = playerPosition.x;
+        const eyeY = playerPosition.y + headHeight;
+        const eyeZ = playerPosition.z;
 
-        // Forward vector from yaw/pitch
+        // Forward vector from yaw/pitch (same convention as before: +Z when yaw=0)
         const cp = Math.cos(pitch);
         const sp = Math.sin(pitch);
         const sx = Math.sin(yaw);
         const cx = Math.cos(yaw);
 
-        const dir = new THREE.Vector3(sx * cp, sp, cx * cp);
-        const lookTarget = new THREE.Vector3().copy(eyePos).add(dir.multiplyScalar(10));
+        const dirX = sx * cp;
+        const dirY = sp;
+        const dirZ = cx * cp;
 
-        camera.position.copy(eyePos);
-        camera.lookAt(lookTarget);
+        camera.position.set(eyeX, eyeY, eyeZ);
+        // Use scalar lookAt to avoid creating temporary Vector3
+        camera.lookAt(eyeX + dirX * 10, eyeY + dirY * 10, eyeZ + dirZ * 10);
     } else {
         // Third-person (existing behavior)
         const r = baseR * zoom;
@@ -242,8 +252,12 @@ export function updatePlayer(player, keys, camera, light, throttledSetPlayerPosi
         const offZ = Math.cos(yaw) * r * cosE;
         const offY = baseY * zoom + r * sinE;
 
-        const cameraOffset = new THREE.Vector3(offX, offY, offZ);
-        camera.position.copy(playerPosition).add(cameraOffset);
+        // Avoid allocating a new Vector3 each frame
+        camera.position.set(
+            playerPosition.x + offX,
+            playerPosition.y + offY,
+            playerPosition.z + offZ
+        );
         camera.lookAt(playerPosition);
     }
     

@@ -1,0 +1,46 @@
+import * as THREE from 'three';
+import { createNpcRig } from './common.js';
+import { attachWanderFree } from './behaviors/wanderFree.js';
+import { getPlayerIdentity } from '../player/identity.js';
+
+export function createNeji(scene, settings, position = new THREE.Vector3()) {
+  return createNpcRig({
+    scene,
+    settings,
+    name: 'Neji',
+    manifestPath: './src/components/json/nejiAnimations.json',
+    position,
+    scale: 2.8,
+    autoAdd: false,
+  }).then((group) => {
+    try {
+      group.userData.label = 'Neji';
+      group.userData.onInteract = (self) => {
+        try {
+          const npc = self || group;
+          npc.userData.interacting = true;
+          try { window.__npcInteracting = npc; } catch (_) {}
+          const identity = getPlayerIdentity();
+          const playerName = identity?.name || 'Kakashi Hatake';
+          const playerImage = identity?.mugshot || '/src/assets/images/mugshots/kakashi.png';
+
+          window.dispatchEvent(new CustomEvent('open-npc-dialog', {
+            detail: {
+              npc: 'Neji',
+              npcImage: 'https://static.wikia.nocookie.net/naruto/images/6/6b/Neji_Part_I.png',
+              player: playerName,
+              playerImage,
+              lines: [
+                { speaker: 'npc', text: 'Destiny may bind us, but I will carve a better path.' },
+                { speaker: 'player', text: 'Your insight keeps the team sharp, Neji.' },
+                { speaker: 'npc', text: 'Then we will not falter.' },
+              ]
+            }
+          }));
+        } catch (_) {}
+      };
+    } catch (_) {}
+    try { attachWanderFree(group, { speed: 7.5 }); } catch (_) {}
+    return group;
+  });
+}

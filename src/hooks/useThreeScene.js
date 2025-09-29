@@ -7,7 +7,7 @@ import { startAnimationLoop } from '../scene/animationLoop.js';
 import { initThreeScene, cleanupThreeScene } from './sceneLifecycle.js';
 import { applyDayNightCycle } from '../scene/dayNightCycle.js';
 
-export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady, worldState, timeOfDayHours }) => {
+export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady, worldState, timeOfDayHours, reportBootStatus }) => {
     const sceneRef = useRef(null);
     const rendererRef = useRef(null);
     const cameraRef = useRef(null);
@@ -82,9 +82,10 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             playerRef,
             objectTooltipsGroupRef,
             objectTooltipsUpdateRef,
-            interactPromptRef
+            interactPromptRef,
+            reportBootStatus
         });
-    }, [mountRef, settings.antialiasing]); // NOTE: intentionally excludes onReady to prevent re-init on movement-driven re-renders
+    }, [mountRef, settings.antialiasing, reportBootStatus]); // NOTE: intentionally excludes onReady to prevent re-init on movement-driven re-renders
 
     useEffect(() => {
         if (!isPlaying) {

@@ -47,6 +47,10 @@ export function startAnimationLoop({
     const interactionDistance = INTERACTION_DISTANCE; // world units to interact
     let lastInteractObj = null;
     let promptHideTimeout = null;
+    // Throttle interactable scanning for performance (especially in FPV)
+    let lastFocusObj = null;
+    let lastFocusCheck = 0;
+    const FOCUS_CHECK_INTERVAL_MS = 100; // ~10 Hz
 
     const clampPitch = (v) => Math.max(-0.9, Math.min(0.9, v));
     const normalizeAngle = (a) => {
@@ -126,8 +130,9 @@ export function startAnimationLoop({
 
     function findNearestInteractable(playerPosition) {
         if (!objectGridRef.current) return null;
-        // Use an expanded radius so objects with far centers but nearby collider edges are included
-        const nearby = objectGridRef.current.getObjectsNear(playerPosition, interactionDistance + 80) || [];
+        // Use a narrower radius in FPV to reduce workload; expand in 3rd-person
+        const extra = firstPersonRef?.current ? 20 : 80;
+        const nearby = objectGridRef.current.getObjectsNear(playerPosition, interactionDistance + extra) || [];
 
         // Geometry helpers for collider-distance checks
         const pointInPolyXZ = (p, poly) => {
@@ -331,7 +336,13 @@ export function startAnimationLoop({
 
         // Interaction prompt handling
         const playerPos = playerRef.current.position;
-        const focusObj = findNearestInteractable(playerPos);
+        // Throttle expensive spatial query
+        let focusObj = lastFocusObj;
+        if (timestamp - lastFocusCheck >= FOCUS_CHECK_INTERVAL_MS) {
+            focusObj = findNearestInteractable(playerPos);
+            lastFocusObj = focusObj;
+            lastFocusCheck = timestamp;
+        }
         if (focusObj) {
             const name = focusObj.userData?.label || focusObj.name || 'Object';
             setPrompt(`Press F to interact (${name})`, true);

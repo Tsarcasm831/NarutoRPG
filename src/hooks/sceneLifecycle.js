@@ -5,6 +5,8 @@ import { createNaruto } from '../game/npcs/naruto.js';
 import { createSasuke } from '../game/npcs/sasuke.js';
 import { createSakura } from '../game/npcs/sakura.js';
 import { createShikamaru } from '../game/npcs/shikamaru.js';
+import { createNeji } from '../game/npcs/neji.js';
+import { createOrochimaru } from '../game/npcs/orochimaru.js';
 
 export function initThreeScene({
   mountRef,
@@ -22,7 +24,8 @@ export function initThreeScene({
   playerRef,
   objectTooltipsGroupRef,
   objectTooltipsUpdateRef,
-  interactPromptRef
+  interactPromptRef,
+  reportBootStatus
 }) {
   if (!mountRef.current) return;
 
@@ -49,30 +52,72 @@ export function initThreeScene({
     },
     createPlayer,
     onReady: () => {
-      try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
-      // Spawn party near the player once the player is ready
-      try {
-        const p = player?.position || new THREE.Vector3();
-        const base = new THREE.Vector3(p.x, p.y, p.z);
-        const offsets = [
-          new THREE.Vector3(6, 0, 0),   // Naruto to the +X
-          new THREE.Vector3(-6, 0, 0),  // Sasuke to the -X
-          new THREE.Vector3(0, 0, 6),   // Sakura to the +Z
-          new THREE.Vector3(0, 0, -6),  // Shikamaru to the -Z
-        ];
-        // Create NPCs (no movement controllers attached)
-        Promise.all([
-          createNaruto(scene, { shadows: settings.shadows }, base.clone().add(offsets[0])),
-          createSasuke(scene, { shadows: settings.shadows }, base.clone().add(offsets[1])),
-          createSakura(scene, { shadows: settings.shadows }, base.clone().add(offsets[2])),
-          createShikamaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[3])),
-        ]).then((npcs) => {
-          try { scene.userData.npcs = npcs; } catch (_) {}
-        }).catch(() => {});
-      } catch (_) {}
-      try {
-        onReadyRef.current && onReadyRef.current();
-      } catch (_) {}
+      const finishBoot = async () => {
+        try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
+        let npcs = [];
+        try {
+          reportBootStatus?.('squad', 'active');
+          const p = player?.position || new THREE.Vector3();
+          const base = new THREE.Vector3(p.x, p.y, p.z);
+          const offsets = [
+            new THREE.Vector3(6, 0, 0),     // Naruto to the +X
+            new THREE.Vector3(-6, 0, 0),    // Sasuke to the -X
+            new THREE.Vector3(0, 0, 6),     // Sakura to the +Z
+            new THREE.Vector3(0, 0, -6),    // Shikamaru to the -Z
+            new THREE.Vector3(8, 0, 8),     // Neji near the +X/+Z quadrant
+            new THREE.Vector3(-8, 0, 8),    // Orochimaru near the -X/+Z quadrant
+          ];
+
+          const spawnPromises = [
+            createNaruto(scene, { shadows: settings.shadows }, base.clone().add(offsets[0])),
+            createSasuke(scene, { shadows: settings.shadows }, base.clone().add(offsets[1])),
+            createSakura(scene, { shadows: settings.shadows }, base.clone().add(offsets[2])),
+            createShikamaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[3])),
+            createNeji(scene, { shadows: settings.shadows }, base.clone().add(offsets[4])),
+            createOrochimaru(scene, { shadows: settings.shadows }, base.clone().add(offsets[5])),
+          ];
+
+          const results = await Promise.allSettled(spawnPromises);
+          const fulfilled = [];
+          const rejected = [];
+
+          results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+              fulfilled.push(result.value);
+            } else {
+              rejected.push({ index, reason: result.reason });
+            }
+          });
+
+          fulfilled.forEach((npc) => {
+            try { scene.add(npc); } catch (_) {}
+          });
+
+          if (fulfilled.length) {
+            npcs = fulfilled;
+            try { scene.userData.npcs = fulfilled; } catch (_) {}
+          }
+
+          if (rejected.length) {
+            reportBootStatus?.('squad', 'error', { rejected });
+            rejected.forEach(({ index, reason }) => {
+              const name = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'][index] || 'Unknown';
+              console.error(`[NPC] Failed to spawn ${name}:`, reason);
+            });
+          } else {
+            reportBootStatus?.('squad', 'done');
+          }
+        } catch (err) {
+          reportBootStatus?.('squad', 'error', { err });
+          console.error('[NPC] Failed during squad spawn:', err);
+        } finally {
+          try {
+            onReadyRef.current && onReadyRef.current(npcs);
+          } catch (_) {}
+        }
+      };
+
+      finishBoot();
     }
   });
 
