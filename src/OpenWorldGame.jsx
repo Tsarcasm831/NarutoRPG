@@ -50,16 +50,6 @@ const OpenWorldGame = () => {
   const [selectedCharacterKey, setSelectedCharacterKey] = useState(defaultCharacter.key);
   const [characterChoice, setCharacterChoice] = useState(defaultCharacter.key);
   const [showCharacterSelect, setShowCharacterSelect] = useState(false);
-  const sessionRef = useRef({ id: null });
-  const heartbeatTimerRef = useRef(null);
-  const [isClaimingSession, setIsClaimingSession] = useState(false);
-  const [sessionError, setSessionError] = useState(null);
-  const wsRef = useRef(null);
-  const otherPlayersRef = useRef(new Map());
-  const [otherPlayersTick, setOtherPlayersTick] = useState(0);
-  const [takenCharacters, setTakenCharacters] = useState([]);
-  const [characterSelectError, setCharacterSelectError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState({ state: "idle", message: "Offline" });
   useEffect(() => {
     // Prefer version derived from the HTML page title (e.g., "Naruto RPG v0.010.000 [Alpha]")
     let label = "";
@@ -167,123 +157,6 @@ const OpenWorldGame = () => {
   }, [xpMultiplier]);
   const keysRef = usePlayerControls({ ...uiState, onGainExperience: gainExperience });
   const joystickRef = useRef(null);
-  const formatConnectedMessage = useCallback(() => {
-    const total = (otherPlayersRef.current?.size || 0) + 1;
-    if (total <= 1) return "Connected • waiting for squadmates";
-    if (total === 2) return "Connected • 2 shinobi online";
-    return `Connected • ${total} shinobi online`;
-  }, []);
-  const updateOtherPlayers = useCallback((mutator) => {
-    if (typeof mutator !== "function") return;
-    mutator(otherPlayersRef.current);
-    setOtherPlayersTick((tick) => tick + 1);
-  }, []);
-  const handleMultiplayerMessage = useCallback((message) => {
-    if (!message || typeof message.type !== "string") return;
-    const currentSessionId = sessionRef.current?.id;
-
-    switch (message.type) {
-      case "hello": {
-        if (Array.isArray(message.takenCharacters)) {
-          setTakenCharacters(message.takenCharacters);
-        }
-        if (Array.isArray(message.players)) {
-          updateOtherPlayers((map) => {
-            map.clear();
-            message.players.forEach((player) => {
-              if (!player || !player.sessionId || player.sessionId === currentSessionId) return;
-              map.set(player.sessionId, { ...player });
-            });
-          });
-        }
-        try {
-          console.info('[Multiplayer] hello', message);
-        } catch (_) {}
-        setConnectionStatus({ state: "connected", message: formatConnectedMessage() });
-        break;
-      }
-      case "player:join": {
-        const player = message.player;
-        if (!player || !player.sessionId || player.sessionId === currentSessionId) return;
-        updateOtherPlayers((map) => {
-          map.set(player.sessionId, { ...player });
-        });
-        setConnectionStatus({ state: "connected", message: formatConnectedMessage() });
-        break;
-      }
-      case "player:update": {
-        const targetId = message.sessionId;
-        if (!targetId || targetId === currentSessionId) return;
-        updateOtherPlayers((map) => {
-          const { type, ...rest } = message || {};
-          const existing = map.get(targetId) || {};
-          map.set(targetId, { ...existing, ...rest });
-        });
-        break;
-      }
-      case "player:leave": {
-        const leavingId = message.sessionId;
-        if (!leavingId || leavingId === currentSessionId) return;
-        updateOtherPlayers((map) => {
-          map.delete(leavingId);
-        });
-        setConnectionStatus({ state: "connected", message: formatConnectedMessage() });
-        break;
-      }
-      case "error": {
-        if (message.message) {
-          setSessionError(message.message);
-        }
-        setConnectionStatus({ state: "error", message: message.message || "Multiplayer error" });
-        break;
-      }
-      default:
-        break;
-    }
-  }, [setSessionError, setTakenCharacters, updateOtherPlayers]);
-
-  useEffect(() => {
-    if (gameState !== "Playing") return;
-    if (typeof window === "undefined" || typeof WebSocket === "undefined") return;
-
-    const sendState = () => {
-      const socket = wsRef.current;
-      if (!socket || socket.readyState !== WebSocket.OPEN) return;
-      const player = playerRef.current;
-      if (!player || !player.position) return;
-      const position = player.position;
-      const rotationY = typeof player.rotation?.y === "number" ? player.rotation.y : 0;
-      const animation = player.userData?.currentAnimation || null;
-      const payload = {
-        type: "state:update",
-        position: {
-          x: position.x,
-          y: position.y || 0,
-          z: position.z
-        },
-        rotation: { y: rotationY },
-        animation: animation || null
-      };
-      try {
-        socket.send(JSON.stringify(payload));
-      } catch (_) {}
-    };
-
-    const interval = window.setInterval(sendState, 180);
-    sendState();
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [gameState, playerRef]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.__narutoMultiplayer = {
-      sessionId: sessionRef.current?.id || null,
-      otherPlayers: Array.from(otherPlayersRef.current.values()),
-      connectionStatus
-    };
-  }, [connectionStatus, otherPlayersTick]);
   const reportBootStatus = useCallback((stepId, status, payload) => {
     if (stepId !== 'squad') return;
     const fallbackRoster = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'];
@@ -314,7 +187,7 @@ const OpenWorldGame = () => {
     setGameReady(true);
   }, []);
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef, remotePlayersApi } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: handleSceneReady, worldState, timeOfDayHours, reportBootStatus });
+  const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: handleSceneReady, worldState, timeOfDayHours, reportBootStatus });
   const musicWasPlayingRef = useRef(false);
   const [showNpcDialog, setShowNpcDialog] = useState(false);
   const [npcDialogData, setNpcDialogData] = useState(null);
@@ -360,195 +233,6 @@ const OpenWorldGame = () => {
       window.removeEventListener("open-npc-dialog", openNpc);
     };
   }, []);
-  const clearHeartbeat = useCallback(() => {
-    if (heartbeatTimerRef.current) {
-      clearInterval(heartbeatTimerRef.current);
-      heartbeatTimerRef.current = null;
-    }
-  }, []);
-
-  const sendHeartbeat = useCallback((sessionId) => {
-    if (!sessionId || typeof fetch === "undefined") return;
-    try {
-      fetch(`/api/session/${sessionId}/heartbeat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ timestamp: Date.now() })
-      }).catch(() => {});
-    } catch (_) {}
-  }, []);
-
-  const startHeartbeat = useCallback((sessionInfo) => {
-    clearHeartbeat();
-    const id = sessionInfo?.sessionId || sessionRef.current?.id;
-    if (!id) return;
-    sendHeartbeat(id);
-    const rawInterval = Number(sessionInfo?.refreshIn);
-    const intervalMs = Math.max(10_000, Math.min(Number.isFinite(rawInterval) && rawInterval > 0 ? rawInterval : 30_000, 90_000));
-    heartbeatTimerRef.current = setInterval(() => sendHeartbeat(id), intervalMs);
-  }, [clearHeartbeat, sendHeartbeat, sessionRef]);
-
-  const requestSessionSlot = useCallback(async () => {
-    if (sessionRef.current?.id) {
-      return { sessionId: sessionRef.current.id };
-    }
-    if (typeof fetch === "undefined") {
-      throw new Error("Session services unavailable in this environment.");
-    }
-
-    let response;
-    try {
-      response = await fetch("/api/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ts: Date.now() })
-      });
-    } catch (error) {
-      throw new Error("Unable to reach the session server. Please try again.");
-    }
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch (_) {}
-
-    if (response.status === 429) {
-      throw new Error(data.message || "Server is full. Please try again later.");
-    }
-
-    if (!response.ok || !data.sessionId) {
-      throw new Error(data.message || "Unable to reserve a player slot. Please try again.");
-    }
-
-    sessionRef.current = { id: data.sessionId, characterKey: null };
-    setSessionError(null);
-    startHeartbeat(data);
-    if (Array.isArray(data.takenCharacters)) {
-      setTakenCharacters(data.takenCharacters);
-    }
-    return data;
-  }, [sessionRef, setSessionError, startHeartbeat, setTakenCharacters]);
-
-  const refreshTakenCharacters = useCallback(async () => {
-    if (typeof fetch === "undefined") return;
-    const sessionId = sessionRef.current?.id;
-    const query = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : "";
-    try {
-      const response = await fetch(`/api/session${query}`, {
-        method: "GET",
-        headers: { "Cache-Control": "no-store" }
-      });
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (_) {}
-      if (Array.isArray(data?.takenCharacters)) {
-        setTakenCharacters(data.takenCharacters);
-      }
-    } catch (_) {}
-  }, [setTakenCharacters, sessionRef]);
-
-  const claimCharacterSlot = useCallback(async (characterKey, characterName) => {
-    const sessionId = sessionRef.current?.id;
-    if (!sessionId) {
-      throw new Error("Session expired. Please return to the main menu and try again.");
-    }
-    if (typeof fetch === "undefined") {
-      throw new Error("Character services are unavailable in this environment.");
-    }
-
-    let response;
-    try {
-      response = await fetch(`/api/session/${sessionId}/character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ characterKey, characterName })
-      });
-    } catch (_) {
-      throw new Error("Unable to contact the server. Please try again.");
-    }
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch (_) {}
-
-    if (!response.ok) {
-      const message = data?.message || (response.status === 409
-        ? "That shinobi is already deployed. Please choose another."
-        : "Unable to claim that shinobi. Please try again.");
-      const error = new Error(message);
-      error.code = data?.code || response.status;
-      throw error;
-    }
-
-    sessionRef.current = { ...(sessionRef.current || {}), id: sessionId, characterKey };
-    if (Array.isArray(data?.takenCharacters)) {
-      setTakenCharacters(data.takenCharacters);
-    }
-    return data;
-  }, [sessionRef, setTakenCharacters]);
-
-  const releaseSession = useCallback(async (reason = "user_exit") => {
-    const currentId = sessionRef.current?.id;
-    if (!currentId) return;
-    sessionRef.current = { id: null };
-    clearHeartbeat();
-    if (wsRef.current) {
-      try {
-        wsRef.current.close(4000, reason);
-      } catch (_) {}
-      wsRef.current = null;
-    }
-    if (typeof fetch === "undefined") return;
-    try {
-      await fetch(`/api/session/${currentId}/release`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason, timestamp: Date.now() })
-      });
-    } catch (_) {}
-    setTakenCharacters([]);
-    setCharacterSelectError(null);
-    setConnectionStatus({ state: "idle", message: "Offline" });
-  }, [clearHeartbeat, sessionRef, setTakenCharacters, setCharacterSelectError]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handleUnload = () => {
-      const currentId = sessionRef.current?.id;
-      if (!currentId) return;
-      try {
-        const payload = JSON.stringify({ reason: "page_unload", timestamp: Date.now() });
-        if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
-          navigator.sendBeacon(`/api/session/${currentId}/release`, payload);
-        }
-      } catch (_) {}
-    };
-    window.addEventListener("beforeunload", handleUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleUnload);
-    };
-  }, [sessionRef]);
-
-  useEffect(() => {
-    return () => {
-      releaseSession("component_unmount");
-    };
-  }, [releaseSession]);
-
-  useEffect(() => {
-    if (gameState === "MainMenu") {
-      releaseSession("return_to_menu");
-    }
-  }, [gameState, releaseSession]);
-
-  useEffect(() => {
-    if (gameState === "MainMenu") {
-      setConnectionStatus({ state: "idle", message: "Offline" });
-    }
-  }, [gameState]);
-
   const getInitialLoadingSteps = React.useCallback(() => ([
     {
       id: 'prefetch',
@@ -582,39 +266,14 @@ const OpenWorldGame = () => {
     }
   ]), []);
 
-  const handleStartGameRequest = useCallback(async () => {
-    if (isClaimingSession) return;
-    setSessionError(null);
-    setCharacterSelectError(null);
-    setConnectionStatus({ state: "reserving", message: "Reserving player slot…" });
-    setIsClaimingSession(true);
-    try {
-      await requestSessionSlot();
-      await refreshTakenCharacters();
-      setConnectionStatus({ state: "reserved", message: "Slot reserved • choose your shinobi" });
-      setLoadingSteps(getInitialLoadingSteps());
-      setLoadingProgress(0);
-      setGameReady(false);
-      setCharacterChoice(selectedCharacterKey);
-      setGameState("Loading");
-      setShowCharacterSelect(true);
-    } catch (error) {
-      console.error("Failed to reserve session slot", error);
-      setLoadingSteps([]);
-      setLoadingProgress(0);
-      setGameState("MainMenu");
-      const message = error instanceof Error ? error.message : "Unable to reserve a player slot. Please try again.";
-      setSessionError(message);
-      setConnectionStatus({ state: "error", message });
-    } finally {
-      setIsClaimingSession(false);
-    }
-  }, [getInitialLoadingSteps, isClaimingSession, refreshTakenCharacters, requestSessionSlot, selectedCharacterKey, setShowCharacterSelect]);
-
-  useEffect(() => {
-    if (!showCharacterSelect) return;
-    refreshTakenCharacters();
-  }, [refreshTakenCharacters, showCharacterSelect]);
+  const handleStartGameRequest = useCallback(() => {
+    setLoadingSteps(getInitialLoadingSteps());
+    setLoadingProgress(0);
+    setGameReady(false);
+    setCharacterChoice(selectedCharacterKey);
+    setGameState("Loading");
+    setShowCharacterSelect(true);
+  }, [getInitialLoadingSteps, selectedCharacterKey]);
 
   const runGameLoading = useCallback(async (characterKey) => {
     setSelectedCharacterKey(characterKey);
@@ -683,24 +342,6 @@ const OpenWorldGame = () => {
 
   const handleCharacterConfirm = useCallback(async () => {
     const chosen = getCharacterByKey(characterChoice);
-    if (!chosen) {
-      setCharacterSelectError("Select a shinobi to continue.");
-      return;
-    }
-
-    try {
-      await claimCharacterSlot(chosen.key, chosen.name);
-      setCharacterSelectError(null);
-      setConnectionStatus({ state: "connecting", message: "Connecting to multiplayer…" });
-    } catch (error) {
-      console.error('Failed to claim character slot', error);
-      const message = error instanceof Error ? error.message : 'Unable to deploy that shinobi right now.';
-      setCharacterSelectError(message);
-      await refreshTakenCharacters();
-      setConnectionStatus({ state: "reserved", message: "Slot reserved • choose another shinobi" });
-      return;
-    }
-
     const identity = setPlayerIdentity(chosen);
     setCharacterChoice(identity.key);
     setPlayerStats(ensureExperienceConsistency(buildStatsForCharacter(identity.key)));
@@ -714,10 +355,8 @@ const OpenWorldGame = () => {
       setLoadingProgress(0);
       setLoadingSteps([]);
       setGameState('MainMenu');
-      setSessionError('Failed to start game. Please try again.');
-      releaseSession('start_failed');
     }
-  }, [characterChoice, claimCharacterSlot, refreshTakenCharacters, releaseSession, runGameLoading]);
+  }, [characterChoice, runGameLoading]);
 
   const handleCharacterCancel = useCallback(() => {
     setShowCharacterSelect(false);
@@ -725,30 +364,9 @@ const OpenWorldGame = () => {
     setLoadingSteps([]);
     setLoadingProgress(0);
     setGameState("MainMenu");
-    setCharacterSelectError(null);
-    setConnectionStatus({ state: "idle", message: "Offline" });
-    releaseSession("selection_cancelled");
-  }, [releaseSession, selectedCharacterKey]);
-  const remotePlayerCount = otherPlayersRef.current.size;
-  const remotePlayerSummary = remotePlayerCount === 0 ? "No squadmates connected" : remotePlayerCount === 1 ? "1 squadmate connected" : `${remotePlayerCount} squadmates connected`;
-  const connectionBadgeClass = (() => {
-    switch (connectionStatus.state) {
-      case "connected":
-        return "bg-emerald-600/80 border-emerald-300/60";
-      case "connecting":
-      case "reserving":
-      case "reserved":
-        return "bg-amber-600/80 border-amber-300/60";
-      case "disconnected":
-        return "bg-gray-700/80 border-gray-400/50";
-      case "error":
-        return "bg-red-700/80 border-red-300/60";
-      default:
-        return "bg-slate-700/80 border-slate-500/60";
-    }
-  })();
+  }, [selectedCharacterKey]);
   return /* @__PURE__ */ jsxDEV("div", { className: "relative w-full h-screen overflow-hidden bg-black", children: [
-    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGameRequest, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true), startPending: isClaimingSession, startDisabled: isClaimingSession, serverMessage: sessionError }, void 0, false, {
+    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGameRequest, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true) }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 54,
       columnNumber: 9
@@ -760,28 +378,7 @@ const OpenWorldGame = () => {
       lineNumber: 55,
       columnNumber: 9
     }),
-    gameState !== "MainMenu" && connectionStatus.state !== "idle" && /* @__PURE__ */ jsxDEV("div", { className: `absolute top-4 right-4 z-50 flex flex-col gap-1 rounded-xl border px-4 py-3 text-sm text-white shadow-xl backdrop-blur ${connectionBadgeClass}`, children: [
-      /* @__PURE__ */ jsxDEV("div", { className: "text-xs uppercase tracking-wider opacity-80", children: "Multiplayer" }, void 0, false, {
-        fileName: "<stdin>",
-        lineNumber: 56,
-        columnNumber: 11
-      }),
-      /* @__PURE__ */ jsxDEV("p", { className: "font-semibold", children: connectionStatus.message }, void 0, false, {
-        fileName: "<stdin>",
-        lineNumber: 57,
-        columnNumber: 11
-      }),
-      /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-white/80", children: remotePlayerSummary }, void 0, false, {
-        fileName: "<stdin>",
-        lineNumber: 58,
-        columnNumber: 11
-      })
-    ] }, void 0, false, {
-      fileName: "<stdin>",
-      lineNumber: 55,
-      columnNumber: 9
-    }),
-    gameState === "Loading" && showCharacterSelect && /* @__PURE__ */ jsxDEV(CharacterSelectModal, { options: PLAYER_CHARACTERS, selectedKey: characterChoice, lockedKeys: takenCharacters, errorMessage: characterSelectError, onSelect: (key) => setCharacterChoice(key), onConfirm: handleCharacterConfirm, onCancel: handleCharacterCancel }, void 0, false, {
+    gameState === "Loading" && showCharacterSelect && /* @__PURE__ */ jsxDEV(CharacterSelectModal, { options: PLAYER_CHARACTERS, selectedKey: characterChoice, onSelect: (key) => setCharacterChoice(key), onConfirm: handleCharacterConfirm, onCancel: handleCharacterCancel }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 56,
       columnNumber: 9

@@ -97,16 +97,7 @@ const STATIC_SHOWCASE_IMAGES = (() => {
   results.sort((a, b) => a.name.localeCompare(b.name));
   return results;
 })();
-const MainMenu = ({
-  onStart,
-  onOptions,
-  onChangelog,
-  onCredits,
-  version,
-  startDisabled = false,
-  startPending = false,
-  serverMessage = null
-}) => {
+const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showMapModal, setShowMapModal] = React.useState(false);
   const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
@@ -375,9 +366,6 @@ const MainMenu = ({
     mapModalWasOpenRef.current = showMapModal;
   }, [showMapModal]);
 
-  const isStartDisabled = Boolean(startDisabled || startPending);
-  const startButtonLabel = startPending ? "Connecting..." : "Start Game";
-
   return /* @__PURE__ */ jsxDEV(
     "div",
     {
@@ -416,9 +404,8 @@ const MainMenu = ({
               "button",
               {
                 onClick: onStart,
-                disabled: isStartDisabled,
-                className: `bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform transition-all duration-200 ${isStartDisabled ? "opacity-60 cursor-not-allowed" : "hover:scale-105"}`,
-                children: startButtonLabel
+                className: "bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200",
+                children: "Start Game"
               },
               void 0,
               false,
@@ -428,11 +415,6 @@ const MainMenu = ({
                 columnNumber: 21
               }
             ),
-            serverMessage && /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-red-200 text-center", role: "status", "aria-live": "polite", children: serverMessage }, void 0, false, {
-              fileName: "<stdin>",
-              lineNumber: 42,
-              columnNumber: 21
-            }),
             /* @__PURE__ */ jsxDEV(
               "button",
               {
