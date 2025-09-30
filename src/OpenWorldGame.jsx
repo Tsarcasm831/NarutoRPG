@@ -36,6 +36,7 @@ import { useGameTime } from "./hooks/useGameTime.js";
 import CharacterSelectModal from "./components/UI/CharacterSelectModal.jsx";
 import { PLAYER_CHARACTERS, getCharacterByKey, getDefaultCharacter, buildStatsForCharacter, buildInventoryForCharacter } from "./game/player/characterCatalog.js";
 import { setPlayerIdentity } from "./game/player/identity.js";
+import { multiplayerManager } from "./network/multiplayerManager.js";
 const VERSION_PREFIX = "v";
 const OVERRIDE_VERSION = null;
 const OpenWorldGame = () => {
@@ -83,6 +84,16 @@ const OpenWorldGame = () => {
   useEffect(() => {
     setPlayerIdentity(defaultCharacter);
   }, [defaultCharacter]);
+  useEffect(() => {
+    let cleaned = false;
+    multiplayerManager.connect();
+    return () => {
+      if (!cleaned) {
+        cleaned = true;
+        multiplayerManager.cleanup();
+      }
+    };
+  }, []);
   const [playerStats, setPlayerStats] = useState(() => ensureExperienceConsistency(buildStatsForCharacter(defaultCharacter.key)));
   const [inventory, setInventory] = useState(() => buildInventoryForCharacter(defaultCharacter.key));
   const [playerPosition, setPlayerPosition] = useState({ x: 0, z: 0 });
@@ -188,6 +199,37 @@ const OpenWorldGame = () => {
   }, []);
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef } = useThreeScene({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying: gameState === "Playing", onReady: handleSceneReady, worldState, timeOfDayHours, reportBootStatus });
+  useEffect(() => {
+    const identity = getCharacterByKey(selectedCharacterKey);
+    multiplayerManager.setIdentity(identity.key, identity.name);
+  }, [selectedCharacterKey]);
+  useEffect(() => {
+    if (gameState !== "Playing") {
+      return;
+    }
+
+    let cancelled = false;
+    let frameId = null;
+
+    const attemptRegister = () => {
+      if (cancelled) return;
+      const player = playerRef.current;
+      if (!player || !player.userData?.assetsReady) {
+        frameId = requestAnimationFrame(attemptRegister);
+        return;
+      }
+
+      const identity = getCharacterByKey(selectedCharacterKey);
+      multiplayerManager.registerLocalPlayer(player, identity.key, identity.name);
+    };
+
+    frameId = requestAnimationFrame(attemptRegister);
+
+    return () => {
+      cancelled = true;
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, [gameState, selectedCharacterKey, playerRef]);
   const musicWasPlayingRef = useRef(false);
   const [showNpcDialog, setShowNpcDialog] = useState(false);
   const [npcDialogData, setNpcDialogData] = useState(null);

@@ -1,0 +1,63 @@
+Naruto-canonical folder index
+
+01_NatureRelease/Wind/
+  - Wind.txt : 0 entries
+01_NatureRelease/Lightning/
+  - Lightning.txt : 0 entries
+01_NatureRelease/Earth/
+  - Earth.txt : 0 entries
+01_NatureRelease/Fire/
+  - Fire.txt : 0 entries
+01_NatureRelease/Water/
+  - Water.txt : 0 entries
+02_KekkeiGenkai/Magnet/
+  - Magnet.txt : 7 entries
+02_KekkeiGenkai/Wood/
+  - Wood.txt : 0 entries
+02_KekkeiGenkai/Boil_Steam/
+  - Boil-Steam.txt : 5 entries
+02_KekkeiGenkai/Sand/
+  - Sand.txt : 0 entries
+02_KekkeiGenkai/Ice/
+  - Ice.txt : 0 entries
+02_KekkeiGenkai/Lava/
+  - Lava.txt : 0 entries
+02_KekkeiGenkai/Crystal/
+  - Crystal.txt : 0 entries
+03_JutsuTypes/Taijutsu/
+  - Physical-Taijutsu.txt : 54 entries
+  - Taijutsu.txt : 0 entries
+03_JutsuTypes/Summoning/
+  - Summoning.txt : 11 entries
+03_JutsuTypes/Rinnegan_Paths/
+  - Paths-Rinnegan.txt : 20 entries
+  - Rinnegan_Paths.txt : 1 entries
+03_JutsuTypes/Yin_Yang/
+  - Yin-Yang.txt : 14 entries
+  - Yin_Yang.txt : 0 entries
+03_JutsuTypes/Genjutsu/
+  - Genjutsu.txt : 0 entries
+03_JutsuTypes/Chakra_Techniques/
+  - Chakra-Techniques.txt : 59 entries
+  - Chakra_Techniques.txt : 1 entries
+03_JutsuTypes/Sealing/
+  - Sealing.txt : 2 entries
+04_Specializations/Insect/
+  - Insect-Bug.txt : 41 entries
+  - Insect.txt : 0 entries
+04_Specializations/Paper/
+  - Paper.txt : 0 entries
+04_Specializations/Space_Time/
+  - Space-Time.txt : 9 entries
+  - Space_Time.txt : 0 entries
+04_Specializations/Sound/
+  - Sound.txt : 1 entries
+04_Specializations/Poison/
+  - Poison-Toxin.txt : 5 entries
+  - Poison.txt : 0 entries
+04_Specializations/Explosion/
+  - Explosion.txt : 0 entries
+99_Misc/Other/
+  - Other.txt : 491 entries
+
+TOTAL ENTRIES: 721

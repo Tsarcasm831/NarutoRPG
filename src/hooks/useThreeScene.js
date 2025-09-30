@@ -6,6 +6,7 @@ import { updateObjects } from '../game/objects.js';
 import { startAnimationLoop } from '../scene/animationLoop.js';
 import { initThreeScene, cleanupThreeScene } from './sceneLifecycle.js';
 import { applyDayNightCycle } from '../scene/dayNightCycle.js';
+import { multiplayerManager } from '../network/multiplayerManager.js';
 
 export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPosition, settings, setWorldObjects, isPlaying, onReady, worldState, timeOfDayHours, reportBootStatus }) => {
     const sceneRef = useRef(null);
@@ -93,6 +94,9 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             return;
         }
         initialize();
+        if (sceneRef.current) {
+            multiplayerManager.attachScene(sceneRef.current);
+        }
 
         // start main loop
         animationStopRef.current = startAnimationLoop({
@@ -137,6 +141,10 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
             timeOfDayHours
         });
     }, [timeOfDayHours]);
+
+    useEffect(() => {
+        multiplayerManager.setSettings(settings);
+    }, [settings]);
 
     // Settings updates (no full reinit)
     useEffect(() => {
@@ -409,5 +417,5 @@ export const useThreeScene = ({ mountRef, keysRef, joystickRef, setPlayerPositio
     // @tweakable maximum camera zoom multiplier (applies to wheel, pinch, and sensitivity calcs)
     const MAX_CAMERA_ZOOM = 50;
 
-    return { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef };
+    return { playerRef, zoomRef, cameraOrbitRef, cameraPitchRef, sceneRef };
 };

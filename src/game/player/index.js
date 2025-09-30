@@ -32,11 +32,21 @@ function gridLabelToWorld(label, worldSize, cellSize = 5) {
  * @param {function} onReady - Callback when player is ready.
  * @returns {THREE.Group} The player group object.
  */
-export function createPlayer(scene, settings, onReady) {
+export function createPlayer(scene, settings, onReady, options = {}) {
     const player = new THREE.Group();
-    // Spawn the player at grid LF315 (center of that cell)
-    const { x, z } = gridLabelToWorld('LF315', WORLD_SIZE, 5);
-    player.position.set(x, 0, z);
+    const opts = options || {};
+    const spawnPosition = opts.spawnPosition;
+    const spawnLabel = typeof opts.spawnLabel === 'string' ? opts.spawnLabel : 'LF315';
+    if (spawnPosition && typeof spawnPosition === 'object') {
+        const sx = Number(spawnPosition.x ?? spawnPosition[0] ?? 0);
+        const sy = Number(spawnPosition.y ?? spawnPosition[1] ?? 0);
+        const sz = Number(spawnPosition.z ?? spawnPosition[2] ?? 0);
+        player.position.set(sx, sy, sz);
+    } else {
+        // Spawn the player at grid LF315 (center of that cell) by default
+        const { x, z } = gridLabelToWorld(spawnLabel, WORLD_SIZE, 5);
+        player.position.set(x, 0, z);
+    }
 
     // Add custom properties for physics and state
     player.userData.velocity = new THREE.Vector3(0, 0, 0);
@@ -48,9 +58,18 @@ export function createPlayer(scene, settings, onReady) {
     player.userData.jumpListener = null;
     // New: lock flag to prevent animation changes during one-shot actions (e.g., attack)
     player.userData.actionLocked = false;
+    player.userData.peerId = opts.peerId || null;
+    player.userData.isRemote = opts.isLocal === false;
+    player.userData.identityKey = opts.identity?.key || opts.identityKey || getPlayerIdentity()?.key || null;
+    player.userData.displayName = opts.identity?.name || opts.displayName || getPlayerIdentity()?.name || null;
+    player.userData.assetsReady = false;
+    if (typeof opts.displayName === 'string') {
+        player.name = opts.displayName;
+    }
 
-    loadPlayerAssets().then(({ model, animations, defaultAnimation }) => {
-        const identity = getPlayerIdentity();
+    const identityOverride = opts.identity || null;
+    loadPlayerAssets(identityOverride).then(({ model, animations, defaultAnimation }) => {
+        const identity = identityOverride || getPlayerIdentity();
         const scale = identity?.scale || 2.8;
         model.scale.set(scale, scale, scale);
         model.traverse(function (child) {
@@ -71,13 +90,17 @@ export function createPlayer(scene, settings, onReady) {
             const clip = animations[name];
             player.userData.animations[name] = mixer.clipAction(clip);
         }
-        
+
         const initialAnimation = animations[defaultAnimation] ? defaultAnimation : DEFAULT_ANIMATION;
         player.userData.defaultAnimation = initialAnimation;
         playAnimation(player, initialAnimation);
 
         // Notify scene/game that the player (critical asset) is ready
+        player.userData.assetsReady = true;
         try { onReady && onReady(); } catch (_) {}
+        if (typeof opts.onModelLoaded === 'function') {
+            try { opts.onModelLoaded(player); } catch (_) {}
+        }
     }).catch(error => {
         console.error('Error creating player:', error);
         // Fallback to a cylinder if model fails to load
@@ -90,9 +113,13 @@ export function createPlayer(scene, settings, onReady) {
         scene.add(player);
 
         // Even on fallback, signal readiness so the game can proceed
+        player.userData.assetsReady = true;
+        if (typeof opts.onModelLoaded === 'function') {
+            try { opts.onModelLoaded(player); } catch (_) {}
+        }
         try { onReady && onReady(); } catch (_) {}
     });
-    
+
     return player;
 }
 

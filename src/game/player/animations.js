@@ -53,8 +53,8 @@ const pickDefaultAnimation = (animations, preferred) => {
  * Loads the active player character model and animations based on the runtime identity.
  * @returns {Promise<{model: THREE.Group, animations: Object, defaultAnimation: string}>}
  */
-export async function loadPlayerAssets() {
-    const character = getPlayerIdentity();
+export async function loadPlayerAssets(identityOverride = null) {
+    const character = identityOverride || getPlayerIdentity();
     if (!character) {
         throw new Error('Player identity not set before loading assets.');
     }

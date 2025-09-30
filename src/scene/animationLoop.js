@@ -2,6 +2,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 import { updatePlayer } from '../game/player/index.js';
 import { updateWanderFree } from '/src/game/npcs/behaviors/wanderFree.js';
 import { INTERACTION_DISTANCE } from '../game/constants.js';
+import { multiplayerManager } from '../network/multiplayerManager.js';
 
 /**
  * Starts the main animation loop and returns a stop() function.
@@ -388,6 +389,12 @@ export function startAnimationLoop({
             // NEW: pass first-person ref
             firstPersonRef
         );
+
+        try {
+            multiplayerManager.update(delta, timestamp);
+        } catch (err) {
+            console.error('[Multiplayer] update() failed:', err);
+        }
 
         rendererRef.current.render(sceneRef.current, cameraRef.current);
     }

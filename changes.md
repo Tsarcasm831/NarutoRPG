@@ -1,4 +1,5 @@
 Recent
+- Multiplayer: Wired the main world into Websim presence so other players spawn with synced movement, rotation, and character identity; index.html now loads the WebsimSocket client script.
 - Main Menu: Added a Showcase gallery modal that surfaces src/assets/images/showcase/ images (auto-detected, no manifest needed) and opens them full size.
 - Neji: Force his model materials to write depth so the ground no longer shows through.
 - NPC Dialog: Use local mugshots for Neji and Orochimaru during interactions instead of remote URLs.
