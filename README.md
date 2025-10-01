@@ -74,7 +74,7 @@ An in‑browser Naruto‑inspired open‑world prototype built with React and Th
 - No bundler required. The app uses ESM via CDN (`esm.sh`) and `@babel/standalone` for JSX during development.
 - A real static server is recommended so fetches and the Cache API work. Python’s `http.server` is sufficient.
 - Some assets are cross‑origin; the loader uses `no-cors` where needed and warms the HTTP cache.
-- Version label is derived from the page title token (e.g., `v0.011.000`) or the top changelog entry.
+- Version label is derived from the page title token (e.g., `v0.012`) or the top changelog entry.
 - Recent changes are visible in the in‑game Changelog panel.
 
 ### Changelog & Versioning (for contributors)
