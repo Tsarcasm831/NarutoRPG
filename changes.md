@@ -1,4 +1,5 @@
 Recent
+- Changelog: Published v0.012 entry with synced multiplayer updates and trimmed trailing .000 from version labels.
 - Main Menu: Added a read-only Planned Improvements modal sourced from a 50-item roadmap checklist.
 - Multiplayer: Wired the main world into Websim presence so other players spawn with synced movement, rotation, and character identity; index.html now loads the WebsimSocket client script.
 - Main Menu: Added a Showcase gallery modal that surfaces src/assets/images/showcase/ images (auto-detected, no manifest needed) and opens them full size.

@@ -24,7 +24,20 @@ const LATEST_VERSION = deriveLatestVersion();
 
 // Keep newest entry first so OpenWorldGame can read the latest version
 export const changelogData = [
-  // Today (new): 2025-09-27
+  {
+    version: "0.012",
+    date: "2025-10-05",
+    changes: [
+      "Main Menu: Added shinobi picker alongside new Showcase gallery and Planned Improvements modal.",
+      "Multiplayer: Synced party spawns/movement through Websim presence so friends load into the same world.",
+      "NPCs: Introduced Orochimaru and Neji with expanded wander/dialog flows and local mugshots.",
+      "Movement/Collision: Tightened strafe displacement, scaled actors, and matched FPV eye height to new proportions.",
+      "Loading: Spawn squadmates together, keep pointer lock during dialog, and streamline the progress overlay.",
+      "Audio: Added the 'Akatsuki Theme' to the background music rotation.",
+      "Docs: Expanded README guidance covering setup, features, and contributor workflow."
+    ]
+  },
+  // Previous (kept intact): 2025-09-27
   {
     version: "0.011.000",
     date: "2025-09-27",
