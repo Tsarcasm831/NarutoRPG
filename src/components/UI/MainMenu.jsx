@@ -1,5 +1,6 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
+import { plannedImprovementStats, plannedImprovements } from "../../data/plannedImprovements.js";
 const MAP_EDITOR_URL = "map/index.html";
 const MAP_BUTTON_LABEL = "Map Editor";
 const MAP_MODAL_WIDTH_PCT = 98;
@@ -102,6 +103,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
   const [showShowcase, setShowShowcase] = React.useState(false);
+  const [showPlannedImprovements, setShowPlannedImprovements] = React.useState(false);
   const [showcaseImages, setShowcaseImages] = React.useState(() => STATIC_SHOWCASE_IMAGES);
   const [isLoadingShowcase, setIsLoadingShowcase] = React.useState(false);
   const [showcaseError, setShowcaseError] = React.useState(null);
@@ -110,10 +112,29 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const mapModalContentRef = React.useRef(null);
   const previouslyFocusedElementRef = React.useRef(null);
   const showcaseButtonRef = React.useRef(null);
+  const plannedImprovementsButtonRef = React.useRef(null);
+  const plannedImprovementsCloseButtonRef = React.useRef(null);
+  const plannedImprovementsModalContentRef = React.useRef(null);
+  const plannedImprovementsPreviouslyFocusedElementRef = React.useRef(null);
   const showcaseCloseButtonRef = React.useRef(null);
   const showcaseModalContentRef = React.useRef(null);
   const showcasePreviouslyFocusedElementRef = React.useRef(null);
   const hasAttemptedDynamicShowcaseFetchRef = React.useRef(STATIC_SHOWCASE_IMAGES.length > 0);
+  const groupedPlannedImprovements = React.useMemo(() => {
+    const groups = new Map();
+    for (const item of plannedImprovements) {
+      const key = item.category || "Misc";
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(item);
+    }
+    return Array.from(groups.entries());
+  }, []);
+  const plannedImprovementsCompletionPct = React.useMemo(() => {
+    if (!plannedImprovementStats.total) return 0;
+    return Math.round((plannedImprovementStats.completed / plannedImprovementStats.total) * 100);
+  }, []);
   React.useEffect(() => {
     if (!showMapModal || !mapModalContentRef.current) return;
     const modalNode = mapModalContentRef.current;
@@ -350,13 +371,17 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
         setShowShowcase(false);
         return;
       }
+      if (showPlannedImprovements) {
+        setShowPlannedImprovements(false);
+        return;
+      }
       if (showHints) {
         setShowHints(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [showMapModal, showWelcome, showShowcase, showHints]);
+  }, [showMapModal, showWelcome, showShowcase, showPlannedImprovements, showHints]);
   React.useEffect(() => {
     if (showMapModal) {
       if (mapCloseButtonRef.current) mapCloseButtonRef.current.focus();
@@ -365,6 +390,65 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     }
     mapModalWasOpenRef.current = showMapModal;
   }, [showMapModal]);
+  React.useEffect(() => {
+    if (!showPlannedImprovements || !plannedImprovementsModalContentRef.current) {
+      return;
+    }
+    const modalNode = plannedImprovementsModalContentRef.current;
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      plannedImprovementsPreviouslyFocusedElementRef.current = activeElement;
+    } else {
+      plannedImprovementsPreviouslyFocusedElementRef.current = null;
+    }
+    if (plannedImprovementsCloseButtonRef.current) {
+      plannedImprovementsCloseButtonRef.current.focus();
+    }
+    const focusableSelectors = "button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex='-1'])";
+    const getFocusableElements = () => {
+      return Array.from(modalNode.querySelectorAll(focusableSelectors)).filter((element) => {
+        if (element.hasAttribute("disabled")) return false;
+        if (element.getAttribute("tabindex") === "-1") return false;
+        return element.getAttribute("aria-hidden") !== "true";
+      });
+    };
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") return;
+      const focusableElements = getFocusableElements();
+      if (!focusableElements.length) {
+        event.preventDefault();
+        return;
+      }
+      if (focusableElements.length === 1) {
+        event.preventDefault();
+        focusableElements[0].focus();
+        return;
+      }
+      const [firstElement] = focusableElements;
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const currentFocus = document.activeElement;
+      if (event.shiftKey) {
+        if (currentFocus === firstElement || !modalNode.contains(currentFocus)) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        return;
+      }
+      if (currentFocus === lastElement || !modalNode.contains(currentFocus)) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+    modalNode.addEventListener("keydown", handleKeyDown);
+    return () => {
+      modalNode.removeEventListener("keydown", handleKeyDown);
+      const previousElement = plannedImprovementsPreviouslyFocusedElementRef.current;
+      if (previousElement && typeof previousElement.focus === "function") {
+        previousElement.focus();
+      }
+      plannedImprovementsPreviouslyFocusedElementRef.current = null;
+    };
+  }, [showPlannedImprovements]);
 
   return /* @__PURE__ */ jsxDEV(
     "div",
@@ -448,6 +532,22 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             /* @__PURE__ */ jsxDEV(
               "button",
               {
+                ref: plannedImprovementsButtonRef,
+                onClick: () => setShowPlannedImprovements(true),
+                className: "bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200",
+                children: "Planned Improvements"
+              },
+              void 0,
+              false,
+              {
+                fileName: "<stdin>",
+                lineNumber: 55,
+                columnNumber: 21
+              }
+            ),
+            /* @__PURE__ */ jsxDEV(
+              "button",
+              {
                 onClick: onCredits,
                 className: "bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200",
                 children: "Credits"
@@ -521,6 +621,125 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
             fileName: "<stdin>",
             lineNumber: 75,
             columnNumber: 13
+          }
+        ),
+        showPlannedImprovements && /* @__PURE__ */ jsxDEV(
+          "div",
+          {
+            className: "fixed inset-0 z-50 flex items-center justify-center",
+            role: "dialog",
+            "aria-modal": "true",
+            "aria-labelledby": "planned-improvements-title",
+            children: [
+              /* @__PURE__ */ jsxDEV(
+                "div",
+                {
+                  className: "absolute inset-0 bg-black/70",
+                  onClick: () => setShowPlannedImprovements(false)
+                },
+                void 0,
+                false,
+                {
+                  fileName: "<stdin>",
+                  lineNumber: 112,
+                  columnNumber: 17
+                }
+              ),
+              /* @__PURE__ */ jsxDEV(
+                "div",
+                {
+                  ref: plannedImprovementsModalContentRef,
+                  className: "relative bg-gray-900 text-white border-2 border-yellow-600 rounded-xl shadow-2xl w-[95vw] max-w-[720px] max-h-[85vh] p-6 overflow-y-auto",
+                  children: [
+                    /* @__PURE__ */ jsxDEV("div", { className: "flex items-start justify-between gap-4", children: [
+                      /* @__PURE__ */ jsxDEV("div", { children: [
+                        /* @__PURE__ */ jsxDEV("h2", { id: "planned-improvements-title", className: "text-yellow-400 font-bold text-xl", children: "Planned Improvements Roadmap" }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 121,
+                          columnNumber: 25
+                        }),
+                        /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-gray-300", children: `${plannedImprovementStats.completed} of ${plannedImprovementStats.total} tasks complete (${plannedImprovementsCompletionPct}%)` }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 122,
+                          columnNumber: 25
+                        }),
+                        /* @__PURE__ */ jsxDEV("div", { className: "mt-2 w-full h-3 rounded-full bg-gray-700", children: /* @__PURE__ */ jsxDEV("div", { className: "h-full rounded-full bg-yellow-500 transition-all", style: { width: `${plannedImprovementsCompletionPct}%` } }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 123,
+                          columnNumber: 27
+                        }) }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 123,
+                          columnNumber: 25
+                        })
+                      ] }, void 0, true, {
+                        fileName: "<stdin>",
+                        lineNumber: 120,
+                        columnNumber: 23
+                      }),
+                      /* @__PURE__ */ jsxDEV("button", { ref: plannedImprovementsCloseButtonRef, onClick: () => setShowPlannedImprovements(false), className: "text-red-400 hover:text-red-300 text-2xl font-bold", "aria-label": "Close planned improvements", children: "\xD7" }, void 0, false, {
+                        fileName: "<stdin>",
+                        lineNumber: 125,
+                        columnNumber: 23
+                      })
+                    ] }, void 0, true, {
+                      fileName: "<stdin>",
+                      lineNumber: 119,
+                      columnNumber: 21
+                    }),
+                    /* @__PURE__ */ jsxDEV("div", { className: "mt-4 space-y-6 text-sm", children: groupedPlannedImprovements.map(([category, items]) => /* @__PURE__ */ jsxDEV("section", { className: "space-y-2", children: [
+                      /* @__PURE__ */ jsxDEV("h3", { className: "text-yellow-300 font-semibold", children: category }, void 0, false, {
+                        fileName: "<stdin>",
+                        lineNumber: 130,
+                        columnNumber: 31
+                      }),
+                      /* @__PURE__ */ jsxDEV("ul", { className: "space-y-2", children: items.map((item) => /* @__PURE__ */ jsxDEV("li", { className: "flex items-start gap-3", children: [
+                        /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: item.completed, disabled: true, className: "mt-0.5 h-4 w-4 rounded border-gray-500 bg-gray-800" }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 133,
+                          columnNumber: 37
+                        }),
+                        /* @__PURE__ */ jsxDEV("span", { className: "text-gray-100 leading-snug", children: item.title }, void 0, false, {
+                          fileName: "<stdin>",
+                          lineNumber: 134,
+                          columnNumber: 37
+                        })
+                      ] }, item.id, true, {
+                        fileName: "<stdin>",
+                        lineNumber: 132,
+                        columnNumber: 35
+                      })) }, void 0, false, {
+                        fileName: "<stdin>",
+                        lineNumber: 131,
+                        columnNumber: 31
+                      })
+                    ] }, category, true, {
+                      fileName: "<stdin>",
+                      lineNumber: 129,
+                      columnNumber: 29
+                    })) }, void 0, false, {
+                      fileName: "<stdin>",
+                      lineNumber: 128,
+                      columnNumber: 21
+                    })
+                  ]
+                },
+                void 0,
+                true,
+                {
+                  fileName: "<stdin>",
+                  lineNumber: 116,
+                  columnNumber: 19
+                }
+              )
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "<stdin>",
+            lineNumber: 110,
+            columnNumber: 15
           }
         ),
         MAP_EDITOR_ENABLED && showMapModal && /* @__PURE__ */ jsxDEV(

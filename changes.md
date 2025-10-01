@@ -1,4 +1,5 @@
 Recent
+- Main Menu: Added a read-only Planned Improvements modal sourced from a 50-item roadmap checklist.
 - Multiplayer: Wired the main world into Websim presence so other players spawn with synced movement, rotation, and character identity; index.html now loads the WebsimSocket client script.
 - Main Menu: Added a Showcase gallery modal that surfaces src/assets/images/showcase/ images (auto-detected, no manifest needed) and opens them full size.
 - Neji: Force his model materials to write depth so the ground no longer shows through.
