@@ -1,4 +1,8 @@
 Recent
+- Loading UI: decouple progress updates into a shared store, smooth the bar, and tie minimum progress to completed stages for accurate feedback.
+- Assets: Precache local UI, map, and mugshot images during the loading phase to avoid refetches in later panels.
+- Loading: Track scene initialization as its own step and smooth progress updates through squad deployment.
+- Audio: Start the background score when the world finishes booting instead of during the loading screen.
 - Changelog: Published v0.012 entry with synced multiplayer updates and trimmed trailing .000 from version labels.
 - Main Menu: Added a read-only Planned Improvements modal sourced from a 50-item roadmap checklist.
 - Multiplayer: Wired the main world into Websim presence so other players spawn with synced movement, rotation, and character identity; index.html now loads the WebsimSocket client script.

@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useLoadingSnapshot } from "../../state/loadingStore.js";
+import { useSmoothProgress } from "../../hooks/useSmoothProgress.js";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -10,18 +12,54 @@ const getPrefersReducedMotion = () => {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 };
 
-const LoadingScreen = ({ progress, steps = [] }) => {
+const clampProgress = (value) => {
+  const numeric = typeof value === "string" ? parseFloat(value) : value;
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, Math.min(100, numeric));
+};
+
+const LoadingScreenComponent = ({ progress, steps }) => {
+  const snapshot = useLoadingSnapshot();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(getPrefersReducedMotion);
 
-  const clampedProgress = useMemo(() => {
-    const numeric = typeof progress === "string" ? parseFloat(progress) : progress;
-    if (!Number.isFinite(numeric)) {
-      return 0;
-    }
-    return Math.max(0, Math.min(100, Math.round(numeric)));
-  }, [progress]);
+  const effectiveProgress = progress != null ? progress : snapshot.progress;
+  const stepList = useMemo(() => {
+    if (steps != null) return Array.isArray(steps) ? steps : [];
+    return Array.isArray(snapshot.steps) ? snapshot.steps : [];
+  }, [steps, snapshot.steps]);
 
-  const stepList = useMemo(() => (Array.isArray(steps) ? steps : []), [steps]);
+  const derivedProgress = useMemo(() => {
+    if (!Array.isArray(stepList) || stepList.length === 0) return 0;
+    let progressUnits = 0;
+    for (let i = 0; i < stepList.length; i += 1) {
+      const status = stepList[i]?.status;
+      if (status === 'done' || status === 'error') {
+        progressUnits += 1;
+        continue;
+      }
+      if (status === 'active') {
+        progressUnits += 0.4;
+      }
+      break;
+    }
+    const frac = progressUnits / stepList.length;
+    return Math.max(0, Math.min(100, Math.round(frac * 100)));
+  }, [stepList]);
+
+  const targetProgress = useMemo(() => {
+    const numeric = clampProgress(effectiveProgress);
+    return Math.max(numeric, derivedProgress);
+  }, [effectiveProgress, derivedProgress]);
+
+  const smoothedProgress = useSmoothProgress(targetProgress, {
+    immediate: prefersReducedMotion,
+    minStep: 1.2,
+    smoothingFactor: 0.25,
+    settleThreshold: 0.5
+  });
+
+  const clampedProgress = useMemo(() => Math.round(clampProgress(smoothedProgress)), [smoothedProgress]);
+
   const activeStep = useMemo(() => {
     if (!stepList.length) return null;
     return stepList.find((step) => step?.status === "active") || stepList.find((step) => step?.status === "pending");
@@ -159,6 +197,9 @@ const LoadingScreen = ({ progress, steps = [] }) => {
     )
   );
 };
+
+const LoadingScreen = React.memo(LoadingScreenComponent);
+LoadingScreen.displayName = "LoadingScreen";
 
 export default LoadingScreen;
 export { LoadingScreen };

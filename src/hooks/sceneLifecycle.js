@@ -30,6 +30,112 @@ export function initThreeScene({
 }) {
   if (!mountRef.current) return;
 
+  reportBootStatus?.('scene', 'active', { stage: 'Mounting renderer and scene graph...' });
+
+  let initPackage;
+  try {
+    initPackage = initScene({
+      mountEl: mountRef.current,
+      settings: {
+        antialiasing: settings.antialiasing,
+        shadows: settings.shadows,
+        shadowQuality: settings.shadowQuality,
+        grid: settings.grid
+      },
+      createPlayer,
+      onReady: () => {
+        const finishBoot = async () => {
+          try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
+          let npcs = [];
+          try {
+            const p = player?.position || new THREE.Vector3();
+            const base = new THREE.Vector3(p.x, p.y, p.z);
+            let identityKey = '';
+            try {
+              const identity = getPlayerIdentity?.();
+              const raw = identity?.key || identity?.name || '';
+              identityKey = String(raw).toLowerCase().split(/\s+/)[0] || '';
+            } catch (_) {
+              identityKey = '';
+            }
+
+            const spawnEntries = [
+              { key: 'naruto', label: 'Naruto', offset: new THREE.Vector3(6, 0, 0), create: createNaruto },
+              { key: 'sasuke', label: 'Sasuke', offset: new THREE.Vector3(-6, 0, 0), create: createSasuke },
+              { key: 'sakura', label: 'Sakura', offset: new THREE.Vector3(0, 0, 6), create: createSakura },
+              { key: 'shikamaru', label: 'Shikamaru', offset: new THREE.Vector3(0, 0, -6), create: createShikamaru },
+              { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
+              { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
+            ];
+
+            const activeEntries = spawnEntries.filter((entry) => entry.key !== identityKey);
+            const roster = activeEntries.map((entry) => entry.label);
+
+            if (roster.length) {
+              reportBootStatus?.('squad', 'active', { roster });
+            } else {
+              reportBootStatus?.('squad', 'active', { roster: [] });
+            }
+
+            const spawnPromises = activeEntries.map((entry) => {
+              const targetPosition = base.clone().add(entry.offset.clone());
+              return entry.create(scene, { shadows: settings.shadows }, targetPosition);
+            });
+
+            if (!spawnPromises.length) {
+              reportBootStatus?.('squad', 'done', { roster: [] });
+              npcs = [];
+              return;
+            }
+
+            const results = await Promise.allSettled(spawnPromises);
+            const fulfilled = [];
+            const rejected = [];
+
+            results.forEach((result, index) => {
+              if (result.status === 'fulfilled') {
+                fulfilled.push(result.value);
+              } else {
+                rejected.push({ index, reason: result.reason, label: roster[index] });
+              }
+            });
+
+            fulfilled.forEach((npc) => {
+              try { scene.add(npc); } catch (_) {}
+            });
+
+            if (fulfilled.length) {
+              npcs = fulfilled;
+              try { scene.userData.npcs = fulfilled; } catch (_) {}
+            }
+
+            if (rejected.length) {
+              reportBootStatus?.('squad', 'error', { rejected, roster });
+              rejected.forEach(({ index, reason, label }) => {
+                const name = label || roster[index] || `NPC ${index + 1}`;
+                console.error(`[NPC] Failed to spawn ${name}:`, reason);
+              });
+            } else {
+              reportBootStatus?.('squad', 'done', { roster });
+            }
+          } catch (err) {
+            reportBootStatus?.('squad', 'error', { err });
+            console.error('[NPC] Failed during squad spawn:', err);
+          } finally {
+            try {
+              onReadyRef.current && onReadyRef.current(npcs);
+            } catch (_) {}
+          }
+        };
+
+        finishBoot();
+      }
+    });
+  } catch (err) {
+    reportBootStatus?.('scene', 'error', { stage: 'Unable to initialize renderer.', err });
+    throw err;
+  }
+
   const {
     scene,
     renderer,
@@ -43,103 +149,9 @@ export function initThreeScene({
     player,
     objectTooltipsGroup,
     updateObjectTooltips
-  } = initScene({
-    mountEl: mountRef.current,
-    settings: {
-      antialiasing: settings.antialiasing,
-      shadows: settings.shadows,
-      shadowQuality: settings.shadowQuality,
-      grid: settings.grid
-    },
-    createPlayer,
-    onReady: () => {
-      const finishBoot = async () => {
-        try { console.log('[NPC] Spawning party near player...'); } catch (_) {}
-        let npcs = [];
-        try {
-          const p = player?.position || new THREE.Vector3();
-          const base = new THREE.Vector3(p.x, p.y, p.z);
-          let identityKey = '';
-          try {
-            const identity = getPlayerIdentity?.();
-            const raw = identity?.key || identity?.name || '';
-            identityKey = String(raw).toLowerCase().split(/\s+/)[0] || '';
-          } catch (_) {
-            identityKey = '';
-          }
+  } = initPackage;
 
-          const spawnEntries = [
-            { key: 'naruto', label: 'Naruto', offset: new THREE.Vector3(6, 0, 0), create: createNaruto },
-            { key: 'sasuke', label: 'Sasuke', offset: new THREE.Vector3(-6, 0, 0), create: createSasuke },
-            { key: 'sakura', label: 'Sakura', offset: new THREE.Vector3(0, 0, 6), create: createSakura },
-            { key: 'shikamaru', label: 'Shikamaru', offset: new THREE.Vector3(0, 0, -6), create: createShikamaru },
-            { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
-            { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
-          ];
-
-          const activeEntries = spawnEntries.filter((entry) => entry.key !== identityKey);
-          const roster = activeEntries.map((entry) => entry.label);
-
-          if (roster.length) {
-            reportBootStatus?.('squad', 'active', { roster });
-          } else {
-            reportBootStatus?.('squad', 'active', { roster: [] });
-          }
-
-          const spawnPromises = activeEntries.map((entry) => {
-            const targetPosition = base.clone().add(entry.offset.clone());
-            return entry.create(scene, { shadows: settings.shadows }, targetPosition);
-          });
-
-          if (!spawnPromises.length) {
-            reportBootStatus?.('squad', 'done', { roster: [] });
-            npcs = [];
-            return;
-          }
-
-          const results = await Promise.allSettled(spawnPromises);
-          const fulfilled = [];
-          const rejected = [];
-
-          results.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-              fulfilled.push(result.value);
-            } else {
-              rejected.push({ index, reason: result.reason, label: roster[index] });
-            }
-          });
-
-          fulfilled.forEach((npc) => {
-            try { scene.add(npc); } catch (_) {}
-          });
-
-          if (fulfilled.length) {
-            npcs = fulfilled;
-            try { scene.userData.npcs = fulfilled; } catch (_) {}
-          }
-
-          if (rejected.length) {
-            reportBootStatus?.('squad', 'error', { rejected, roster });
-            rejected.forEach(({ index, reason, label }) => {
-              const name = label || roster[index] || `NPC ${index + 1}`;
-              console.error(`[NPC] Failed to spawn ${name}:`, reason);
-            });
-          } else {
-            reportBootStatus?.('squad', 'done', { roster });
-          }
-        } catch (err) {
-          reportBootStatus?.('squad', 'error', { err });
-          console.error('[NPC] Failed during squad spawn:', err);
-        } finally {
-          try {
-            onReadyRef.current && onReadyRef.current(npcs);
-          } catch (_) {}
-        }
-      };
-
-      finishBoot();
-    }
-  });
+  reportBootStatus?.('scene', 'done', { stage: 'Renderer linked. Preparing squad deployment...' });
 
   sceneRef.current = scene;
   rendererRef.current = renderer;

@@ -43,13 +43,16 @@ const ESSENTIAL_ANIMATION_MATCHES = [
 ];
 
 // NEW: Local image assets to precache during the first loading screen
-const IMAGE_ASSETS = [
-    // UI and splash screens
+const CORE_UI_IMAGES = [
     './loading.png',
     './loading1.png',
     './menu.png',
+    './devs.png',
+    './Naruto World.jpg',
+    './konohagakure.jpg'
+];
 
-    // Terrain and world textures (some may be swapped by settings/biomes)
+const TERRAIN_TEXTURES = [
     './grass_texture.png',
     './sand_texture.png',
     './dirt_path_texture.png',
@@ -57,6 +60,75 @@ const IMAGE_ASSETS = [
     './snow_texture.png',
     './forest_floor_texture.png',
     './ground_texture.png'
+];
+
+const ROAD_TEXTURES = [
+    './primary_road_texture.png',
+    './secondary_road_texture.png',
+    './tertiary_road_texture.png',
+    './src/assets/textures/dirt_path_texture.png'
+];
+
+const MAP_IMAGES = [
+    './map/konohagakure.jpg',
+    './map/assets/icons/1.png',
+    './map/assets/icons/2.png',
+    './map/assets/icons/3.png',
+    './map/assets/icons/4.png',
+    './map/assets/icons/5.png',
+    './map/assets/icons/6.png',
+    './map/assets/icons/7.png',
+    './map/assets/icons/8.png',
+    './map/assets/icons/9.png',
+    './map/assets/icons/10.png',
+    './map/assets/icons/11.png',
+    './map/assets/icons/12.png',
+    './map/assets/icons/A.png',
+    './map/assets/icons/B.png',
+    './map/assets/icons/C.png',
+    './map/assets/icons/D.png',
+    './map/assets/icons/E.png'
+];
+
+const MUGSHOT_IMAGES = [
+    './src/assets/images/mugshots/kakashi.png',
+    './src/assets/images/mugshots/naruto.png',
+    './src/assets/images/mugshots/sasuke.png',
+    './src/assets/images/mugshots/sakura.png',
+    './src/assets/images/mugshots/shikamaru.png',
+    './src/assets/images/mugshots/neji.png',
+    './src/assets/images/mugshots/orochimaru.png'
+];
+
+const SHOWCASE_IMAGES = [
+    './src/assets/images/showcase/animation_viewer.png',
+    './src/assets/images/showcase/world_2025-09-01.png',
+    './src/assets/images/showcase/hokage_monument.png',
+    './src/assets/images/showcase/inventory.png',
+    './src/assets/images/showcase/map_template.png'
+];
+
+const HOKAGE_IMAGES = [
+    './hokage/office_top_floor/src/assets/images/Hatake_Kakashi.png',
+    './hokage/office_top_floor/src/assets/images/Namikaze_Minato.png',
+    './hokage/office_top_floor/src/assets/images/Orochimaru.png',
+    './hokage/office_top_floor/src/assets/images/Senju_Hashirama.png',
+    './hokage/office_top_floor/src/assets/images/Senju_Tobirama.png',
+    './hokage/office_top_floor/src/assets/images/Tsunade.png',
+    './hokage/office_top_floor/src/assets/images/Uzumaki_Naruto.png',
+    './hokage/office_top_floor/src/assets/images/Jiraiya.png',
+    './hokage/office_top_floor/src/assets/images/hall.png',
+    './hokage/office_interior/hokage_office.png'
+];
+
+const IMAGE_ASSETS = [
+    ...CORE_UI_IMAGES,
+    ...TERRAIN_TEXTURES,
+    ...ROAD_TEXTURES,
+    ...MAP_IMAGES,
+    ...MUGSHOT_IMAGES,
+    ...SHOWCASE_IMAGES,
+    ...HOKAGE_IMAGES
 ];
 
 // NEW: 3D model assets to pre-cache (include external fallback for Hospital)
