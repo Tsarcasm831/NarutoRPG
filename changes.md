@@ -1,4 +1,5 @@
 Recent
+- Tests: Added time utility formatting and useGameTime hook coverage with fake timers and pause handling.
 - FPV/NPC Dialog: Keep first-person active during conversations by suspending controls and restoring pointer lock on close.
 - NPC Dialog: Opening conversations now exits pointer lock and suspends gameplay input so FPV players stay grounded mid-talk.
 - Loading UI: decouple progress updates into a shared store, smooth the bar, and tie minimum progress to completed stages for accurate feedback.

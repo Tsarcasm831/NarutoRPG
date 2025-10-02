@@ -61,7 +61,7 @@ export function useGameTime({ isRunning, initialHour = 8, tickIntervalMs = 250, 
 
     frame = requestAnimationFrame(tick);
     return () => {
-      if (frame) cancelAnimationFrame(frame);
+      if (frame && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(frame);
     };
   }, [isRunning, tickIntervalMs, resetKey]);
 
