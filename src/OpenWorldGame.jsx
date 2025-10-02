@@ -284,14 +284,21 @@ const OpenWorldGame = () => {
     const openNpc = (e) => {
       // Do not pause the game or music for NPC dialog
       const detail = e?.detail || null;
+      const pointerWasLocked = !!document.pointerLockElement;
       try {
         window.__npcDialogActive = true;
       } catch (_) {}
       try {
         window.__clearPlayerControlState?.();
       } catch (_) {}
+      if (pointerWasLocked) {
+        try {
+          window.__suspendPointerLockSync = true;
+          window.__resumePointerLockAfterDialog = true;
+        } catch (_) {}
+      }
       try {
-        if (document.pointerLockElement) document.exitPointerLock();
+        if (pointerWasLocked) document.exitPointerLock();
       } catch (_) {}
       setNpcDialogData(detail);
       setShowNpcDialog(true);
@@ -619,10 +626,21 @@ const OpenWorldGame = () => {
       // Close NPC dialog without touching global pause/music
       setShowNpcDialog(false);
       setNpcDialogData(null);
+      const shouldRestorePointerLock = !!window.__resumePointerLockAfterDialog;
       try { window.__npcDialogActive = false; } catch (_) {}
       try { window.__clearPlayerControlState?.(); } catch (_) {}
       // Release interaction lock if set
       try { if (window.__npcInteracting) { window.__npcInteracting.userData.interacting = false; delete window.__npcInteracting; } } catch (_) {}
+      if (shouldRestorePointerLock) {
+        try {
+          const canvas = document.querySelector('canvas');
+          if (canvas && canvas.requestPointerLock && document.pointerLockElement !== canvas) {
+            canvas.requestPointerLock();
+          }
+        } catch (_) {}
+      }
+      try { delete window.__resumePointerLockAfterDialog; } catch (_) {}
+      try { delete window.__suspendPointerLockSync; } catch (_) {}
     }, npcName: (npcDialogData == null ? void 0 : npcDialogData.npc) || "NPC", npcImage: (npcDialogData == null ? void 0 : npcDialogData.npcImage) || "", playerName: (npcDialogData == null ? void 0 : npcDialogData.player) || "You", playerImage: (npcDialogData == null ? void 0 : npcDialogData.playerImage) || "", lines: (npcDialogData == null ? void 0 : npcDialogData.lines) || [] }, void 0, false) }, void 0, false),
     eventOverlay && /* @__PURE__ */ jsxDEV(WorldEventOverlay, { overlay: eventOverlay, onConfirm: acknowledgeEvent, onDismiss: dismissEventOverlay }, void 0, false)
   ] }, void 0, true, {

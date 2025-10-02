@@ -93,8 +93,9 @@ export function startAnimationLoop({
     const onPointerLockChange = () => {
         const el = rendererRef.current?.domElement;
         const isLocked = (document.pointerLockElement === el);
-        // Sync FPV state purely from actual pointer-lock status
-        firstPersonRef.current = !!isLocked;
+        const suppressUnlockEffects = !!window.__suspendPointerLockSync && !isLocked;
+        // Sync FPV state, but keep FPV active if we're intentionally suspending pointer lock
+        firstPersonRef.current = suppressUnlockEffects ? true : !!isLocked;
 
         // Keep orientation consistent when entering/leaving FPV
         try {
@@ -102,7 +103,10 @@ export function startAnimationLoop({
             if (isLocked && model && cameraOrbitRef) {
                 // Entering FPV: mirror model yaw into camera orbit
                 cameraOrbitRef.current = model.rotation.y || 0;
-            } else if (!isLocked && model && cameraOrbitRef) {
+                if (window.__suspendPointerLockSync) {
+                    try { delete window.__suspendPointerLockSync; } catch (_) {}
+                }
+            } else if (!isLocked && model && cameraOrbitRef && !suppressUnlockEffects) {
                 // Leaving FPV: keep player facing where they looked in FPV,
                 // and place third-person camera behind the player (add PI)
                 const yaw = cameraOrbitRef.current || 0;
@@ -112,8 +116,10 @@ export function startAnimationLoop({
         } catch (_) {}
     };
     const onPointerLockError = () => {
-        // If lock fails, ensure FPV is off
+        // If lock fails, ensure FPV is off and clear any pending suspension flags
         firstPersonRef.current = false;
+        try { delete window.__suspendPointerLockSync; } catch (_) {}
+        try { delete window.__resumePointerLockAfterDialog; } catch (_) {}
     };
     document.addEventListener('pointerlockchange', onPointerLockChange);
     document.addEventListener('pointerlockerror', onPointerLockError);

@@ -1,4 +1,5 @@
 Recent
+- FPV/NPC Dialog: Keep first-person active during conversations by suspending controls and restoring pointer lock on close.
 - NPC Dialog: Opening conversations now exits pointer lock and suspends gameplay input so FPV players stay grounded mid-talk.
 - Loading UI: decouple progress updates into a shared store, smooth the bar, and tie minimum progress to completed stages for accurate feedback.
 - Assets: Precache local UI, map, and mugshot images during the loading phase to avoid refetches in later panels.
