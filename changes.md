@@ -42,3 +42,4 @@ Recent
 
 - Tests: Added character catalog coverage to ensure identity, stats, and inventory builders clone data and honor overrides.
 
+- Tests: Added district layout utility coverage for normalization, cloning, caching, and reload paths.
