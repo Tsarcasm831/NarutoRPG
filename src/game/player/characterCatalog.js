@@ -190,8 +190,11 @@ export const PLAYER_CHARACTERS = [
 ];
 
 export const getCharacterByKey = (key) => {
-  if (!key) return PLAYER_CHARACTERS[0];
-  return PLAYER_CHARACTERS.find((character) => character.key === key) || PLAYER_CHARACTERS[0];
+  const character = key
+    ? PLAYER_CHARACTERS.find((candidate) => candidate.key === key)
+    : undefined;
+  const resolved = character || PLAYER_CHARACTERS[0];
+  return clone(resolved);
 };
 
 export const getDefaultCharacter = () => PLAYER_CHARACTERS[0];
