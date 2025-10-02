@@ -40,3 +40,5 @@ Recent
 
 - Tooling: Added Vitest setup with testing dependencies and scripts for component testing.
 
+- Tests: Added character catalog coverage to ensure identity, stats, and inventory builders clone data and honor overrides.
+
