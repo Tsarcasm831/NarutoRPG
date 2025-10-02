@@ -283,8 +283,17 @@ const OpenWorldGame = () => {
     window.addEventListener("open-kitbash-building", openKit);
     const openNpc = (e) => {
       // Do not pause the game or music for NPC dialog
-      // Keep FPV active: do NOT release pointer lock here so interacting in FPV doesn't dump to third-person.
-      setNpcDialogData(e?.detail || null);
+      const detail = e?.detail || null;
+      try {
+        window.__npcDialogActive = true;
+      } catch (_) {}
+      try {
+        window.__clearPlayerControlState?.();
+      } catch (_) {}
+      try {
+        if (document.pointerLockElement) document.exitPointerLock();
+      } catch (_) {}
+      setNpcDialogData(detail);
       setShowNpcDialog(true);
     };
     window.addEventListener("open-npc-dialog", openNpc);
@@ -610,6 +619,8 @@ const OpenWorldGame = () => {
       // Close NPC dialog without touching global pause/music
       setShowNpcDialog(false);
       setNpcDialogData(null);
+      try { window.__npcDialogActive = false; } catch (_) {}
+      try { window.__clearPlayerControlState?.(); } catch (_) {}
       // Release interaction lock if set
       try { if (window.__npcInteracting) { window.__npcInteracting.userData.interacting = false; delete window.__npcInteracting; } } catch (_) {}
     }, npcName: (npcDialogData == null ? void 0 : npcDialogData.npc) || "NPC", npcImage: (npcDialogData == null ? void 0 : npcDialogData.npcImage) || "", playerName: (npcDialogData == null ? void 0 : npcDialogData.player) || "You", playerImage: (npcDialogData == null ? void 0 : npcDialogData.playerImage) || "", lines: (npcDialogData == null ? void 0 : npcDialogData.lines) || [] }, void 0, false) }, void 0, false),

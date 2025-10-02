@@ -5,9 +5,18 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
     const keysRef = useRef({});
 
     useEffect(() => {
+        const clearControlState = () => {
+            keysRef.current = {};
+        };
+        window.__clearPlayerControlState = clearControlState;
+
         const handleKeyDown = (event) => {
             // Prevent panel toggling if an input field is focused
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
+                return;
+            }
+
+            if (window.__npcDialogActive) {
                 return;
             }
 
@@ -163,11 +172,18 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
         };
 
         const handleKeyUp = (event) => {
+            if (window.__npcDialogActive) {
+                keysRef.current[event.code] = false;
+                return;
+            }
             keysRef.current[event.code] = false;
         };
 
         // Mouse buttons (bind left-click for attack)
         const handleMouseDown = (event) => {
+            if (window.__npcDialogActive) {
+                return;
+            }
             if (window.__gamePaused) {
                 return;
             }
@@ -194,6 +210,9 @@ export const usePlayerControls = ({ setShowCharacter, setShowInventory, setShowW
             window.removeEventListener('keyup', handleKeyUp);
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mouseup', handleMouseUp);
+            if (window.__clearPlayerControlState === clearControlState) {
+                delete window.__clearPlayerControlState;
+            }
         };
     }, [setShowCharacter, setShowInventory, setShowWorldMap, setShowSettings, setShowMobileControls, setShowAnimations, setShowJutsuModal, setShowKakashi, gameState, setSettings, setShowPause]);
 
