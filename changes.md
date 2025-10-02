@@ -36,4 +36,7 @@ Recent
 - Player Loader: Pointed manifest fallbacks at the local temp bundles so non-Kakashi picks use available GLBs instead of 404s.
 - World: Skip spawning the chosen hero as an NPC and expose squad roster info so loading progress stays accurate when the roster changes.
 
+- Tests: Added coverage for experience leveling, quest rewards, and edge cases.
+
 - Tooling: Added Vitest setup with testing dependencies and scripts for component testing.
+
