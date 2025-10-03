@@ -62,7 +62,7 @@ export function createShikamaru(scene, settings, position = new THREE.Vector3())
     } catch (_) {}
     const applyRoam = (polygon) => {
       const fallbackWander = () => {
-        const options = { speed: 8 };
+        const options = { speed: 5.5 };
         if (polygon) {
           options.keepWithinPolygon = polygon;
         }
@@ -71,12 +71,23 @@ export function createShikamaru(scene, settings, position = new THREE.Vector3())
 
       try {
         attachRoadPatrol(group, {
-          speed: 7,
-          pauseChance: 0.5,
-          pauseMin: 1.8,
-          pauseMax: 4.5,
+          speed: 5.6,
+          pauseChance: 0.55,
+          pauseMin: 1.2,
+          pauseMax: 3.8,
           minRoadWidth: 2.5,
           restrictToPolygon: polygon,
+          deviation: {
+            chance: 0.45,
+            radius: polygon ? 14 : 18,
+            speed: 5,
+            durationMin: 2,
+            durationMax: 22,
+            pauseChance: 0.55,
+            pauseMin: 0.9,
+            pauseMax: 3.2,
+            radiusCollision: group.userData?.collider?.radius ?? 2.0,
+          },
           onError: fallbackWander,
         });
       } catch (_) {

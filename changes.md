@@ -1,4 +1,5 @@
 Recent
+- NPC Patrols: Naruto and Shikamaru now stroll their roads, wander off-route for moments, and return within half a minute.
 - Tests: Added useWorldEvents hook coverage for countdown overlays, buffs, overrides, and dismiss flows.
 - Tests: Added time utility formatting and useGameTime hook coverage with fake timers and pause handling.
 - FPV/NPC Dialog: Keep first-person active during conversations by suspending controls and restoring pointer lock on close.

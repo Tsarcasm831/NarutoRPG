@@ -3,16 +3,16 @@ import { resolveCollisions } from '/src/game/player/movement/collision.js';
 import { attachRoadPatrol } from './roadPatrol.js';
 import { attachWanderFree } from './wanderFree.js';
 
-const WALK_PATROL_SPEED = 8;
-const RUN_PATROL_SPEED = 13;
-const RETURN_WALK_SPEED = 8.5;
-const RETURN_RUN_SPEED = 11.5;
+const WALK_PATROL_SPEED = 5.75;
+const RUN_PATROL_SPEED = 8.75;
+const RETURN_WALK_SPEED = 6.5;
+const RETURN_RUN_SPEED = 9.5;
 const RETURN_TOLERANCE = 1.75;
-const WANDER_SPEED = 6.5;
-const WANDER_DURATION_MIN = 30;
-const WANDER_DURATION_MAX = 70;
-const WANDER_RADIUS = 18;
-const WANDER_CENTER_JITTER = 8;
+const WANDER_SPEED = 5.25;
+const WANDER_DURATION_MIN = 2;
+const WANDER_DURATION_MAX = 30;
+const WANDER_RADIUS = 20;
+const WANDER_CENTER_JITTER = 10;
 const MODE_POOL = ['walk', 'run'];
 
 function shuffle(array) {
@@ -112,11 +112,11 @@ function startWander(npcGroup, routine, overrideDuration = null) {
   try {
     attachWanderFree(npcGroup, {
       speed: WANDER_SPEED,
-      pauseChance: 0.65,
-      pauseMin: 1.5,
-      pauseMax: 4.5,
-      dirChangeMin: 2.5,
-      dirChangeMax: 5.5,
+      pauseChance: 0.7,
+      pauseMin: 0.8,
+      pauseMax: 3.8,
+      dirChangeMin: 1.8,
+      dirChangeMax: 4.2,
       keepWithinPolygon: polygon,
     });
   } catch (_) {
@@ -136,9 +136,10 @@ function startPatrol(npcGroup, routine, mode) {
   const pauseMin = mode === 'run' ? 0.5 : 1.5;
   const pauseMax = mode === 'run' ? 1.6 : 4.2;
   const minSegments = mode === 'run' ? 8 : 6;
+  const deviationRadius = Math.max(8, routine.wanderRadius * (mode === 'run' ? 0.65 : 0.8));
 
   const fallbackToWander = () => {
-    startWander(npcGroup, routine, 40);
+    startWander(npcGroup, routine, 18);
   };
 
   try {
@@ -154,6 +155,17 @@ function startPatrol(npcGroup, routine, mode) {
             routine.loopTriggered = true;
           }
         },
+      },
+      deviation: {
+        chance: mode === 'run' ? 0.25 : 0.4,
+        radius: deviationRadius,
+        speed: mode === 'run' ? Math.max(5.5, speed * 0.85) : Math.max(4.2, speed * 0.95),
+        durationMin: 2,
+        durationMax: mode === 'run' ? 18 : 26,
+        pauseChance: mode === 'run' ? 0.35 : 0.5,
+        pauseMin: 0.7,
+        pauseMax: mode === 'run' ? 2.4 : 3.6,
+        radiusCollision: npcGroup.userData?.collider?.radius ?? 2.0,
       },
       onError: fallbackToWander,
     });
