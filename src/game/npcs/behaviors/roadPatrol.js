@@ -61,19 +61,29 @@ function makeNodeKey(point) {
   return `${point.x.toFixed(2)},${point.z.toFixed(2)}`;
 }
 
-function ensureWalkingAnimation(npcGroup) {
+const WALK_SPEED_THRESHOLD = 7.25;
+
+function ensureMoveAnimation(npcGroup, speed = WALK_SPEED_THRESHOLD) {
   const actions = npcGroup?.userData?.animations;
   if (!actions) return;
-  const walkingAction = actions.running || actions.runFast || actions.walking || actions.casualWalk;
-  if (!walkingAction) return;
-  if (npcGroup.userData.currentAnimation === walkingAction._clip?.name) return;
-  try {
-    Object.values(actions).forEach((action) => action.stop());
-    walkingAction.reset();
-    walkingAction.setLoop(THREE.LoopRepeat);
-    walkingAction.play();
-    npcGroup.userData.currentAnimation = walkingAction._clip?.name || 'walking';
-  } catch (_) {}
+  const preferWalk = speed <= WALK_SPEED_THRESHOLD;
+  const candidates = preferWalk
+    ? ['walking', 'casualWalk', 'running', 'runFast']
+    : ['running', 'runFast', 'walking', 'casualWalk'];
+  for (const key of candidates) {
+    const action = actions[key];
+    if (!action) continue;
+    const desiredName = action._clip?.name || key;
+    if (npcGroup.userData.currentAnimation === desiredName) return;
+    try {
+      Object.values(actions).forEach((anim) => anim.stop());
+      action.reset();
+      action.setLoop(THREE.LoopRepeat);
+      action.play();
+      npcGroup.userData.currentAnimation = desiredName;
+    } catch (_) {}
+    return;
+  }
 }
 
 function ensureIdleAnimation(npcGroup) {
@@ -155,10 +165,25 @@ function chooseNextSegment(ai, currentNodeKey) {
   return pickRandom(pool);
 }
 
-function setTarget(ai, npcGroup, targetPoint) {
+function setTarget(ai, npcGroup, targetPoint, speedOverride = null) {
   if (!targetPoint) return;
   ai.targetPoint = { x: targetPoint.x, z: targetPoint.z };
-  ensureWalkingAnimation(npcGroup);
+  ensureMoveAnimation(npcGroup, speedOverride ?? ai.speed ?? WALK_SPEED_THRESHOLD);
+}
+
+function maybeStartDeviation(ai, npcGroup) {
+  if (!ai.deviation || ai.mode === 'deviate') return false;
+  if (Math.random() >= ai.deviation.chance) return false;
+  const duration = ai.deviation.durationMin + Math.random() * (ai.deviation.durationMax - ai.deviation.durationMin);
+  ai.mode = 'deviate';
+  ai.deviationState = {
+    timer: duration,
+    wait: 0,
+    origin: { x: npcGroup.position.x, z: npcGroup.position.z },
+    target: null,
+  };
+  ensureMoveAnimation(npcGroup, ai.deviation.speed);
+  return true;
 }
 
 function handleArrival(ai, npcGroup) {
@@ -166,7 +191,7 @@ function handleArrival(ai, npcGroup) {
     ai.mode = 'patrol';
     if (!ai.currentSegment) return;
     const nextPoint = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
-    setTarget(ai, npcGroup, nextPoint);
+    setTarget(ai, npcGroup, nextPoint, ai.speed);
     return;
   }
 
@@ -175,6 +200,11 @@ function handleArrival(ai, npcGroup) {
   if (Math.random() < pauseChance) {
     ai.wait = ai.pauseMin + Math.random() * (ai.pauseMax - ai.pauseMin);
     ensureIdleAnimation(npcGroup);
+  }
+
+  if (maybeStartDeviation(ai, npcGroup)) {
+    ai.targetPoint = null;
+    return;
   }
 
   const arrivedKey = ai.travelDir > 0 ? ai.currentSegment.endKey : ai.currentSegment.startKey;
@@ -213,18 +243,111 @@ function handleArrival(ai, npcGroup) {
       }
     }
   }
+
   const next = chooseNextSegment(ai, arrivedKey);
-  if (!next) {
-    ai.travelDir *= -1;
-    const fallbackPoint = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
-    setTarget(ai, npcGroup, fallbackPoint);
+    if (!next) {
+      ai.travelDir *= -1;
+      const fallbackPoint = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
+      setTarget(ai, npcGroup, fallbackPoint, ai.speed);
+      return;
+    }
+
+    ai.currentSegment = next.segment;
+    ai.travelDir = next.dir;
+    const destination = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
+    setTarget(ai, npcGroup, destination, ai.speed);
+}
+
+function randomPointInRadius(origin, radius) {
+  const angle = Math.random() * Math.PI * 2;
+  const distance = Math.sqrt(Math.random()) * radius;
+  return {
+    x: origin.x + Math.cos(angle) * distance,
+    z: origin.z + Math.sin(angle) * distance,
+  };
+}
+
+function finishDeviation(ai, npcGroup) {
+  ai.mode = 'approach';
+  ai.deviationState = null;
+  const nearest = nearestSegment(npcGroup.position, ai.segments);
+  if (!nearest) {
+    ai.targetPoint = null;
+    ai.mode = 'patrol';
+    return;
+  }
+  ai.currentSegment = nearest.segment;
+  const distToStart = dist2(npcGroup.position.x, npcGroup.position.z, nearest.segment.start.x, nearest.segment.start.z);
+  const distToEnd = dist2(npcGroup.position.x, npcGroup.position.z, nearest.segment.end.x, nearest.segment.end.z);
+  ai.travelDir = distToEnd < distToStart ? 1 : -1;
+  ai.pendingTarget = ai.travelDir > 0 ? nearest.segment.end : nearest.segment.start;
+  setTarget(ai, npcGroup, nearest.projection.point, ai.speed);
+}
+
+function updateDeviation(ai, npcGroup, delta, objectGrid) {
+  const deviation = ai.deviation;
+  const state = ai.deviationState;
+  if (!deviation || !state) {
+    finishDeviation(ai, npcGroup);
     return;
   }
 
-  ai.currentSegment = next.segment;
-  ai.travelDir = next.dir;
-  const destination = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
-  setTarget(ai, npcGroup, destination);
+  state.timer -= delta;
+  if (state.timer <= 0) {
+    finishDeviation(ai, npcGroup);
+    return;
+  }
+
+  if (state.wait > 0) {
+    state.wait -= delta;
+    if (state.wait <= 0) {
+      state.wait = 0;
+      ensureMoveAnimation(npcGroup, deviation.speed);
+    } else {
+      return;
+    }
+  }
+
+  if (!state.target) {
+    if (Math.random() < deviation.pauseChance) {
+      state.wait = deviation.pauseMin + Math.random() * (deviation.pauseMax - deviation.pauseMin);
+      ensureIdleAnimation(npcGroup);
+      return;
+    }
+    state.target = randomPointInRadius(state.origin, deviation.radius);
+    ensureMoveAnimation(npcGroup, deviation.speed);
+  }
+
+  const dx = state.target.x - npcGroup.position.x;
+  const dz = state.target.z - npcGroup.position.z;
+  const distance = Math.hypot(dx, dz);
+  if (distance < 0.1) {
+    state.target = null;
+    return;
+  }
+
+  const step = deviation.speed * delta;
+  const prevX = npcGroup.position.x;
+  const prevZ = npcGroup.position.z;
+  const moveX = prevX + (dx / (distance || 1)) * Math.min(step, distance);
+  const moveZ = prevZ + (dz / (distance || 1)) * Math.min(step, distance);
+  const intended = { x: moveX, z: moveZ };
+  const restoreFlag = npcGroup.userData.__ignoreCollision;
+  npcGroup.userData.__ignoreCollision = true;
+  const collisionRadius = deviation.radiusCollision ?? ai.radius;
+  const resolved = resolveCollisions(intended, collisionRadius, objectGrid);
+  npcGroup.userData.__ignoreCollision = restoreFlag;
+  npcGroup.position.x = resolved.x;
+  npcGroup.position.z = resolved.z;
+
+  try {
+    const model = npcGroup.userData.model || npcGroup.children?.[0];
+    const moveDirX = npcGroup.position.x - prevX;
+    const moveDirZ = npcGroup.position.z - prevZ;
+    if (model && (Math.abs(moveDirX) > 1e-3 || Math.abs(moveDirZ) > 1e-3)) {
+      model.rotation.y = Math.atan2(moveDirX, moveDirZ);
+    }
+  } catch (_) {}
 }
 
 export function attachRoadPatrol(npcGroup, options = {}) {
@@ -247,6 +370,24 @@ export function attachRoadPatrol(npcGroup, options = {}) {
       }
     : null;
 
+  const deviationRaw = options.deviation && typeof options.deviation === 'object' ? options.deviation : null;
+  const deviation = deviationRaw
+    ? {
+        chance: Math.max(0, Math.min(1, deviationRaw.chance ?? 0.3)),
+        radius: Math.max(2, deviationRaw.radius ?? 10),
+        speed: Math.max(2, Math.min(20, deviationRaw.speed ?? Math.max(2, speed * 0.85))),
+        durationMin: Math.max(0.5, deviationRaw.durationMin ?? 4),
+        durationMax: Math.max(
+          Math.max(0.5, deviationRaw.durationMin ?? 4),
+          deviationRaw.durationMax ?? 12,
+        ),
+        pauseChance: Math.max(0, Math.min(1, deviationRaw.pauseChance ?? pauseChance)),
+        pauseMin: Math.max(0, deviationRaw.pauseMin ?? pauseMin),
+        pauseMax: Math.max(deviationRaw.pauseMin ?? pauseMin, deviationRaw.pauseMax ?? pauseMax),
+        radiusCollision: Math.max(1.2, Math.min(3.0, deviationRaw.radiusCollision || radius)),
+      }
+    : null;
+
   npcGroup.userData.ai = {
     type: 'roadPatrol',
     speed,
@@ -265,6 +406,8 @@ export function attachRoadPatrol(npcGroup, options = {}) {
     ready: false,
     loopConfig,
     loopState: loopConfig ? { originKey: loopConfig.anchorKey || null, stepsSinceOrigin: 0, hasLeftOrigin: false, loopCount: 0 } : null,
+    deviation,
+    deviationState: null,
   };
 
   loadKonohaRoads()
@@ -285,7 +428,7 @@ export function attachRoadPatrol(npcGroup, options = {}) {
         ai.mode = 'approach';
         ai.travelDir = Math.random() < 0.5 ? 1 : -1;
         ai.pendingTarget = ai.travelDir > 0 ? nearest.segment.end : nearest.segment.start;
-        setTarget(ai, npcGroup, nearest.projection.point);
+        setTarget(ai, npcGroup, nearest.projection.point, ai.speed);
       }
     })
     .catch(() => {
@@ -301,9 +444,19 @@ export function updateRoadPatrol(npcGroup, delta, objectGrid) {
     ai.wait -= delta;
     if (ai.wait <= 0) {
       ai.wait = 0;
-      ensureWalkingAnimation(npcGroup);
+      ensureMoveAnimation(npcGroup, ai.mode === 'deviate' && ai.deviation ? ai.deviation.speed : ai.speed);
     }
     return;
+  }
+
+  if (ai.mode === 'deviate') {
+    updateDeviation(ai, npcGroup, delta, objectGrid);
+    if (ai.mode === 'deviate') {
+      return;
+    }
+    if (ai.mode === 'approach') {
+      ai.targetPoint = ai.targetPoint || null;
+    }
   }
 
   if (!ai.ready || !ai.currentSegment) return;
@@ -317,7 +470,7 @@ export function updateRoadPatrol(npcGroup, delta, objectGrid) {
   const distance = Math.hypot(dx, dz);
   if (distance < 0.05) {
     if (ai.mode === 'approach' && ai.pendingTarget) {
-      setTarget(ai, npcGroup, ai.pendingTarget);
+      setTarget(ai, npcGroup, ai.pendingTarget, ai.speed);
       ai.mode = 'patrol';
       ai.pendingTarget = null;
       return;
@@ -326,7 +479,8 @@ export function updateRoadPatrol(npcGroup, delta, objectGrid) {
     return;
   }
 
-  const step = ai.speed * delta;
+  const moveSpeed = ai.speed;
+  const step = moveSpeed * delta;
   const normX = dx / (distance || 1);
   const normZ = dz / (distance || 1);
   const moveX = npcGroup.position.x + normX * Math.min(step, distance);
@@ -348,14 +502,14 @@ export function updateRoadPatrol(npcGroup, delta, objectGrid) {
     }
   } catch (_) {}
 
-  if (Math.hypot(ai.targetPoint.x - npcGroup.position.x, ai.targetPoint.z - npcGroup.position.z) < 0.3) {
-    if (ai.mode === 'approach' && ai.pendingTarget) {
-      setTarget(ai, npcGroup, ai.pendingTarget);
-      ai.mode = 'patrol';
-      ai.pendingTarget = null;
-    } else {
-      handleArrival(ai, npcGroup);
+    if (Math.hypot(ai.targetPoint.x - npcGroup.position.x, ai.targetPoint.z - npcGroup.position.z) < 0.3) {
+      if (ai.mode === 'approach' && ai.pendingTarget) {
+        setTarget(ai, npcGroup, ai.pendingTarget, ai.speed);
+        ai.mode = 'patrol';
+        ai.pendingTarget = null;
+      } else {
+        handleArrival(ai, npcGroup);
+      }
     }
-  }
 }
 
