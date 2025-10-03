@@ -10,6 +10,13 @@ const sunsetSunColor = new THREE.Color(0xffc98a);
 const dayAmbientColor = new THREE.Color(0xfefefe);
 const nightAmbientColor = new THREE.Color(0x111a26);
 const warmAmbientColor = new THREE.Color(0xffd9a3);
+const daySkyTopColor = new THREE.Color('#7cc4ff');
+const daySkyBottomColor = new THREE.Color('#cde9ff');
+const duskSkyTopColor = new THREE.Color('#ff9159');
+const duskSkyBottomColor = new THREE.Color('#ffd6a6');
+const nightSkyTopColor = new THREE.Color('#07112c');
+const nightSkyBottomColor = new THREE.Color('#030a17');
+const moonGlowColor = new THREE.Color('#f4f6ff');
 
 const tmpSunColor = new THREE.Color();
 const tmpAmbientColor = new THREE.Color();
@@ -18,6 +25,14 @@ const tmpFogColor = new THREE.Color();
 const tmpOffset = new THREE.Vector3();
 const tmpWindowColor = new THREE.Color();
 const tmpWindowEmissive = new THREE.Color();
+const tmpSkyTop = new THREE.Color();
+const tmpSkyBottom = new THREE.Color();
+const tmpNightTop = new THREE.Color();
+const tmpNightBottom = new THREE.Color();
+const tmpSunGlow = new THREE.Color();
+const tmpMoonColor = new THREE.Color();
+const tmpSunDirection = new THREE.Vector3();
+const tmpMoonDirection = new THREE.Vector3();
 
 const KITBASH_DAY_START = 6;
 const KITBASH_EVENING_START = 18;
@@ -45,7 +60,7 @@ export function applyDayNightCycle({ scene, directionalLight, ambientLight, time
   const daylightBlend = clamp01(smoothstep(6, 7, hour) - smoothstep(19, 20, hour));
   const twilightBlend = clamp01(smoothstep(5, 6, hour) + (1 - smoothstep(20, 21, hour)));
   const brightnessFloor = 0.12;
-  const brightness = brightnessFloor + daylightBlend * (1 - brightnessFloor);
+  const nightBlend = 1 - daylightBlend;
 
   const sunriseWarm = clamp01(1 - Math.abs(hour - 6) / 2);
   const sunsetWarm = clamp01(1 - Math.abs(hour - 18) / 2);
@@ -72,6 +87,44 @@ export function applyDayNightCycle({ scene, directionalLight, ambientLight, time
       tmpSkyColor.lerp(sunsetSunColor, combinedWarm * 0.2);
     }
     scene.background.copy(tmpSkyColor);
+  }
+
+  const sky = directionalLight.userData?.sky;
+  if (sky) {
+    const { uniforms, sun, moon } = sky;
+    if (uniforms) {
+      tmpSkyTop.copy(daySkyTopColor).lerp(duskSkyTopColor, combinedWarm * 0.7);
+      tmpSkyBottom.copy(daySkyBottomColor).lerp(duskSkyBottomColor, combinedWarm * 0.9);
+      tmpNightTop.copy(nightSkyTopColor);
+      tmpNightBottom.copy(nightSkyBottomColor);
+
+      uniforms.topColor.value.copy(tmpSkyTop);
+      uniforms.bottomColor.value.copy(tmpSkyBottom);
+      uniforms.nightTopColor.value.copy(tmpNightTop);
+      uniforms.nightBottomColor.value.copy(tmpNightBottom);
+      uniforms.horizonBlend.value = clamp01(0.1 + daylightBlend * 0.9);
+      uniforms.duskFactor.value = clamp01(combinedWarm * 0.8 + twilightBlend * 0.4);
+      const starIntensity = clamp01(Math.pow(nightBlend, 1.4) + Math.max(0, twilightBlend - 0.3) * 0.5);
+      uniforms.starIntensity.value = starIntensity;
+    }
+
+    if (sun?.material) {
+      const opacity = clamp01(0.15 + daylightBlend * 0.9 + combinedWarm * 0.3);
+      sun.material.opacity = opacity;
+      sun.visible = opacity > 0.02;
+      if (sun.material.color) {
+        sun.material.color.copy(tmpSunGlow.copy(daySunColor).lerp(sunsetSunColor, combinedWarm));
+      }
+    }
+
+    if (moon?.material) {
+      const moonStrength = clamp01(Math.pow(nightBlend, 1.2) + Math.max(0, twilightBlend - 0.4) * 0.2);
+      moon.material.opacity = 0.1 + moonStrength * 0.9;
+      moon.visible = moon.material.opacity > 0.05;
+      if (moon.material.color) {
+        moon.material.color.copy(tmpMoonColor.copy(moonGlowColor).lerp(nightSunColor, 0.25));
+      }
+    }
   }
 
   if (scene?.fog?.color && scene.fog.color.isColor) {
@@ -105,6 +158,25 @@ export function applyDayNightCycle({ scene, directionalLight, ambientLight, time
     } else {
       directionalLight.userData.sunOffset.copy(tmpOffset);
     }
+
+    const sunDir = tmpSunDirection.copy(tmpOffset).normalize();
+    if (!directionalLight.userData.sunDirection || !directionalLight.userData.sunDirection.isVector3) {
+      directionalLight.userData.sunDirection = sunDir.clone();
+    } else {
+      directionalLight.userData.sunDirection.copy(sunDir);
+    }
+
+    const moonDir = tmpMoonDirection.copy(sunDir).multiplyScalar(-1);
+    if (!directionalLight.userData.moonDirection || !directionalLight.userData.moonDirection.isVector3) {
+      directionalLight.userData.moonDirection = moonDir.clone();
+    } else {
+      directionalLight.userData.moonDirection.copy(moonDir);
+    }
+
+    directionalLight.userData.daylightBlend = daylightBlend;
+    directionalLight.userData.twilightBlend = twilightBlend;
+    directionalLight.userData.nightBlend = nightBlend;
+    directionalLight.userData.sunWarmth = combinedWarm;
   }
 }
 

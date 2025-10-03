@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createTerrain } from './terrain.js';
 import { setupGridLabels } from './gridLabels.js';
 import { setupObjectTooltips } from './objectTooltips.js';
+import { createSkyEnvironment } from './skyEnvironment.js';
 import { INTERACTION_DISTANCE } from '../game/constants.js';
 
 /**
@@ -54,6 +55,13 @@ export function initScene({ mountEl, settings, createPlayer, onReady }) {
     scene.add(directionalLight);
     directionalLight.target.position.set(0, 0, 0);
     scene.add(directionalLight.target);
+
+    const sky = createSkyEnvironment();
+    scene.add(sky.skyDome);
+    scene.add(sky.sun);
+    scene.add(sky.moon);
+    scene.userData.sky = sky;
+    directionalLight.userData.sky = sky;
 
     // Terrain
     const { groundContainer, worldSize } = createTerrain(scene, settings);

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import { updatePlayer } from '../game/player/index.js';
 import { updateWanderFree } from '/src/game/npcs/behaviors/wanderFree.js';
@@ -46,6 +47,8 @@ export function startAnimationLoop({
     };
     const fpsInterval = fpsIntervals[fpsLimit] || 0;
     let lastFrameTime = 0;
+    const tmpSunVec = new THREE.Vector3();
+    const tmpMoonVec = new THREE.Vector3();
 
     const interactionDistance = INTERACTION_DISTANCE; // world units to interact
     let lastInteractObj = null;
@@ -404,6 +407,40 @@ export function startAnimationLoop({
             multiplayerManager.update(delta, timestamp);
         } catch (err) {
             console.error('[Multiplayer] update() failed:', err);
+        }
+
+        const scene = sceneRef.current;
+        const camera = cameraRef.current;
+        if (scene && camera) {
+            const sky = scene.userData?.sky;
+            const light = lightRef.current;
+            if (sky) {
+                if (sky.skyDome) {
+                    sky.skyDome.position.copy(camera.position);
+                }
+                const sunDir = light?.userData?.sunDirection;
+                const moonDir = light?.userData?.moonDirection;
+                if (sky.sun) {
+                    const distance = sky.sun.userData?.distance || 3000;
+                    if (sunDir?.isVector3 && sunDir.lengthSq() > 1e-6) {
+                        tmpSunVec.copy(sunDir).normalize();
+                    } else {
+                        tmpSunVec.set(0.25, 0.8, 0.3).normalize();
+                    }
+                    sky.sun.position.copy(camera.position).addScaledVector(tmpSunVec, distance);
+                }
+                if (sky.moon) {
+                    const distance = sky.moon.userData?.distance || 2600;
+                    if (moonDir?.isVector3 && moonDir.lengthSq() > 1e-6) {
+                        tmpMoonVec.copy(moonDir).normalize();
+                    } else if (sunDir?.isVector3 && sunDir.lengthSq() > 1e-6) {
+                        tmpMoonVec.copy(sunDir).multiplyScalar(-1).normalize();
+                    } else {
+                        tmpMoonVec.set(-0.25, 0.6, -0.3).normalize();
+                    }
+                    sky.moon.position.copy(camera.position).addScaledVector(tmpMoonVec, distance);
+                }
+            }
         }
 
         rendererRef.current.render(sceneRef.current, cameraRef.current);
