@@ -316,14 +316,11 @@ export function startAnimationLoop({
             if (Array.isArray(npcs)) {
                 for (let i = 0; i < npcs.length; i++) {
                     const g = npcs[i];
-                    // Ensure NPC is in spatial grid to enable collisions/interactions
+                    // Ensure NPC stays registered with the spatial grid for collisions/interactions
                     try {
                         const grid = objectGridRef.current;
                         if (grid && g && g.position) {
-                            if (g.userData.__gridRef !== grid) {
-                                grid.add(g);
-                                g.userData.__gridRef = grid;
-                            }
+                            grid.update(g);
                         }
                     } catch (_) {}
                     try { ensureNpcCollisionIdle(g, delta, objectGridRef.current); } catch (_) {}

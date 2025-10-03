@@ -59,3 +59,4 @@ Recent
 - NPCs: Colliding characters now pause for 15s and play stand-and-chat style idles before resuming their routes.
 - NPCs: Naruto-style patrol routines now drive all squad members with character-specific pacing and roam radii.
 - NPCs: Added dedicated behavior modules for Sasuke, Sakura, Shikamaru, Neji, and Orochimaru that plug into the shared updater.
+- NPCs: Keep the spatial grid in sync with moving characters so patrol animations play and chat collisions trigger reliably.
