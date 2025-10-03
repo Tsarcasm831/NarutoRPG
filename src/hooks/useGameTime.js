@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { nowHighResMs, formatGameClock, isGamePaused } from '../utils/time.js';
 
 const SECONDS_PER_HOUR = 60 * 60;
@@ -65,6 +65,24 @@ export function useGameTime({ isRunning, initialHour = 8, tickIntervalMs = 250, 
     };
   }, [isRunning, tickIntervalMs, resetKey]);
 
+  const setTimeOfDay = useCallback((hour) => {
+    let nextHour = hour;
+    if (typeof nextHour === 'string' && nextHour.trim() !== '') {
+      const parsed = Number(nextHour);
+      if (Number.isFinite(parsed)) {
+        nextHour = parsed;
+      }
+    }
+    if (!Number.isFinite(nextHour)) {
+      nextHour = timeRef.current / SECONDS_PER_HOUR;
+    }
+    const normalized = clampHour(nextHour);
+    const seconds = normalized * SECONDS_PER_HOUR;
+    timeRef.current = seconds;
+    setDisplaySeconds(seconds);
+    return normalized;
+  }, []);
+
   const timeOfDayHours = displaySeconds / SECONDS_PER_HOUR;
   const normalizedDayProgress = displaySeconds / SECONDS_PER_DAY;
 
@@ -72,6 +90,7 @@ export function useGameTime({ isRunning, initialHour = 8, tickIntervalMs = 250, 
     timeOfDayHours,
     normalizedDayProgress,
     totalSeconds: displaySeconds,
-    formattedTime: formatGameClock(displaySeconds)
+    formattedTime: formatGameClock(displaySeconds),
+    setTimeOfDay
   };
 }

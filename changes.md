@@ -47,3 +47,5 @@ Recent
 - Tests: Added district layout utility coverage for normalization, cloning, caching, and reload paths.
 - Tests: Hardened music playback and pause safety with mocked audio, cache fallbacks, and pointer lock coverage.
 - World: Kitbashed building windows now glow at night with randomized late-night lights-out behavior tied to the day/night cycle.
+
+- Devtools: Added console helpers to jump the world clock to dawn, midday, dusk, or night presets.
