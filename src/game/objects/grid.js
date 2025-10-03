@@ -5,6 +5,7 @@ export class ObjectGrid {
         this.grid = {};
         this.halfWorldSize = worldSize / 2;
         this.numCells = Math.ceil(worldSize / cellSize);
+        this.objectLookup = new WeakMap();
     }
 
     _getGridCoords(position) {
@@ -17,11 +18,55 @@ export class ObjectGrid {
         return `${coords.x},${coords.z}`;
     }
 
-    add(object) {
+    _ensureCell(key) {
+        if (!this.grid[key]) this.grid[key] = [];
+        return this.grid[key];
+    }
+
+    _addToCell(key, object) {
+        const cell = this._ensureCell(key);
+        if (!cell.includes(object)) {
+            cell.push(object);
+        }
+        this.objectLookup.set(object, key);
+    }
+
+    _removeFromCell(key, object) {
+        const cell = this.grid[key];
+        if (!cell) return;
+        const index = cell.indexOf(object);
+        if (index !== -1) {
+            cell.splice(index, 1);
+        }
+        if (cell.length === 0) {
+            delete this.grid[key];
+        }
+    }
+
+    _placeObject(object) {
+        if (!object?.position) return;
         const coords = this._getGridCoords(object.position);
         const key = this._getKey(coords);
-        if (!this.grid[key]) this.grid[key] = [];
-        this.grid[key].push(object);
+        const previousKey = this.objectLookup.get(object);
+        if (previousKey && previousKey !== key) {
+            this._removeFromCell(previousKey, object);
+        }
+        this._addToCell(key, object);
+    }
+
+    add(object) {
+        this._placeObject(object);
+    }
+
+    update(object) {
+        this._placeObject(object);
+    }
+
+    remove(object) {
+        const key = this.objectLookup.get(object);
+        if (!key) return;
+        this._removeFromCell(key, object);
+        this.objectLookup.delete(object);
     }
 
     getObjectsNear(position, radius) {
@@ -42,5 +87,6 @@ export class ObjectGrid {
 
     clear() {
         this.grid = {};
+        this.objectLookup = new WeakMap();
     }
 }
