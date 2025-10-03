@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
-import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachOrochimaruRoutine } from './behaviors/orochimaruRoutine.js';
 import { getPlayerIdentity } from '../player/identity.js';
 
 export function createOrochimaru(scene, settings, position = new THREE.Vector3()) {
@@ -41,7 +41,7 @@ export function createOrochimaru(scene, settings, position = new THREE.Vector3()
         } catch (_) {}
       };
     } catch (_) {}
-    try { attachWanderFree(group, { speed: 6.5 }); } catch (_) {}
+    try { attachOrochimaruRoutine(group, { spawnPosition: group.position.clone() }); } catch (_) {}
     return group;
   });
 }

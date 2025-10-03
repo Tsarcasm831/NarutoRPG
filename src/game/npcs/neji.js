@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
-import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachNejiRoutine } from './behaviors/nejiRoutine.js';
 import { getPlayerIdentity } from '../player/identity.js';
 
 export function createNeji(scene, settings, position = new THREE.Vector3()) {
@@ -58,7 +58,7 @@ export function createNeji(scene, settings, position = new THREE.Vector3()) {
         } catch (_) {}
       };
     } catch (_) {}
-    try { attachWanderFree(group, { speed: 7.5 }); } catch (_) {}
+    try { attachNejiRoutine(group, { spawnPosition: group.position.clone() }); } catch (_) {}
     return group;
   });
 }

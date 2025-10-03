@@ -74,7 +74,10 @@ function playIdleAnimation(npcGroup) {
 
 function ensureModeQueue(routine) {
   if (!Array.isArray(routine.modeQueue) || routine.modeQueue.length === 0) {
-    routine.modeQueue = shuffle(MODE_POOL);
+    const pool = Array.isArray(routine.modePool) && routine.modePool.length > 0
+      ? routine.modePool
+      : MODE_POOL;
+    routine.modeQueue = shuffle(pool);
   }
 }
 
@@ -191,28 +194,46 @@ function startReturn(npcGroup, routine) {
 
 export function attachNarutoRoutine(npcGroup, options = {}) {
   if (!npcGroup) return;
-  const spawn = options.spawnPosition && options.spawnPosition.isVector3
-    ? options.spawnPosition.clone()
+  const {
+    spawnPosition,
+    wanderRadius,
+    wanderMin,
+    wanderMax,
+    returnTolerance,
+    routineKey = '__narutoRoutine',
+    modePool,
+    startMode = 'walk',
+  } = options || {};
+  const spawn = spawnPosition && spawnPosition.isVector3
+    ? spawnPosition.clone()
     : npcGroup.position.clone();
   const routine = {
     state: 'init',
     spawn,
-    wanderRadius: Math.max(8, options.wanderRadius || WANDER_RADIUS),
-    wanderMin: Math.max(10, options.wanderMin ?? WANDER_DURATION_MIN),
-    wanderMax: Math.max(options.wanderMin ?? WANDER_DURATION_MIN, options.wanderMax ?? WANDER_DURATION_MAX),
-    returnTolerance: options.returnTolerance ?? RETURN_TOLERANCE,
+    wanderRadius: Math.max(8, wanderRadius || WANDER_RADIUS),
+    wanderMin: Math.max(10, wanderMin ?? WANDER_DURATION_MIN),
+    wanderMax: Math.max(wanderMin ?? WANDER_DURATION_MIN, wanderMax ?? WANDER_DURATION_MAX),
+    returnTolerance: returnTolerance ?? RETURN_TOLERANCE,
     modeQueue: [],
+    modePool: Array.isArray(modePool) && modePool.length > 0 ? modePool.slice() : MODE_POOL.slice(),
     loopTriggered: false,
     wanderTimer: 0,
     returnFromMode: null,
     lastPatrolMode: null,
+    key: routineKey,
+    startMode,
   };
-  npcGroup.userData.__narutoRoutine = routine;
-  startPatrol(npcGroup, routine, 'walk');
+  npcGroup.userData.__narutoRoutineKey = routineKey;
+  npcGroup.userData[routineKey] = routine;
+  if (routineKey !== '__narutoRoutine') {
+    npcGroup.userData.__narutoRoutine = routine;
+  }
+  startPatrol(npcGroup, routine, routine.startMode === 'run' ? 'run' : 'walk');
 }
 
 export function updateNarutoRoutine(npcGroup, delta, objectGrid) {
-  const routine = npcGroup?.userData?.__narutoRoutine;
+  const key = npcGroup?.userData?.__narutoRoutineKey || '__narutoRoutine';
+  const routine = npcGroup?.userData?.[key] || npcGroup?.userData?.__narutoRoutine;
   if (!routine) return;
   const collisionLocked = ensureNpcCollisionIdle(npcGroup, delta, objectGrid);
   if (npcGroup.userData?.interacting) {

@@ -1,26 +1,7 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
-import { attachWanderFree } from './behaviors/wanderFree.js';
-import { attachRoadPatrol } from './behaviors/roadPatrol.js';
+import { attachShikamaruRoutine } from './behaviors/shikamaruRoutine.js';
 import { getPlayerIdentity } from '../player/identity.js';
-import { loadKonohaRoads } from '/src/components/game/objects/konoha_roads.js';
-import { WORLD_SIZE } from '/src/scene/terrain.js';
-
-const WORLD_HALF = WORLD_SIZE / 2;
-
-function districtPolygonToWorld(points) {
-  if (!Array.isArray(points)) return null;
-  const poly = points
-    .map((point) => {
-      if (!Array.isArray(point) || point.length < 2) return null;
-      const x = (Number(point[0]) / 100) * WORLD_SIZE - WORLD_HALF;
-      const z = (Number(point[1]) / 100) * WORLD_SIZE - WORLD_HALF;
-      if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-      return { x, z };
-    })
-    .filter(Boolean);
-  return poly.length >= 3 ? poly : null;
-}
 
 export function createShikamaru(scene, settings, position = new THREE.Vector3()) {
   return createNpcRig({
@@ -60,50 +41,9 @@ export function createShikamaru(scene, settings, position = new THREE.Vector3())
         } catch (_) {}
       };
     } catch (_) {}
-    const applyRoam = (polygon) => {
-      const fallbackWander = () => {
-        const options = { speed: 5.5 };
-        if (polygon) {
-          options.keepWithinPolygon = polygon;
-        }
-        try { attachWanderFree(group, options); } catch (_) {}
-      };
-
-      try {
-        attachRoadPatrol(group, {
-          speed: 5.6,
-          pauseChance: 0.55,
-          pauseMin: 1.2,
-          pauseMax: 3.8,
-          minRoadWidth: 2.5,
-          restrictToPolygon: polygon,
-          deviation: {
-            chance: 0.45,
-            radius: polygon ? 14 : 18,
-            speed: 5,
-            durationMin: 2,
-            durationMax: 22,
-            pauseChance: 0.55,
-            pauseMin: 0.9,
-            pauseMax: 3.2,
-            radiusCollision: group.userData?.collider?.radius ?? 2.0,
-          },
-          onError: fallbackWander,
-        });
-      } catch (_) {
-        fallbackWander();
-      }
-    };
-
-    loadKonohaRoads()
-      .then(({ districts }) => {
-        const district = districts?.Nara || districts?.nara;
-        const polygon = districtPolygonToWorld(district?.points);
-        applyRoam(polygon);
-      })
-      .catch(() => {
-        applyRoam(null);
-      });
+    try {
+      attachShikamaruRoutine(group, { spawnPosition: group.position.clone() });
+    } catch (_) {}
     return group;
   });
 }
