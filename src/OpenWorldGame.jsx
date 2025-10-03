@@ -261,6 +261,7 @@ const OpenWorldGame = () => {
   const musicWasPlayingRef = useRef(false);
   const [showNpcDialog, setShowNpcDialog] = useState(false);
   const [npcDialogData, setNpcDialogData] = useState(null);
+  const npcDialogWasOpenRef = useRef(false);
   const releasePauseMenu = useCallback(() => {
     const wasPausedBefore = window.__pauseMenuWasPausedBefore;
     delete window.__pauseMenuActive;
@@ -319,6 +320,22 @@ const OpenWorldGame = () => {
       window.removeEventListener("open-npc-dialog", openNpc);
     };
   }, []);
+  useEffect(() => {
+    const wasOpen = npcDialogWasOpenRef.current;
+    npcDialogWasOpenRef.current = showNpcDialog;
+    if (wasOpen && !showNpcDialog) {
+      try { window.__npcDialogActive = false; } catch (_) {}
+      try { window.__clearPlayerControlState?.(); } catch (_) {}
+      try {
+        if (window.__npcInteracting) {
+          window.__npcInteracting.userData.interacting = false;
+          delete window.__npcInteracting;
+        }
+      } catch (_) {}
+      try { delete window.__resumePointerLockAfterDialog; } catch (_) {}
+      try { delete window.__suspendPointerLockSync; } catch (_) {}
+    }
+  }, [showNpcDialog]);
   const getInitialLoadingSteps = React.useCallback(() => ([
     {
       id: 'prefetch',
