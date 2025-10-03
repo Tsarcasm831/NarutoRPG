@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
+import { ensureNpcCollisionIdle } from '../common.js';
 import { attachRoadPatrol } from './roadPatrol.js';
 import { attachWanderFree } from './wanderFree.js';
 
@@ -213,6 +214,7 @@ export function attachNarutoRoutine(npcGroup, options = {}) {
 export function updateNarutoRoutine(npcGroup, delta, objectGrid) {
   const routine = npcGroup?.userData?.__narutoRoutine;
   if (!routine) return;
+  const collisionLocked = ensureNpcCollisionIdle(npcGroup, delta, objectGrid);
   if (npcGroup.userData?.interacting) {
     playIdleAnimation(npcGroup);
     return;
@@ -226,6 +228,10 @@ export function updateNarutoRoutine(npcGroup, delta, objectGrid) {
   }
 
   if (routine.state === 'returning') {
+    if (collisionLocked) {
+      playIdleAnimation(npcGroup);
+      return;
+    }
     const ai = npcGroup.userData?.ai;
     if (!ai || ai.type !== 'narutoReturn') {
       startReturn(npcGroup, routine);
