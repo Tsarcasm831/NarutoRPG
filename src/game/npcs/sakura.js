@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
-import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachSakuraRoutine } from './behaviors/sakuraRoutine.js';
 import { getPlayerIdentity } from '../player/identity.js';
 
 export function createSakura(scene, settings, position = new THREE.Vector3()) {
@@ -41,8 +41,9 @@ export function createSakura(scene, settings, position = new THREE.Vector3()) {
         } catch (_) {}
       };
     } catch (_) {}
-    // Give Sakura free-wander behavior
-    try { attachWanderFree(group, { speed: 7.5 }); } catch (_) {}
+    try {
+      attachSakuraRoutine(group, { spawnPosition: group.position.clone() });
+    } catch (_) {}
     return group;
   });
 }

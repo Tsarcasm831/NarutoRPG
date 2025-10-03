@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
-import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachSasukeRoutine } from './behaviors/sasukeRoutine.js';
 import { getPlayerIdentity } from '../player/identity.js';
 
 export function createSasuke(scene, settings, position = new THREE.Vector3()) {
@@ -41,8 +41,9 @@ export function createSasuke(scene, settings, position = new THREE.Vector3()) {
         } catch (_) {}
       };
     } catch (_) {}
-    // Give Sasuke free-wander behavior
-    try { attachWanderFree(group, { speed: 10 }); } catch (_) {}
+    try {
+      attachSasukeRoutine(group, { spawnPosition: group.position.clone() });
+    } catch (_) {}
     return group;
   });
 }
