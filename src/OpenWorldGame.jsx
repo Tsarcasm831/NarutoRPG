@@ -32,6 +32,7 @@ import HokageOfficeModal from "./components/UI/HokageOfficeModal.jsx";
 import KitbashBuildingModal from "./components/UI/KitbashBuildingModal.jsx";
 import JutsuModal from "./components/UI/JutsuModal.jsx";
 import { preloadMusic, musicPlay, musicPause, musicState } from "./utils/musicManager.js";
+import { registerTimeDevtools } from "./utils/devtools.js";
 import { useGameTime } from "./hooks/useGameTime.js";
 import CharacterSelectModal from "./components/UI/CharacterSelectModal.jsx";
 import { PLAYER_CHARACTERS, getCharacterByKey, getDefaultCharacter, buildStatsForCharacter, buildInventoryForCharacter } from "./game/player/characterCatalog.js";
@@ -130,7 +131,15 @@ const OpenWorldGame = () => {
   const [showJutsuModal, setShowJutsuModal] = useState(false);
   const [quests, setQuests] = useState(() => createInitialQuests());
   // In-game time must be computed before passing to world events
-  const { timeOfDayHours, formattedTime: gameClock } = useGameTime({ isRunning: gameState === "Playing", initialHour: 8, resetKey: timeResetKey });
+  const { timeOfDayHours, formattedTime: gameClock, setTimeOfDay } = useGameTime({ isRunning: gameState === "Playing", initialHour: 8, resetKey: timeResetKey });
+  const timeOfDayRef = useRef(timeOfDayHours);
+  useEffect(() => {
+    timeOfDayRef.current = timeOfDayHours;
+  }, [timeOfDayHours]);
+  useEffect(() => registerTimeDevtools({
+    getTimeOfDayHours: () => timeOfDayRef.current,
+    setTimeOfDayHours: setTimeOfDay
+  }), [setTimeOfDay]);
   const { worldState, eventOverlay, acknowledgeEvent, dismissEventOverlay, activeEvent, upcomingEvent, nextEventCountdownMs } = useWorldEvents({ gameState, timeOfDayHours });
   const uiState = {
     setShowCharacter,
