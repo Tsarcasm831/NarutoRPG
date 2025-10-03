@@ -54,3 +54,4 @@ Recent
 - NPCs: Naruto now patrols Konoha roads from MO382 and Shikamaru roams the Nara District after spawning at RJ416.
 - NPCs: Naruto alternates full road loops with ramen-side loitering, swapping between walk and run patrols after each wander.
 - NPCs: Shikamaru now follows the Nara district road grid with fallbacks to free roaming so he explores instead of pacing.
+- World: Added a gradient skysphere plus sun and moon sprites that follow the dynamic day-night cycle.
