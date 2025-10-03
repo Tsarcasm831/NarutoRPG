@@ -1,0 +1,105 @@
+{
+  "types": [
+    "Life",
+    "Attack",
+    "Defense",
+    "Ninjutsu",
+    "Resistance"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "Life": 15,
+      "Attack": 10,
+      "Defense": 6,
+      "Ninjutsu": 10,
+      "Resistance": 6
+    },
+    {
+      "level": 2,
+      "Life": 45,
+      "Attack": 30,
+      "Defense": 18,
+      "Ninjutsu": 30,
+      "Resistance": 18
+    },
+    {
+      "level": 3,
+      "Life": 69,
+      "Attack": 46,
+      "Defense": 30,
+      "Ninjutsu": 46,
+      "Resistance": 30
+    },
+    {
+      "level": 4,
+      "Life": 106,
+      "Attack": 71,
+      "Defense": 46,
+      "Ninjutsu": 71,
+      "Resistance": 46
+    },
+    {
+      "level": 5,
+      "Life": 162,
+      "Attack": 109,
+      "Defense": 71,
+      "Ninjutsu": 109,
+      "Resistance": 71
+    },
+    {
+      "level": 6,
+      "Life": 251,
+      "Attack": 168,
+      "Defense": 110,
+      "Ninjutsu": 168,
+      "Resistance": 110
+    },
+    {
+      "level": 7,
+      "Life": 384,
+      "Attack": 258,
+      "Defense": 169,
+      "Ninjutsu": 258,
+      "Resistance": 169
+    },
+    {
+      "level": 8,
+      "Life": 592,
+      "Attack": 397,
+      "Defense": 259,
+      "Ninjutsu": 397,
+      "Resistance": 259
+    }
+  ],
+  "fusion_exp_curve": [
+    {
+      "from_to": "1\u21922",
+      "exp": 10
+    },
+    {
+      "from_to": "2\u21923",
+      "exp": 30
+    },
+    {
+      "from_to": "3\u21924",
+      "exp": 90
+    },
+    {
+      "from_to": "4\u21925",
+      "exp": 270
+    },
+    {
+      "from_to": "5\u21926",
+      "exp": 810
+    },
+    {
+      "from_to": "6\u21927",
+      "exp": 2430
+    },
+    {
+      "from_to": "7\u21928",
+      "exp": 7290
+    }
+  ]
+}

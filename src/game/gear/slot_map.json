@@ -1,0 +1,22 @@
+{
+  "Weapon": {
+    "primary_stat": "Attack",
+    "magatama_type": "Attack"
+  },
+  "Clothes": {
+    "primary_stat": "Defense",
+    "magatama_type": "Defense"
+  },
+  "Headgear": {
+    "primary_stat": "Life",
+    "magatama_type": "Life"
+  },
+  "Scroll": {
+    "primary_stat": "Ninjutsu",
+    "magatama_type": "Ninjutsu"
+  },
+  "Accessory": {
+    "primary_stat": "Resistance",
+    "magatama_type": "Resistance"
+  }
+}

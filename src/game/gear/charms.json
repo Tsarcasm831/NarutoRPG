@@ -1,0 +1,25 @@
+{
+  "overview": "Charms enhance base stats on each equipment slot and gate Rainbow Magatama sockets at charm levels 3, 6, 9.",
+  "per_slot_effects": {
+    "Weapon": [
+      "Attack"
+    ],
+    "Clothes": [
+      "Defense"
+    ],
+    "Headgear": [
+      "Life"
+    ],
+    "Scroll": [
+      "Ninjutsu"
+    ],
+    "Accessory": [
+      "Resistance"
+    ]
+  },
+  "rainbow_socket_milestones": [
+    3,
+    6,
+    9
+  ]
+}

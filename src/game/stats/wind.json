@@ -1,0 +1,123 @@
+{
+  "schema_version": "0.3",
+  "meta": {
+    "id": "wind_base",
+    "name": "Wind Base",
+    "element": "Wind",
+    "rarity_tier": "common",
+    "version": "0.3",
+    "last_updated": "2025-10-03",
+    "author": "Anton + GPT-5 Thinking"
+  },
+  "leveling": {
+    "base_level": 1,
+    "max_level_hint": 120,
+    "scaling_formula": "stat(L) = floor(base[L1] * (1 + growth_rate_pct/100)^(L-1))",
+    "growth_rate_pct": {
+      "life": 9.5,
+      "attack": 10.5,
+      "defense": 9.0,
+      "ninjutsu": 10.8,
+      "resistance": 9.2
+    },
+    "example_projection": {
+      "1": {
+        "life": 90,
+        "attack": 18,
+        "defense": 14,
+        "ninjutsu": 20,
+        "resistance": 15
+      },
+      "60": {
+        "life": 19040,
+        "attack": 6510,
+        "defense": 2260,
+        "ninjutsu": 8489,
+        "resistance": 2699
+      },
+      "120": {
+        "life": 4410854,
+        "attack": 2602457,
+        "defense": 397998,
+        "ninjutsu": 3992652,
+        "resistance": 530377
+      }
+    }
+  },
+  "basic": {
+    "life": 90,
+    "attack": 18,
+    "defense": 14,
+    "ninjutsu": 20,
+    "resistance": 15
+  },
+  "softcaps": {
+    "life": {
+      "threshold": 150000,
+      "diminish_pct_per_50k": 6
+    },
+    "attack": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "defense": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "ninjutsu": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "resistance": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    }
+  },
+  "combat_secondary": {
+    "initiative": 16,
+    "critical": 12,
+    "injury": 8,
+    "combo": 9,
+    "control": 6
+  },
+  "elemental_resistance_pct": {
+    "wind": 4,
+    "fire": -4,
+    "water": 0,
+    "earth": 0,
+    "lightning": 2
+  },
+  "penetration_misc": {
+    "tai_penetration": 5,
+    "nin_penetration": 7,
+    "damage_reduction": 2,
+    "life_recovery": 1
+  },
+  "affinities": {
+    "preferred_damage_type": "NINJUTSU",
+    "status_bias": {
+      "stun": 0,
+      "burn": 0,
+      "slow": 0,
+      "bleed": 0,
+      "shock": 0
+    }
+  },
+  "tags": [
+    "template",
+    "chakra",
+    "baseline",
+    "wind"
+  ],
+  "ui": {
+    "stat_order": [
+      "life",
+      "attack",
+      "defense",
+      "ninjutsu",
+      "resistance"
+    ],
+    "show_radar": true
+  },
+  "notes": "Mobile crit-friendly template; high Ninjutsu/Attack scaling; weak early defenses but scales fast."
+}

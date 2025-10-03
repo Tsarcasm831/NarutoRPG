@@ -1,0 +1,123 @@
+{
+  "schema_version": "0.3",
+  "meta": {
+    "id": "earth_base",
+    "name": "Earth Base",
+    "element": "Earth",
+    "rarity_tier": "common",
+    "version": "0.3",
+    "last_updated": "2025-10-03",
+    "author": "Anton + GPT-5 Thinking"
+  },
+  "leveling": {
+    "base_level": 1,
+    "max_level_hint": 120,
+    "scaling_formula": "stat(L) = floor(base[L1] * (1 + growth_rate_pct/100)^(L-1))",
+    "growth_rate_pct": {
+      "life": 10.2,
+      "attack": 9.0,
+      "defense": 10.6,
+      "ninjutsu": 9.1,
+      "resistance": 10.6
+    },
+    "example_projection": {
+      "1": {
+        "life": 100,
+        "attack": 15,
+        "defense": 20,
+        "ninjutsu": 17,
+        "resistance": 20
+      },
+      "60": {
+        "life": 30811,
+        "attack": 2422,
+        "defense": 7631,
+        "ninjutsu": 2898,
+        "resistance": 7631
+      },
+      "120": {
+        "life": 10461880,
+        "attack": 426426,
+        "defense": 3220253,
+        "ninjutsu": 539006,
+        "resistance": 3220253
+      }
+    }
+  },
+  "basic": {
+    "life": 100,
+    "attack": 15,
+    "defense": 20,
+    "ninjutsu": 17,
+    "resistance": 20
+  },
+  "softcaps": {
+    "life": {
+      "threshold": 150000,
+      "diminish_pct_per_50k": 6
+    },
+    "attack": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "defense": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "ninjutsu": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "resistance": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    }
+  },
+  "combat_secondary": {
+    "initiative": 10,
+    "critical": 8,
+    "injury": 9,
+    "combo": 6,
+    "control": 7
+  },
+  "elemental_resistance_pct": {
+    "wind": 0,
+    "fire": 0,
+    "water": 2,
+    "earth": 4,
+    "lightning": -4
+  },
+  "penetration_misc": {
+    "tai_penetration": 4,
+    "nin_penetration": 5,
+    "damage_reduction": 3,
+    "life_recovery": 2
+  },
+  "affinities": {
+    "preferred_damage_type": "TAIJUTSU",
+    "status_bias": {
+      "stun": 0,
+      "burn": 0,
+      "slow": 0,
+      "bleed": 0,
+      "shock": 0
+    }
+  },
+  "tags": [
+    "template",
+    "chakra",
+    "baseline",
+    "earth"
+  ],
+  "ui": {
+    "stat_order": [
+      "life",
+      "attack",
+      "defense",
+      "ninjutsu",
+      "resistance"
+    ],
+    "show_radar": true
+  },
+  "notes": "Tank template; highest defensive growth; slower damage scaling but massive late-game EHP."
+}

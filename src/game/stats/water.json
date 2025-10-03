@@ -1,0 +1,123 @@
+{
+  "schema_version": "0.3",
+  "meta": {
+    "id": "water_base",
+    "name": "Water Base",
+    "element": "Water",
+    "rarity_tier": "common",
+    "version": "0.3",
+    "last_updated": "2025-10-03",
+    "author": "Anton + GPT-5 Thinking"
+  },
+  "leveling": {
+    "base_level": 1,
+    "max_level_hint": 120,
+    "scaling_formula": "stat(L) = floor(base[L1] * (1 + growth_rate_pct/100)^(L-1))",
+    "growth_rate_pct": {
+      "life": 9.6,
+      "attack": 9.8,
+      "defense": 9.6,
+      "ninjutsu": 11.0,
+      "resistance": 9.8
+    },
+    "example_projection": {
+      "1": {
+        "life": 95,
+        "attack": 16,
+        "defense": 15,
+        "ninjutsu": 21,
+        "resistance": 16
+      },
+      "60": {
+        "life": 21210,
+        "attack": 3977,
+        "defense": 3348,
+        "ninjutsu": 9914,
+        "resistance": 3977
+      },
+      "120": {
+        "life": 5190145,
+        "attack": 1085921,
+        "defense": 819496,
+        "ninjutsu": 5195816,
+        "resistance": 1085921
+      }
+    }
+  },
+  "basic": {
+    "life": 95,
+    "attack": 16,
+    "defense": 15,
+    "ninjutsu": 21,
+    "resistance": 16
+  },
+  "softcaps": {
+    "life": {
+      "threshold": 150000,
+      "diminish_pct_per_50k": 6
+    },
+    "attack": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "defense": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "ninjutsu": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "resistance": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    }
+  },
+  "combat_secondary": {
+    "initiative": 12,
+    "critical": 8,
+    "injury": 8,
+    "combo": 8,
+    "control": 7
+  },
+  "elemental_resistance_pct": {
+    "wind": 0,
+    "fire": 2,
+    "water": 4,
+    "earth": -4,
+    "lightning": 0
+  },
+  "penetration_misc": {
+    "tai_penetration": 4,
+    "nin_penetration": 7,
+    "damage_reduction": 2,
+    "life_recovery": 2
+  },
+  "affinities": {
+    "preferred_damage_type": "NINJUTSU",
+    "status_bias": {
+      "stun": 0,
+      "burn": 0,
+      "slow": 0,
+      "bleed": 0,
+      "shock": 0
+    }
+  },
+  "tags": [
+    "template",
+    "chakra",
+    "baseline",
+    "water"
+  ],
+  "ui": {
+    "stat_order": [
+      "life",
+      "attack",
+      "defense",
+      "ninjutsu",
+      "resistance"
+    ],
+    "show_radar": true
+  },
+  "notes": "Control and sustain; best Ninjutsu scaling; balanced defenses; excels in long fights."
+}

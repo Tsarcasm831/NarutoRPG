@@ -1,0 +1,42 @@
+{
+  "socket_unlocks_by_charm_level": [
+    {
+      "charm_level": 3,
+      "rainbow_sockets_unlocked_total": 1
+    },
+    {
+      "charm_level": 6,
+      "rainbow_sockets_unlocked_total": 2
+    },
+    {
+      "charm_level": 9,
+      "rainbow_sockets_unlocked_total": 3
+    }
+  ],
+  "levels_example_stats": [
+    {
+      "level": 7,
+      "Life": 110,
+      "Attack": 73,
+      "Ninjutsu": 73,
+      "Defense": 48,
+      "Resistance": 48
+    },
+    {
+      "level": 8,
+      "Life": 145,
+      "Attack": 97,
+      "Ninjutsu": 97,
+      "Defense": 63,
+      "Resistance": 63
+    },
+    {
+      "level": 9,
+      "Life": 185,
+      "Attack": 123,
+      "Ninjutsu": 123,
+      "Defense": 81,
+      "Resistance": 81
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "Weapon": [
+    {
+      "tier": "Genin Dart",
+      "base_attack": 21,
+      "attack_per_level": 4
+    },
+    {
+      "tier": "Chunin Kunai",
+      "base_attack": 24,
+      "attack_per_level": 5
+    },
+    {
+      "tier": "Jonin Blade +1",
+      "base_attack": 35,
+      "attack_per_level": 11
+    },
+    {
+      "tier": "Kage Sword",
+      "base_attack": 40,
+      "attack_per_level": 14
+    }
+  ],
+  "Clothes": [
+    {
+      "tier": "Genin Shirt",
+      "base_defense": 19,
+      "defense_per_level": 3
+    },
+    {
+      "tier": "Chunin Chainmail",
+      "base_defense": 22,
+      "defense_per_level": 4
+    },
+    {
+      "tier": "Jonin Vest +1",
+      "base_defense": 33,
+      "defense_per_level": 7
+    },
+    {
+      "tier": "Kage Robe",
+      "base_defense": 38,
+      "defense_per_level": 8
+    }
+  ],
+  "Headgear": [
+    {
+      "tier": "Genin Goggles",
+      "base_life": 44,
+      "life_per_level": 8
+    },
+    {
+      "tier": "Chunin Forehead Protector",
+      "base_life": 55,
+      "life_per_level": 9
+    },
+    {
+      "tier": "Jonin Mask +1",
+      "base_life": 78,
+      "life_per_level": 15
+    },
+    {
+      "tier": "Kage Hat",
+      "base_life": 89,
+      "life_per_level": 17
+    }
+  ],
+  "Scroll": [
+    {
+      "tier": "Genin Letter",
+      "base_ninjutsu": 21,
+      "ninjutsu_per_level": 4
+    },
+    {
+      "tier": "Chunin Handbook",
+      "base_ninjutsu": 24,
+      "ninjutsu_per_level": 5
+    },
+    {
+      "tier": "Jonin Scroll +1",
+      "base_ninjutsu": 35,
+      "ninjutsu_per_level": 11
+    },
+    {
+      "tier": "Kage Secret Book",
+      "base_ninjutsu": 40,
+      "ninjutsu_per_level": 13
+    }
+  ],
+  "Accessory": [
+    {
+      "tier": "Genin Bronze Ring",
+      "base_resistance": 19,
+      "resistance_per_level": 3
+    },
+    {
+      "tier": "Chunin Ring",
+      "base_resistance": 22,
+      "resistance_per_level": 4
+    },
+    {
+      "tier": "Jonin Necklace +1",
+      "base_resistance": 33,
+      "resistance_per_level": 7
+    },
+    {
+      "tier": "Kage Necklace",
+      "base_resistance": 38,
+      "resistance_per_level": 8
+    }
+  ]
+}

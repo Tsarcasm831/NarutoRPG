@@ -1,0 +1,123 @@
+{
+  "schema_version": "0.3",
+  "meta": {
+    "id": "lightning_base",
+    "name": "Lightning Base",
+    "element": "Lightning",
+    "rarity_tier": "common",
+    "version": "0.3",
+    "last_updated": "2025-10-03",
+    "author": "Anton + GPT-5 Thinking"
+  },
+  "leveling": {
+    "base_level": 1,
+    "max_level_hint": 120,
+    "scaling_formula": "stat(L) = floor(base[L1] * (1 + growth_rate_pct/100)^(L-1))",
+    "growth_rate_pct": {
+      "life": 9.0,
+      "attack": 11.5,
+      "defense": 8.6,
+      "ninjutsu": 11.8,
+      "resistance": 8.9
+    },
+    "example_projection": {
+      "1": {
+        "life": 88,
+        "attack": 20,
+        "defense": 13,
+        "ninjutsu": 22,
+        "resistance": 14
+      },
+      "60": {
+        "life": 14211,
+        "attack": 12309,
+        "defense": 1690,
+        "ninjutsu": 15866,
+        "resistance": 2141
+      },
+      "120": {
+        "life": 2501704,
+        "attack": 8447714,
+        "defense": 238612,
+        "ninjutsu": 12793733,
+        "resistance": 356817
+      }
+    }
+  },
+  "basic": {
+    "life": 88,
+    "attack": 20,
+    "defense": 13,
+    "ninjutsu": 22,
+    "resistance": 14
+  },
+  "softcaps": {
+    "life": {
+      "threshold": 150000,
+      "diminish_pct_per_50k": 6
+    },
+    "attack": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "defense": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "ninjutsu": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    },
+    "resistance": {
+      "threshold": 40000,
+      "diminish_pct_per_10k": 5
+    }
+  },
+  "combat_secondary": {
+    "initiative": 18,
+    "critical": 13,
+    "injury": 8,
+    "combo": 9,
+    "control": 5
+  },
+  "elemental_resistance_pct": {
+    "wind": -4,
+    "fire": 0,
+    "water": 0,
+    "earth": 2,
+    "lightning": 4
+  },
+  "penetration_misc": {
+    "tai_penetration": 6,
+    "nin_penetration": 8,
+    "damage_reduction": 2,
+    "life_recovery": 1
+  },
+  "affinities": {
+    "preferred_damage_type": "NINJUTSU",
+    "status_bias": {
+      "stun": 0,
+      "burn": 0,
+      "slow": 0,
+      "bleed": 0,
+      "shock": 0
+    }
+  },
+  "tags": [
+    "template",
+    "chakra",
+    "baseline",
+    "lightning"
+  ],
+  "ui": {
+    "stat_order": [
+      "life",
+      "attack",
+      "defense",
+      "ninjutsu",
+      "resistance"
+    ],
+    "show_radar": true
+  },
+  "notes": "Glass-cannon opener; top initiative; peak single-target burst with crit synergy."
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.3",
+  "version": "0.3",
+  "last_updated": "2025-10-03",
+  "files": [
+    "wind.json",
+    "fire.json",
+    "water.json",
+    "earth.json",
+    "lightning.json"
+  ],
+  "element_chart": {
+    "beats": {
+      "Wind": "Lightning",
+      "Fire": "Wind",
+      "Water": "Fire",
+      "Earth": "Water",
+      "Lightning": "Earth"
+    },
+    "loses_to": {
+      "Wind": "Fire",
+      "Fire": "Water",
+      "Water": "Earth",
+      "Earth": "Lightning",
+      "Lightning": "Wind"
+    }
+  },
+  "leveling_doc": "Use multiplicative growth: stat(L) = floor(base[L1] * (1 + growth_rate_pct/100)^(L-1)). Keep L1 \u2264 100 HP. Growth rates chosen so L120 reaches hundreds of thousands to millions."
+}
