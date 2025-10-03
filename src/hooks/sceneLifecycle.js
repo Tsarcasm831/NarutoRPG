@@ -63,8 +63,8 @@ export function initThreeScene({
 
             const spawnEntries = [
               { key: 'naruto', label: 'Naruto', spawnLabel: 'MO382', create: createNaruto },
-              { key: 'sasuke', label: 'Sasuke', offset: new THREE.Vector3(-6, 0, 0), create: createSasuke },
-              { key: 'sakura', label: 'Sakura', offset: new THREE.Vector3(0, 0, 6), create: createSakura },
+              { key: 'sasuke', label: 'Sasuke', spawnLabel: 'LN318', create: createSasuke },
+              { key: 'sakura', label: 'Sakura', spawnLabel: 'KN318', create: createSakura },
               { key: 'shikamaru', label: 'Shikamaru', spawnLabel: 'RJ416', create: createShikamaru },
               { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
               { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
