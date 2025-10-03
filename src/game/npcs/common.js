@@ -204,3 +204,179 @@ export function updateNpc(group, delta) {
   if (!group || !group.userData?.mixer) return;
   try { group.userData.mixer.update(delta); } catch (_) {}
 }
+
+const COLLISION_CHAT_DURATION = 15;
+const COLLISION_CHAT_COOLDOWN = 3.5;
+const COLLISION_CHAT_SEARCH_PADDING = 2.5;
+
+function ensureCollisionState(npcGroup) {
+  if (!npcGroup?.userData) return null;
+  if (!npcGroup.userData.__collisionChatState) {
+    npcGroup.userData.__collisionChatState = {
+      active: false,
+      timer: 0,
+      cooldown: 0,
+      partnerId: null,
+      partnerRef: null,
+      playing: null,
+    };
+  }
+  return npcGroup.userData.__collisionChatState;
+}
+
+function stopAllAnimations(group) {
+  const actions = group?.userData?.animations;
+  if (!actions) return;
+  try {
+    Object.values(actions).forEach((action) => action.stop());
+  } catch (_) {}
+}
+
+function pickChatAnimation(actions) {
+  if (!actions) return null;
+  const candidates = [
+    'standAndChat',
+    'talkWithRightHand',
+    'talking',
+    'idle12',
+    'idle11',
+    'idle',
+  ];
+  for (const name of candidates) {
+    if (actions[name]) return name;
+  }
+  const values = Object.keys(actions);
+  return values.length ? values[0] : null;
+}
+
+function playChatAnimation(group, state) {
+  const actions = group?.userData?.animations;
+  if (!actions) return;
+  const desired = pickChatAnimation(actions);
+  if (!desired) return;
+  if (state.playing === desired && group.userData?.currentAnimation === desired) return;
+  const action = actions[desired];
+  if (!action) return;
+  try {
+    stopAllAnimations(group);
+    action.reset();
+    action.setLoop(THREE.LoopRepeat);
+    action.clampWhenFinished = false;
+    action.play();
+    group.userData.currentAnimation = desired;
+    state.playing = desired;
+  } catch (_) {}
+}
+
+function endCollisionState(group, state, { setCooldown = true } = {}) {
+  if (!state) return;
+  state.active = false;
+  state.timer = 0;
+  state.partnerId = null;
+  state.partnerRef = null;
+  state.playing = null;
+  if (setCooldown) {
+    state.cooldown = COLLISION_CHAT_COOLDOWN;
+  }
+}
+
+function startCollisionChat(group, state, partner, partnerState) {
+  state.active = true;
+  state.timer = COLLISION_CHAT_DURATION;
+  state.partnerId = partner?.uuid || null;
+  state.partnerRef = partner || null;
+  state.playing = null;
+  state.cooldown = 0;
+
+  if (partnerState) {
+    partnerState.active = true;
+    partnerState.timer = COLLISION_CHAT_DURATION;
+    partnerState.partnerId = group?.uuid || null;
+    partnerState.partnerRef = group || null;
+    partnerState.playing = null;
+    partnerState.cooldown = 0;
+  }
+
+  playChatAnimation(group, state);
+  if (partner && partnerState) {
+    playChatAnimation(partner, partnerState);
+  }
+}
+
+export function ensureNpcCollisionIdle(npcGroup, delta, objectGrid) {
+  if (!npcGroup || !npcGroup.userData) return false;
+  if (npcGroup.userData.interacting) return false;
+
+  const ai = npcGroup.userData.ai;
+  if (ai && ai.conversationActive) return false;
+
+  const state = ensureCollisionState(npcGroup);
+  if (!state) return false;
+
+  if (state.cooldown > 0) {
+    state.cooldown = Math.max(0, state.cooldown - (Number(delta) || 0));
+  }
+
+  if (state.active) {
+    state.timer -= Number(delta) || 0;
+    const partner = state.partnerRef;
+    const stillPartnered =
+      partner &&
+      partner.userData &&
+      partner.userData.__collisionChatState &&
+      partner.userData.__collisionChatState.partnerId === npcGroup.uuid &&
+      partner.userData.__collisionChatState.active;
+    if (state.timer <= 0 || !stillPartnered) {
+      if (partner?.userData?.__collisionChatState) {
+        endCollisionState(partner, partner.userData.__collisionChatState);
+      }
+      endCollisionState(npcGroup, state);
+      return false;
+    }
+    playChatAnimation(npcGroup, state);
+    return true;
+  }
+
+  if (!objectGrid || typeof objectGrid.getObjectsNear !== 'function') {
+    return false;
+  }
+
+  const colliderRadius = npcGroup.userData?.collider?.radius ?? 2.0;
+  const searchRadius = colliderRadius + COLLISION_CHAT_SEARCH_PADDING;
+  let nearby;
+  try {
+    nearby = objectGrid.getObjectsNear(npcGroup.position, searchRadius) || [];
+  } catch (_) {
+    nearby = [];
+  }
+
+  for (const candidate of nearby) {
+    if (!candidate || candidate === npcGroup) continue;
+    if (candidate.userData?.type !== 'npc') continue;
+    if (candidate.userData.interacting) continue;
+
+    const otherState = ensureCollisionState(candidate);
+    if (!otherState) continue;
+    if (otherState.active && otherState.partnerId !== npcGroup.uuid) continue;
+    if (state.cooldown > 0 || otherState.cooldown > 0) continue;
+
+    const otherRadius = candidate.userData?.collider?.radius ?? 2.0;
+    const totalRadius = Math.max(0.1, colliderRadius + otherRadius);
+    const dx = candidate.position.x - npcGroup.position.x;
+    const dz = candidate.position.z - npcGroup.position.z;
+    const distSq = dx * dx + dz * dz;
+    if (distSq > totalRadius * totalRadius) continue;
+
+    const myId = npcGroup.uuid || '';
+    const otherId = candidate.uuid || '';
+    if (myId > otherId) {
+      // Let the consistently ordered instance initiate the chat to avoid double-starts.
+      continue;
+    }
+
+    startCollisionChat(npcGroup, state, candidate, otherState);
+    return true;
+  }
+
+  return false;
+}

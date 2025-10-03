@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
+import { ensureNpcCollisionIdle } from '../common.js';
 
 function normalizePolygon(points) {
   if (!Array.isArray(points)) return null;
@@ -139,16 +140,7 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
   const ai = npcGroup?.userData?.ai;
   if (!ai || ai.type !== 'wanderFree') return;
 
-  if (ai.polygon && !pointInPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon)) {
-    const fallback = nearestPointOnPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon) || ai.polygonCentroid;
-    if (fallback) {
-      npcGroup.position.x = fallback.x;
-      npcGroup.position.z = fallback.z;
-      ai.dir = randDir();
-      ai.wait = 0.1;
-      ai.changeIn = ai.dirChangeMin || 1.5;
-    }
-  }
+  const collisionLocked = ensureNpcCollisionIdle(npcGroup, delta, objectGrid);
 
   // Reduce conversation cooldown each frame
   if (ai.convoCooldown > 0) ai.convoCooldown -= delta;
@@ -177,6 +169,25 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
       }
     } catch (_) {}
     return;
+  }
+
+  if (collisionLocked) {
+    if (ai.wait > 0) {
+      ai.wait -= delta;
+      if (ai.wait < 0) ai.wait = 0;
+    }
+    return;
+  }
+
+  if (ai.polygon && !pointInPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon)) {
+    const fallback = nearestPointOnPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon) || ai.polygonCentroid;
+    if (fallback) {
+      npcGroup.position.x = fallback.x;
+      npcGroup.position.z = fallback.z;
+      ai.dir = randDir();
+      ai.wait = 0.1;
+      ai.changeIn = ai.dirChangeMin || 1.5;
+    }
   }
 
   // Countdown timers

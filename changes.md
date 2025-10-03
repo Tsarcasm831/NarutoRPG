@@ -55,3 +55,5 @@ Recent
 - NPCs: Naruto alternates full road loops with ramen-side loitering, swapping between walk and run patrols after each wander.
 - NPCs: Shikamaru now follows the Nara district road grid with fallbacks to free roaming so he explores instead of pacing.
 - World: Added a gradient skysphere plus sun and moon sprites that follow the dynamic day-night cycle.
+
+- NPCs: Colliding characters now pause for 15s and play stand-and-chat style idles before resuming their routes.
