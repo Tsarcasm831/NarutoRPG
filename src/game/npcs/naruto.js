@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
 import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachRoadPatrol } from './behaviors/roadPatrol.js';
 import { getPlayerIdentity } from '../player/identity.js';
 
 export function createNaruto(scene, settings, position = new THREE.Vector3()) {
@@ -41,8 +42,18 @@ export function createNaruto(scene, settings, position = new THREE.Vector3()) {
         } catch (_) {}
       };
     } catch (_) {}
-    // Give Naruto free-wander behavior
-    try { attachWanderFree(group, { speed: 8 }); } catch (_) {}
+    // Give Naruto a road-focused patrol; fall back to free wander if unavailable
+    try {
+      attachRoadPatrol(group, {
+        speed: 8,
+        pauseChance: 0.25,
+        onError: () => {
+          try { attachWanderFree(group, { speed: 8 }); } catch (_) {}
+        }
+      });
+    } catch (_) {
+      try { attachWanderFree(group, { speed: 8 }); } catch (_) {}
+    }
     return group;
   });
 }

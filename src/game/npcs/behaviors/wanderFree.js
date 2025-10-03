@@ -1,6 +1,97 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
 
+function normalizePolygon(points) {
+  if (!Array.isArray(points)) return null;
+  const poly = points
+    .map((point) => {
+      if (!point) return null;
+      if (Array.isArray(point) && point.length >= 2) {
+        const x = Number(point[0]);
+        const z = Number(point[1]);
+        if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+        return { x, z };
+      }
+      if (typeof point === 'object' && Number.isFinite(point.x) && Number.isFinite(point.z)) {
+        return { x: Number(point.x), z: Number(point.z) };
+      }
+      return null;
+    })
+    .filter(Boolean);
+  return poly.length >= 3 ? poly : null;
+}
+
+function polygonCentroid(points) {
+  if (!Array.isArray(points) || points.length < 3) return null;
+  let area = 0;
+  let cx = 0;
+  let cz = 0;
+  const n = points.length;
+  for (let i = 0; i < n; i++) {
+    const { x: x1, z: z1 } = points[i];
+    const { x: x2, z: z2 } = points[(i + 1) % n];
+    const cross = x1 * z2 - x2 * z1;
+    area += cross;
+    cx += (x1 + x2) * cross;
+    cz += (z1 + z2) * cross;
+  }
+  area *= 0.5;
+  if (Math.abs(area) < 1e-5) {
+    const avg = points.reduce(
+      (acc, p) => ({ x: acc.x + p.x, z: acc.z + p.z }),
+      { x: 0, z: 0 }
+    );
+    return { x: avg.x / n, z: avg.z / n };
+  }
+  return { x: cx / (6 * area), z: cz / (6 * area) };
+}
+
+function pointInPolygon(x, z, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return true;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const zi = polygon[i].z;
+    const xj = polygon[j].x;
+    const zj = polygon[j].z;
+    const intersect = ((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi + 1e-9) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function projectOnSegment(px, pz, ax, az, bx, bz) {
+  const vx = bx - ax;
+  const vz = bz - az;
+  const len2 = vx * vx + vz * vz;
+  if (len2 <= 1e-9) {
+    return { x: ax, z: az, dist2: (px - ax) * (px - ax) + (pz - az) * (pz - az) };
+  }
+  const t = ((px - ax) * vx + (pz - az) * vz) / len2;
+  const clamped = Math.max(0, Math.min(1, t));
+  const x = ax + vx * clamped;
+  const z = az + vz * clamped;
+  const dx = px - x;
+  const dz = pz - z;
+  return { x, z, dist2: dx * dx + dz * dz };
+}
+
+function nearestPointOnPolygon(px, pz, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 1) return null;
+  let best = null;
+  let bestDist = Infinity;
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i];
+    const b = polygon[(i + 1) % polygon.length];
+    const proj = projectOnSegment(px, pz, a.x, a.z, b.x, b.z);
+    if (proj.dist2 < bestDist) {
+      best = { x: proj.x, z: proj.z };
+      bestDist = proj.dist2;
+    }
+  }
+  return best;
+}
+
 function randDir() {
   const a = Math.random() * Math.PI * 2;
   return { x: Math.sin(a), z: Math.cos(a) };
@@ -13,6 +104,16 @@ export function attachWanderFree(npcGroup, options = {}) {
   const pauseChance = Math.max(0, Math.min(1, options.pauseChance ?? 0.6));
   const dirChangeMin = Math.max(0.5, options.dirChangeMin ?? 3);
   const dirChangeMax = Math.max(dirChangeMin, options.dirChangeMax ?? 6);
+
+  const polygon = normalizePolygon(options.keepWithinPolygon);
+  const centroid = polygon ? polygonCentroid(polygon) : null;
+  if (polygon && !pointInPolygon(npcGroup.position.x, npcGroup.position.z, polygon)) {
+    const fallback = nearestPointOnPolygon(npcGroup.position.x, npcGroup.position.z, polygon) || centroid;
+    if (fallback) {
+      npcGroup.position.x = fallback.x;
+      npcGroup.position.z = fallback.z;
+    }
+  }
 
   npcGroup.userData.ai = {
     type: 'wanderFree',
@@ -29,12 +130,25 @@ export function attachWanderFree(npcGroup, options = {}) {
     pauseChance,
     dirChangeMin,
     dirChangeMax,
+    polygon,
+    polygonCentroid: centroid,
   };
 }
 
 export function updateWanderFree(npcGroup, delta, objectGrid) {
   const ai = npcGroup?.userData?.ai;
   if (!ai || ai.type !== 'wanderFree') return;
+
+  if (ai.polygon && !pointInPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon)) {
+    const fallback = nearestPointOnPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon) || ai.polygonCentroid;
+    if (fallback) {
+      npcGroup.position.x = fallback.x;
+      npcGroup.position.z = fallback.z;
+      ai.dir = randDir();
+      ai.wait = 0.1;
+      ai.changeIn = ai.dirChangeMin || 1.5;
+    }
+  }
 
   // Reduce conversation cooldown each frame
   if (ai.convoCooldown > 0) ai.convoCooldown -= delta;
@@ -225,6 +339,19 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
     ai.dir = randDir();
     ai.wait = 0.2 + Math.random() * 0.4;
     return;
+  }
+
+  if (ai.polygon && !pointInPolygon(resolved.x, resolved.z, ai.polygon)) {
+    const fallback = nearestPointOnPolygon(npcGroup.position.x, npcGroup.position.z, ai.polygon) || ai.polygonCentroid;
+    if (fallback) {
+      const toX = fallback.x - npcGroup.position.x;
+      const toZ = fallback.z - npcGroup.position.z;
+      const len = Math.hypot(toX, toZ) || 1;
+      ai.dir = { x: toX / len, z: toZ / len };
+      ai.wait = 0;
+      ai.changeIn = Math.max(0.5, Math.min(ai.changeIn, ai.dirChangeMin || 1.5));
+      return;
+    }
   }
 
   npcGroup.position.x = resolved.x;
