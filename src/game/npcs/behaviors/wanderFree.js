@@ -98,6 +98,14 @@ function randDir() {
   return { x: Math.sin(a), z: Math.cos(a) };
 }
 
+function isActionRunning(action) {
+  if (!action) return false;
+  if (typeof action.isRunning === 'function') {
+    try { return action.isRunning(); } catch (_) { return !!action.enabled; }
+  }
+  return !!action.enabled;
+}
+
 export function attachWanderFree(npcGroup, options = {}) {
   const speed = Math.max(3, Math.min(25, options.speed || 10));
   const pauseMin = Math.max(0, options.pauseMin ?? 2);
@@ -154,22 +162,37 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
   if (npcGroup.userData?.interacting) {
     try {
       const actions = npcGroup.userData.animations || {};
-      if (actions.idle12 && npcGroup.userData.currentAnimation !== 'idle12') {
-        Object.values(actions).forEach(a => a.stop());
-        actions.idle12.setLoop(THREE.LoopRepeat).reset().play();
-        npcGroup.userData.currentAnimation = 'idle12';
-      } else if (actions.idle11 && npcGroup.userData.currentAnimation !== 'idle11') {
-        Object.values(actions).forEach(a => a.stop());
-        actions.idle11.setLoop(THREE.LoopRepeat).reset().play();
-        npcGroup.userData.currentAnimation = 'idle11';
-      } else if (actions.idle && npcGroup.userData.currentAnimation !== 'idle') {
-        Object.values(actions).forEach(a => a.stop());
-        actions.idle.setLoop(THREE.LoopRepeat).reset().play();
-        npcGroup.userData.currentAnimation = 'idle';
+      const preferred = actions.idle12 ? 'idle12' : (actions.idle11 ? 'idle11' : (actions.idle ? 'idle' : null));
+      if (preferred) {
+        const action = actions[preferred];
+        const alreadyPlaying = npcGroup.userData.currentAnimation === preferred && isActionRunning(action);
+        if (!alreadyPlaying) {
+          Object.values(actions).forEach((a) => {
+            try { a.stop(); } catch (_) {}
+          });
+          try {
+            action.clampWhenFinished = false;
+            action.enabled = true;
+            action.paused = false;
+            action.reset();
+            action.setLoop(THREE.LoopRepeat);
+            action.play();
+          } catch (_) {}
+          npcGroup.userData.currentAnimation = preferred;
+        }
+      } else {
+        try { Object.values(actions).forEach((a) => { try { a.stop(); } catch (_) {}; }); } catch (_) {}
+        npcGroup.userData.currentAnimation = null;
       }
     } catch (_) {}
+    try { npcGroup.userData.__wasInteracting = true; } catch (_) {}
     return;
   }
+
+  if (npcGroup.userData?.__wasInteracting && !npcGroup.userData.interacting) {
+    try { npcGroup.userData.currentAnimation = null; } catch (_) {}
+  }
+  try { npcGroup.userData.__wasInteracting = !!npcGroup.userData.interacting; } catch (_) {}
 
   if (collisionLocked) {
     if (ai.wait > 0) {
@@ -382,10 +405,22 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
     const playing = npcGroup.userData.currentAnimation;
     const isMoving = movedDist > 0.01;
     const play = (name) => {
-      if (!actions[name]) return;
-      if (playing !== name) {
-        Object.values(actions).forEach(a => a.stop());
-        actions[name].setLoop(THREE.LoopRepeat).reset().play();
+      const action = actions[name];
+      if (!action) return;
+      const alreadyPlaying = playing === name && isActionRunning(action);
+      if (!alreadyPlaying) {
+        Object.values(actions).forEach((a) => {
+          if (a === action) return;
+          try { a.stop(); } catch (_) {}
+        });
+        try {
+          action.clampWhenFinished = false;
+          action.enabled = true;
+          action.paused = false;
+          action.reset();
+          action.setLoop(THREE.LoopRepeat);
+          action.play();
+        } catch (_) {}
         npcGroup.userData.currentAnimation = name;
       }
     };
