@@ -16,6 +16,20 @@ const tmpAmbientColor = new THREE.Color();
 const tmpSkyColor = new THREE.Color();
 const tmpFogColor = new THREE.Color();
 const tmpOffset = new THREE.Vector3();
+const tmpWindowColor = new THREE.Color();
+const tmpWindowEmissive = new THREE.Color();
+
+const KITBASH_DAY_START = 6;
+const KITBASH_EVENING_START = 18;
+const KITBASH_LATE_NIGHT_START = 22;
+const KITBASH_LIGHT_ON_COLOR = new THREE.Color('#ffd97a');
+const KITBASH_LIGHT_EMISSIVE = new THREE.Color('#fff3b0');
+
+const KITBASH_LIGHTING_PHASE = {
+  DAY: 'day',
+  EVENING: 'evening',
+  LATE_NIGHT: 'late-night'
+};
 
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
 const smoothstep = (edge0, edge1, x) => {
@@ -65,6 +79,10 @@ export function applyDayNightCycle({ scene, directionalLight, ambientLight, time
     scene.fog.color.copy(tmpFogColor);
   }
 
+  if (scene) {
+    updateKitbashWindowLighting({ scene, hour, lightUserData: directionalLight.userData });
+  }
+
   const defaultOffset = directionalLight.userData?.defaultOffset;
   if (defaultOffset) {
     const radius = directionalLight.userData.horizontalRadius || Math.hypot(defaultOffset.x, defaultOffset.z) || 1;
@@ -86,6 +104,126 @@ export function applyDayNightCycle({ scene, directionalLight, ambientLight, time
       directionalLight.userData.sunOffset = tmpOffset.clone();
     } else {
       directionalLight.userData.sunOffset.copy(tmpOffset);
+    }
+  }
+}
+
+function getLightingPhase(hour) {
+  if (hour >= KITBASH_LATE_NIGHT_START || hour < KITBASH_DAY_START) {
+    return KITBASH_LIGHTING_PHASE.LATE_NIGHT;
+  }
+  if (hour >= KITBASH_EVENING_START) {
+    return KITBASH_LIGHTING_PHASE.EVENING;
+  }
+  return KITBASH_LIGHTING_PHASE.DAY;
+}
+
+function ensureKitbashBuildingInfo(building) {
+  if (!building.userData) building.userData = {};
+  if (!building.userData.__kitbashWindowLighting) {
+    building.userData.__kitbashWindowLighting = {};
+  }
+  return building.userData.__kitbashWindowLighting;
+}
+
+function collectKitbashBuildings(scene) {
+  const buildings = [];
+  scene.traverse(obj => {
+    if (!obj?.userData?.isBuilding || !obj.userData.paletteName) return;
+    const info = ensureKitbashBuildingInfo(obj);
+    if (!info.materials || info.materials.length === 0) {
+      const materials = new Set();
+      obj.traverse(child => {
+        if (!child?.isMesh) return;
+        if (child.userData?.role !== 'window' || !child.material) return;
+        const mat = child.material;
+        materials.add(mat);
+        mat.userData = mat.userData || {};
+        if (!mat.userData.__kitbashWindowBase) {
+          mat.userData.__kitbashWindowBase = {
+            color: mat.color?.clone?.() || new THREE.Color(0xffffff),
+            emissive: mat.emissive?.clone?.() || new THREE.Color(0x000000),
+            intensity: typeof mat.emissiveIntensity === 'number' ? mat.emissiveIntensity : 0.7
+          };
+        }
+      });
+      info.materials = Array.from(materials);
+      info.lastAppliedState = undefined;
+      info.nightCycleId = undefined;
+      info.nightLightsOn = undefined;
+    }
+    if (info.materials && info.materials.length > 0) {
+      buildings.push({ building: obj, info });
+    }
+  });
+  return buildings;
+}
+
+function applyMaterialState(materials, state) {
+  for (const material of materials) {
+    const base = material?.userData?.__kitbashWindowBase;
+    if (!base) continue;
+
+    if (state === 'day') {
+      material.color.copy(base.color);
+      material.emissive.copy(base.emissive);
+      material.emissiveIntensity = base.intensity;
+    } else if (state === 'night-on') {
+      material.color.copy(tmpWindowColor.copy(base.color).lerp(KITBASH_LIGHT_ON_COLOR, 0.85));
+      material.emissive.copy(KITBASH_LIGHT_EMISSIVE);
+      material.emissiveIntensity = 1.4;
+    } else if (state === 'night-off') {
+      material.color.copy(tmpWindowColor.copy(base.color).multiplyScalar(0.4));
+      material.emissive.copy(tmpWindowEmissive.copy(base.emissive || base.color).multiplyScalar(0.15));
+      material.emissiveIntensity = 0.05;
+    }
+
+    material.needsUpdate = true;
+  }
+}
+
+function updateKitbashWindowLighting({ scene, hour, lightUserData }) {
+  const buildings = collectKitbashBuildings(scene);
+  if (!buildings.length) return;
+
+  if (!lightUserData.__kitbashLightingState) {
+    lightUserData.__kitbashLightingState = {
+      phase: null,
+      nightCycleId: 0,
+      nightOnProbability: 0.3
+    };
+  }
+
+  const lightingState = lightUserData.__kitbashLightingState;
+  const phase = getLightingPhase(hour);
+  if (lightingState.phase !== phase) {
+    if (phase === KITBASH_LIGHTING_PHASE.LATE_NIGHT) {
+      lightingState.nightCycleId += 1;
+    }
+    lightingState.phase = phase;
+  }
+
+  for (const { info } of buildings) {
+    if (!info.materials || info.materials.length === 0) continue;
+
+    if (phase === KITBASH_LIGHTING_PHASE.LATE_NIGHT) {
+      if (info.nightCycleId !== lightingState.nightCycleId) {
+        info.nightCycleId = lightingState.nightCycleId;
+        info.nightLightsOn = Math.random() < lightingState.nightOnProbability;
+      }
+      const desiredState = info.nightLightsOn ? 'night-on' : 'night-off';
+      if (info.lastAppliedState !== desiredState) {
+        applyMaterialState(info.materials, desiredState);
+        info.lastAppliedState = desiredState;
+      }
+    } else {
+      const desiredState = phase === KITBASH_LIGHTING_PHASE.EVENING ? 'night-on' : 'day';
+      if (info.lastAppliedState !== desiredState) {
+        applyMaterialState(info.materials, desiredState);
+        info.lastAppliedState = desiredState;
+      }
+      info.nightCycleId = undefined;
+      info.nightLightsOn = undefined;
     }
   }
 }
