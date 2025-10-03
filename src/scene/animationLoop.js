@@ -2,6 +2,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 import { updatePlayer } from '../game/player/index.js';
 import { updateWanderFree } from '/src/game/npcs/behaviors/wanderFree.js';
 import { updateRoadPatrol } from '/src/game/npcs/behaviors/roadPatrol.js';
+import { updateNarutoRoutine } from '/src/game/npcs/behaviors/narutoRoutine.js';
 import { INTERACTION_DISTANCE } from '../game/constants.js';
 import { multiplayerManager } from '../network/multiplayerManager.js';
 
@@ -316,9 +317,10 @@ export function startAnimationLoop({
                             }
                         }
                     } catch (_) {}
-                    // Per-NPC behavior (free wander attached to Shikamaru only)
+                    // Per-NPC behavior hooks
                     try { updateWanderFree(g, delta, objectGridRef.current); } catch (_) {}
                     try { updateRoadPatrol(g, delta, objectGridRef.current); } catch (_) {}
+                    try { updateNarutoRoutine(g, delta, objectGridRef.current); } catch (_) {}
                     // Ensure mixer advances regardless
                     try { g?.userData?.mixer?.update(delta); } catch (_) {}
                 }

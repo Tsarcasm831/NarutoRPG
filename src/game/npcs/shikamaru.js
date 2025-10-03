@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createNpcRig } from './common.js';
 import { attachWanderFree } from './behaviors/wanderFree.js';
+import { attachRoadPatrol } from './behaviors/roadPatrol.js';
 import { getPlayerIdentity } from '../player/identity.js';
 import { loadKonohaRoads } from '/src/components/game/objects/konoha_roads.js';
 import { WORLD_SIZE } from '/src/scene/terrain.js';
@@ -59,22 +60,38 @@ export function createShikamaru(scene, settings, position = new THREE.Vector3())
         } catch (_) {}
       };
     } catch (_) {}
-    const applyWander = (polygon) => {
-      const options = { speed: 8 };
-      if (polygon) {
-        options.keepWithinPolygon = polygon;
+    const applyRoam = (polygon) => {
+      const fallbackWander = () => {
+        const options = { speed: 8 };
+        if (polygon) {
+          options.keepWithinPolygon = polygon;
+        }
+        try { attachWanderFree(group, options); } catch (_) {}
+      };
+
+      try {
+        attachRoadPatrol(group, {
+          speed: 7,
+          pauseChance: 0.5,
+          pauseMin: 1.8,
+          pauseMax: 4.5,
+          minRoadWidth: 2.5,
+          restrictToPolygon: polygon,
+          onError: fallbackWander,
+        });
+      } catch (_) {
+        fallbackWander();
       }
-      try { attachWanderFree(group, options); } catch (_) {}
     };
 
     loadKonohaRoads()
       .then(({ districts }) => {
         const district = districts?.Nara || districts?.nara;
         const polygon = districtPolygonToWorld(district?.points);
-        applyWander(polygon);
+        applyRoam(polygon);
       })
       .catch(() => {
-        applyWander(null);
+        applyRoam(null);
       });
     return group;
   });
