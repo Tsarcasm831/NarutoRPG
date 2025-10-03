@@ -12,6 +12,27 @@ function toWorldPoint(point) {
   return { x, z };
 }
 
+function pointInPolygon(x, z, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return true;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const zi = polygon[i].z;
+    const xj = polygon[j].x;
+    const zj = polygon[j].z;
+    const intersect = ((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi + 1e-9) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function segmentWithinPolygon(segment, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return true;
+  const midX = (segment.start.x + segment.end.x) / 2;
+  const midZ = (segment.start.z + segment.end.z) / 2;
+  return pointInPolygon(midX, midZ, polygon);
+}
+
 function dist2(x1, z1, x2, z2) {
   const dx = x2 - x1;
   const dz = z2 - z1;
@@ -74,7 +95,7 @@ function pickRandom(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function buildRoadNetwork(roads, minWidth = 3) {
+function buildRoadNetwork(roads, minWidth = 3, restrictPolygon = null) {
   const segments = [];
   const nodes = new Map();
   const addNode = (key, point, segment, dir) => {
@@ -102,6 +123,7 @@ function buildRoadNetwork(roads, minWidth = 3) {
         endKey: makeNodeKey(end),
         length,
       };
+      if (restrictPolygon && !segmentWithinPolygon(segment, restrictPolygon)) continue;
       segments.push(segment);
       addNode(segment.startKey, start, segment, 1);
       addNode(segment.endKey, end, segment, -1);
@@ -156,6 +178,41 @@ function handleArrival(ai, npcGroup) {
   }
 
   const arrivedKey = ai.travelDir > 0 ? ai.currentSegment.endKey : ai.currentSegment.startKey;
+  if (ai.loopConfig) {
+    const loopState = ai.loopState || (ai.loopState = {
+      originKey: ai.loopConfig.anchorKey || null,
+      stepsSinceOrigin: 0,
+      hasLeftOrigin: false,
+      loopCount: 0,
+    });
+    if (!loopState.originKey) {
+      loopState.originKey = ai.loopConfig.anchorKey || arrivedKey;
+      loopState.stepsSinceOrigin = 0;
+      loopState.hasLeftOrigin = false;
+    } else {
+      loopState.stepsSinceOrigin += 1;
+      if (arrivedKey === loopState.originKey) {
+        if (loopState.hasLeftOrigin && loopState.stepsSinceOrigin >= ai.loopConfig.minSegments) {
+          loopState.loopCount += 1;
+          loopState.stepsSinceOrigin = 0;
+          loopState.hasLeftOrigin = false;
+          if (ai.loopConfig.onComplete) {
+            try {
+              ai.loopConfig.onComplete(loopState.loopCount, npcGroup, ai);
+            } catch (_) {}
+          }
+          if (ai.loopConfig.resetOriginOnComplete) {
+            loopState.originKey = ai.loopConfig.anchorKey || arrivedKey;
+          }
+        } else {
+          loopState.stepsSinceOrigin = 0;
+          loopState.hasLeftOrigin = false;
+        }
+      } else {
+        loopState.hasLeftOrigin = true;
+      }
+    }
+  }
   const next = chooseNextSegment(ai, arrivedKey);
   if (!next) {
     ai.travelDir *= -1;
@@ -177,6 +234,18 @@ export function attachRoadPatrol(npcGroup, options = {}) {
   const pauseChance = Math.max(0, Math.min(1, options.pauseChance ?? 0.35));
   const radius = Math.max(1.2, Math.min(3.0, options.radius || (npcGroup.userData?.collider?.radius ?? 2.0)));
   const fallback = typeof options.onError === 'function' ? options.onError : null;
+  const restrictPolygon = Array.isArray(options.restrictToPolygon) && options.restrictToPolygon.length >= 3
+    ? options.restrictToPolygon
+    : null;
+  const loopCfgRaw = options.loop && typeof options.loop === 'object' ? options.loop : null;
+  const loopConfig = loopCfgRaw
+    ? {
+        minSegments: Math.max(1, loopCfgRaw.minSegments || 4),
+        onComplete: typeof loopCfgRaw.onComplete === 'function' ? loopCfgRaw.onComplete : null,
+        anchorKey: typeof loopCfgRaw.anchorKey === 'string' && loopCfgRaw.anchorKey.length ? loopCfgRaw.anchorKey : null,
+        resetOriginOnComplete: loopCfgRaw.resetOriginOnComplete !== false,
+      }
+    : null;
 
   npcGroup.userData.ai = {
     type: 'roadPatrol',
@@ -194,11 +263,13 @@ export function attachRoadPatrol(npcGroup, options = {}) {
     segments: [],
     nodes: new Map(),
     ready: false,
+    loopConfig,
+    loopState: loopConfig ? { originKey: loopConfig.anchorKey || null, stepsSinceOrigin: 0, hasLeftOrigin: false, loopCount: 0 } : null,
   };
 
   loadKonohaRoads()
     .then(({ roads }) => {
-      const { segments, nodes } = buildRoadNetwork(roads?.all || [], options.minRoadWidth || 3);
+      const { segments, nodes } = buildRoadNetwork(roads?.all || [], options.minRoadWidth || 3, restrictPolygon);
       if (!segments.length) {
         if (fallback) fallback();
         return;
