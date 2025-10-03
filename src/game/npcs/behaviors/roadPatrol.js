@@ -1,0 +1,290 @@
+import * as THREE from 'three';
+import { resolveCollisions } from '/src/game/player/movement/collision.js';
+import { loadKonohaRoads } from '/src/components/game/objects/konoha_roads.js';
+import { WORLD_SIZE } from '/src/scene/terrain.js';
+
+const WORLD_HALF = WORLD_SIZE / 2;
+
+function toWorldPoint(point) {
+  if (!Array.isArray(point) || point.length < 2) return null;
+  const x = (Number(point[0]) / 100) * WORLD_SIZE - WORLD_HALF;
+  const z = (Number(point[1]) / 100) * WORLD_SIZE - WORLD_HALF;
+  return { x, z };
+}
+
+function dist2(x1, z1, x2, z2) {
+  const dx = x2 - x1;
+  const dz = z2 - z1;
+  return dx * dx + dz * dz;
+}
+
+function segmentProjection(px, pz, segment) {
+  const ax = segment.start.x;
+  const az = segment.start.z;
+  const bx = segment.end.x;
+  const bz = segment.end.z;
+  const vx = bx - ax;
+  const vz = bz - az;
+  const len2 = vx * vx + vz * vz;
+  if (len2 === 0) {
+    return { point: { x: ax, z: az }, t: 0, dist2: dist2(px, pz, ax, az) };
+  }
+  const t = ((px - ax) * vx + (pz - az) * vz) / len2;
+  const clamped = Math.max(0, Math.min(1, t));
+  const projX = ax + vx * clamped;
+  const projZ = az + vz * clamped;
+  return { point: { x: projX, z: projZ }, t: clamped, dist2: dist2(px, pz, projX, projZ) };
+}
+
+function makeNodeKey(point) {
+  return `${point.x.toFixed(2)},${point.z.toFixed(2)}`;
+}
+
+function ensureWalkingAnimation(npcGroup) {
+  const actions = npcGroup?.userData?.animations;
+  if (!actions) return;
+  const walkingAction = actions.running || actions.runFast || actions.walking || actions.casualWalk;
+  if (!walkingAction) return;
+  if (npcGroup.userData.currentAnimation === walkingAction._clip?.name) return;
+  try {
+    Object.values(actions).forEach((action) => action.stop());
+    walkingAction.reset();
+    walkingAction.setLoop(THREE.LoopRepeat);
+    walkingAction.play();
+    npcGroup.userData.currentAnimation = walkingAction._clip?.name || 'walking';
+  } catch (_) {}
+}
+
+function ensureIdleAnimation(npcGroup) {
+  const actions = npcGroup?.userData?.animations;
+  if (!actions) return;
+  const idle = actions.idle12 || actions.idle11 || actions.idle || actions.casualWalk;
+  if (!idle) return;
+  try {
+    Object.values(actions).forEach((action) => action.stop());
+    idle.reset();
+    idle.setLoop(THREE.LoopRepeat);
+    idle.play();
+    npcGroup.userData.currentAnimation = idle._clip?.name || 'idle';
+  } catch (_) {}
+}
+
+function pickRandom(items) {
+  if (!Array.isArray(items) || !items.length) return null;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function buildRoadNetwork(roads, minWidth = 3) {
+  const segments = [];
+  const nodes = new Map();
+  const addNode = (key, point, segment, dir) => {
+    const entry = nodes.get(key) || { point, links: [] };
+    entry.links.push({ segment, dir });
+    nodes.set(key, entry);
+  };
+
+  for (const road of roads || []) {
+    const width = Number(road.width || 0);
+    if (width < minWidth) continue;
+    const pts = Array.isArray(road.points) ? road.points.map(toWorldPoint).filter(Boolean) : [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const start = pts[i];
+      const end = pts[i + 1];
+      if (!start || !end) continue;
+      const dx = end.x - start.x;
+      const dz = end.z - start.z;
+      const length = Math.hypot(dx, dz);
+      if (!Number.isFinite(length) || length <= 0.5) continue;
+      const segment = {
+        start,
+        end,
+        startKey: makeNodeKey(start),
+        endKey: makeNodeKey(end),
+        length,
+      };
+      segments.push(segment);
+      addNode(segment.startKey, start, segment, 1);
+      addNode(segment.endKey, end, segment, -1);
+    }
+  }
+
+  return { segments, nodes };
+}
+
+function nearestSegment(position, segments) {
+  let best = null;
+  let bestDist = Infinity;
+  for (const segment of segments) {
+    const proj = segmentProjection(position.x, position.z, segment);
+    if (proj.dist2 < bestDist) {
+      bestDist = proj.dist2;
+      best = { segment, projection: proj };
+    }
+  }
+  return best;
+}
+
+function chooseNextSegment(ai, currentNodeKey) {
+  if (!currentNodeKey) return null;
+  const node = ai.nodes.get(currentNodeKey);
+  if (!node || !node.links.length) return null;
+  const alternatives = node.links.filter((link) => link.segment !== ai.currentSegment);
+  const pool = alternatives.length ? alternatives : node.links;
+  return pickRandom(pool);
+}
+
+function setTarget(ai, npcGroup, targetPoint) {
+  if (!targetPoint) return;
+  ai.targetPoint = { x: targetPoint.x, z: targetPoint.z };
+  ensureWalkingAnimation(npcGroup);
+}
+
+function handleArrival(ai, npcGroup) {
+  if (ai.mode === 'approach') {
+    ai.mode = 'patrol';
+    if (!ai.currentSegment) return;
+    const nextPoint = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
+    setTarget(ai, npcGroup, nextPoint);
+    return;
+  }
+
+  if (!ai.currentSegment) return;
+  const pauseChance = ai.pauseChance ?? 0.5;
+  if (Math.random() < pauseChance) {
+    ai.wait = ai.pauseMin + Math.random() * (ai.pauseMax - ai.pauseMin);
+    ensureIdleAnimation(npcGroup);
+  }
+
+  const arrivedKey = ai.travelDir > 0 ? ai.currentSegment.endKey : ai.currentSegment.startKey;
+  const next = chooseNextSegment(ai, arrivedKey);
+  if (!next) {
+    ai.travelDir *= -1;
+    const fallbackPoint = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
+    setTarget(ai, npcGroup, fallbackPoint);
+    return;
+  }
+
+  ai.currentSegment = next.segment;
+  ai.travelDir = next.dir;
+  const destination = ai.travelDir > 0 ? ai.currentSegment.end : ai.currentSegment.start;
+  setTarget(ai, npcGroup, destination);
+}
+
+export function attachRoadPatrol(npcGroup, options = {}) {
+  const speed = Math.max(2, Math.min(20, options.speed || 8));
+  const pauseMin = Math.max(0, options.pauseMin ?? 1.5);
+  const pauseMax = Math.max(pauseMin, options.pauseMax ?? 4);
+  const pauseChance = Math.max(0, Math.min(1, options.pauseChance ?? 0.35));
+  const radius = Math.max(1.2, Math.min(3.0, options.radius || (npcGroup.userData?.collider?.radius ?? 2.0)));
+  const fallback = typeof options.onError === 'function' ? options.onError : null;
+
+  npcGroup.userData.ai = {
+    type: 'roadPatrol',
+    speed,
+    radius,
+    wait: 0,
+    pauseMin,
+    pauseMax,
+    pauseChance,
+    targetPoint: null,
+    currentSegment: null,
+    travelDir: 1,
+    mode: 'init',
+    pendingTarget: null,
+    segments: [],
+    nodes: new Map(),
+    ready: false,
+  };
+
+  loadKonohaRoads()
+    .then(({ roads }) => {
+      const { segments, nodes } = buildRoadNetwork(roads?.all || [], options.minRoadWidth || 3);
+      if (!segments.length) {
+        if (fallback) fallback();
+        return;
+      }
+      const ai = npcGroup.userData.ai;
+      if (!ai || ai.type !== 'roadPatrol') return;
+      ai.segments = segments;
+      ai.nodes = nodes;
+      ai.ready = true;
+      const nearest = nearestSegment(npcGroup.position, segments);
+      if (nearest) {
+        ai.currentSegment = nearest.segment;
+        ai.mode = 'approach';
+        ai.travelDir = Math.random() < 0.5 ? 1 : -1;
+        ai.pendingTarget = ai.travelDir > 0 ? nearest.segment.end : nearest.segment.start;
+        setTarget(ai, npcGroup, nearest.projection.point);
+      }
+    })
+    .catch(() => {
+      if (fallback) fallback();
+    });
+}
+
+export function updateRoadPatrol(npcGroup, delta, objectGrid) {
+  const ai = npcGroup?.userData?.ai;
+  if (!ai || ai.type !== 'roadPatrol') return;
+
+  if (ai.wait > 0) {
+    ai.wait -= delta;
+    if (ai.wait <= 0) {
+      ai.wait = 0;
+      ensureWalkingAnimation(npcGroup);
+    }
+    return;
+  }
+
+  if (!ai.ready || !ai.currentSegment) return;
+  if (!ai.targetPoint) {
+    handleArrival(ai, npcGroup);
+    if (!ai.targetPoint) return;
+  }
+
+  const dx = ai.targetPoint.x - npcGroup.position.x;
+  const dz = ai.targetPoint.z - npcGroup.position.z;
+  const distance = Math.hypot(dx, dz);
+  if (distance < 0.05) {
+    if (ai.mode === 'approach' && ai.pendingTarget) {
+      setTarget(ai, npcGroup, ai.pendingTarget);
+      ai.mode = 'patrol';
+      ai.pendingTarget = null;
+      return;
+    }
+    handleArrival(ai, npcGroup);
+    return;
+  }
+
+  const step = ai.speed * delta;
+  const normX = dx / (distance || 1);
+  const normZ = dz / (distance || 1);
+  const moveX = npcGroup.position.x + normX * Math.min(step, distance);
+  const moveZ = npcGroup.position.z + normZ * Math.min(step, distance);
+
+  const intended = { x: moveX, z: moveZ };
+  const restoreFlag = npcGroup.userData.__ignoreCollision;
+  npcGroup.userData.__ignoreCollision = true;
+  const resolved = resolveCollisions(intended, ai.radius, objectGrid);
+  npcGroup.userData.__ignoreCollision = restoreFlag;
+
+  npcGroup.position.x = resolved.x;
+  npcGroup.position.z = resolved.z;
+
+  try {
+    const model = npcGroup.userData.model || npcGroup.children?.[0];
+    if (model && distance > 0.01) {
+      model.rotation.y = Math.atan2(normX, normZ);
+    }
+  } catch (_) {}
+
+  if (Math.hypot(ai.targetPoint.x - npcGroup.position.x, ai.targetPoint.z - npcGroup.position.z) < 0.3) {
+    if (ai.mode === 'approach' && ai.pendingTarget) {
+      setTarget(ai, npcGroup, ai.pendingTarget);
+      ai.mode = 'patrol';
+      ai.pendingTarget = null;
+    } else {
+      handleArrival(ai, npcGroup);
+    }
+  }
+}
+

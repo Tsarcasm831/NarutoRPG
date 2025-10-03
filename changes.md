@@ -49,3 +49,5 @@ Recent
 - World: Kitbashed building windows now glow at night with randomized late-night lights-out behavior tied to the day/night cycle.
 
 - Devtools: Added console helpers to jump the world clock to dawn, midday, dusk, or night presets.
+
+- NPCs: Naruto now patrols Konoha roads from MO382 and Shikamaru roams the Nara District after spawning at RJ416.

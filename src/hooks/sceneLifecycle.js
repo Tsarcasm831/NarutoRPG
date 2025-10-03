@@ -8,6 +8,8 @@ import { createShikamaru } from '../game/npcs/shikamaru.js';
 import { createNeji } from '../game/npcs/neji.js';
 import { createOrochimaru } from '../game/npcs/orochimaru.js';
 import { getPlayerIdentity } from '../game/player/identity.js';
+import { parseGridLabel, posForCell } from '../game/objects/utils/gridLabel.js';
+import { WORLD_SIZE } from '../scene/terrain.js';
 
 export function initThreeScene({
   mountRef,
@@ -60,10 +62,10 @@ export function initThreeScene({
             }
 
             const spawnEntries = [
-              { key: 'naruto', label: 'Naruto', offset: new THREE.Vector3(6, 0, 0), create: createNaruto },
+              { key: 'naruto', label: 'Naruto', spawnLabel: 'MO382', create: createNaruto },
               { key: 'sasuke', label: 'Sasuke', offset: new THREE.Vector3(-6, 0, 0), create: createSasuke },
               { key: 'sakura', label: 'Sakura', offset: new THREE.Vector3(0, 0, 6), create: createSakura },
-              { key: 'shikamaru', label: 'Shikamaru', offset: new THREE.Vector3(0, 0, -6), create: createShikamaru },
+              { key: 'shikamaru', label: 'Shikamaru', spawnLabel: 'RJ416', create: createShikamaru },
               { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
               { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
             ];
@@ -78,8 +80,20 @@ export function initThreeScene({
             }
 
             const spawnPromises = activeEntries.map((entry) => {
-              const targetPosition = base.clone().add(entry.offset.clone());
-              return entry.create(scene, { shadows: settings.shadows }, targetPosition);
+              let targetPosition = base.clone();
+              if (entry.spawnLabel) {
+                try {
+                  const { i, j } = parseGridLabel(entry.spawnLabel);
+                  targetPosition = posForCell(i, j, WORLD_SIZE);
+                } catch (_) {
+                  try {
+                    targetPosition.add(entry.offset ? entry.offset.clone() : new THREE.Vector3());
+                  } catch (_) {}
+                }
+              } else if (entry.offset) {
+                targetPosition.add(entry.offset.clone());
+              }
+              return entry.create(scene, { shadows: settings.shadows }, targetPosition.clone());
             });
 
             if (!spawnPromises.length) {
