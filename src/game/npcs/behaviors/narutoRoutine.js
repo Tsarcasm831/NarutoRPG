@@ -21,6 +21,73 @@ const WANDER_RADIUS = 20;
 const WANDER_CENTER_JITTER = 10;
 const MODE_POOL = ['walk', 'run'];
 
+const DEFAULT_WANDER_SETTINGS = {
+  speed: WANDER_SPEED,
+  pauseChance: 0.7,
+  pauseMin: 0.8,
+  pauseMax: 3.8,
+  dirChangeMin: 1.8,
+  dirChangeMax: 4.2,
+};
+
+const DEFAULT_MODE_PROFILES = {
+  walk: {
+    speed: WALK_PATROL_SPEED,
+    pauseChance: 0.32,
+    pauseMin: 1.5,
+    pauseMax: 4.2,
+    minSegments: 6,
+    deviation: {
+      chance: 0.4,
+      radiusMultiplier: 0.8,
+      radiusMin: 8,
+      speedMultiplier: 0.95,
+      speedMin: 4.2,
+      durationMin: 2,
+      durationMax: 26,
+      pauseChance: 0.5,
+      pauseMin: 0.7,
+      pauseMax: 3.6,
+    },
+  },
+  run: {
+    speed: RUN_PATROL_SPEED,
+    pauseChance: 0.1,
+    pauseMin: 0.5,
+    pauseMax: 1.6,
+    minSegments: 8,
+    deviation: {
+      chance: 0.25,
+      radiusMultiplier: 0.65,
+      radiusMin: 8,
+      speedMultiplier: 0.85,
+      speedMin: 5.5,
+      durationMin: 2,
+      durationMax: 18,
+      pauseChance: 0.35,
+      pauseMin: 0.7,
+      pauseMax: 2.4,
+    },
+  },
+};
+
+const DEFAULT_RETURN_SPEEDS = {
+  walk: RETURN_WALK_SPEED,
+  run: RETURN_RUN_SPEED,
+};
+
+function mergeModeProfile(base, override = {}) {
+  const deviation = {
+    ...(base?.deviation || {}),
+    ...(override?.deviation || {}),
+  };
+  return {
+    ...base,
+    ...override,
+    deviation,
+  };
+}
+
 function shuffle(array) {
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -45,18 +112,60 @@ function createCirclePolygon(center, radius, steps = 14) {
 function playAnimationFromCandidates(npcGroup, candidates) {
   const actions = npcGroup?.userData?.animations;
   if (!actions) return false;
+  const currentKey = npcGroup?.userData?.currentAnimation;
+  const currentAction = currentKey ? actions[currentKey] : null;
   for (let i = 0; i < candidates.length; i++) {
     const key = candidates[i];
     const action = actions[key];
     if (!action) continue;
-    const current = npcGroup.userData.currentAnimation;
-    if (current === key || current === action._clip?.name) return true;
+    if (currentAction === action) {
+      try {
+        if (typeof action.isRunning === 'function') {
+          if (!action.isRunning()) {
+            action.reset();
+            action.play();
+          }
+        } else {
+          action.enabled = true;
+          action.play();
+        }
+      } catch (_) {}
+      npcGroup.userData.currentAnimation = key;
+      npcGroup.userData.currentAnimationAction = action;
+      return true;
+    }
     try {
-      Object.values(actions).forEach((a) => a.stop());
+      action.enabled = true;
       action.reset();
       action.setLoop(THREE.LoopRepeat);
-      action.play();
+      if (currentAction && typeof currentAction.crossFadeTo === 'function') {
+        if (typeof currentAction.isRunning === 'function' && !currentAction.isRunning()) {
+          currentAction.reset();
+          currentAction.setLoop(THREE.LoopRepeat);
+          currentAction.play();
+        }
+        action.play();
+        currentAction.crossFadeTo(action, 0.35, true);
+      } else {
+        action.fadeIn?.(0.35);
+        action.play();
+        Object.values(actions).forEach((a) => {
+          if (a === action) return;
+          if (a === currentAction) {
+            a.fadeOut?.(0.35);
+            if (!a.fadeOut) {
+              a.stop?.();
+            }
+            return;
+          }
+          a.fadeOut?.(0.35);
+          if (!a.fadeOut) {
+            a.stop?.();
+          }
+        });
+      }
       npcGroup.userData.currentAnimation = key;
+      npcGroup.userData.currentAnimationAction = action;
       return true;
     } catch (_) {
       return false;
@@ -111,21 +220,23 @@ function startWander(npcGroup, routine, overrideDuration = null) {
   routine.wanderTimer = duration;
 
   const center = routine.spawn.clone();
-  if (WANDER_CENTER_JITTER > 0) {
-    center.x += (Math.random() - 0.5) * WANDER_CENTER_JITTER;
-    center.z += (Math.random() - 0.5) * WANDER_CENTER_JITTER;
+  const jitter = Math.max(0, routine.wanderCenterJitter ?? WANDER_CENTER_JITTER);
+  if (jitter > 0) {
+    center.x += (Math.random() - 0.5) * jitter;
+    center.z += (Math.random() - 0.5) * jitter;
   }
   const polygon = createCirclePolygon(center, routine.wanderRadius);
   routine.currentWanderPolygon = polygon;
 
   try {
+    const wander = routine.wanderSettings || DEFAULT_WANDER_SETTINGS;
     attachWanderFree(npcGroup, {
-      speed: WANDER_SPEED,
-      pauseChance: 0.7,
-      pauseMin: 0.8,
-      pauseMax: 3.8,
-      dirChangeMin: 1.8,
-      dirChangeMax: 4.2,
+      speed: wander.speed,
+      pauseChance: wander.pauseChance,
+      pauseMin: wander.pauseMin,
+      pauseMax: wander.pauseMax,
+      dirChangeMin: wander.dirChangeMin,
+      dirChangeMax: wander.dirChangeMax,
       keepWithinPolygon: polygon,
     });
   } catch (_) {
@@ -140,12 +251,33 @@ function startPatrol(npcGroup, routine, mode) {
   routine.lastPatrolMode = mode;
   routine.currentPatrolMode = mode;
 
-  const speed = mode === 'run' ? RUN_PATROL_SPEED : WALK_PATROL_SPEED;
-  const pauseChance = mode === 'run' ? 0.1 : 0.32;
-  const pauseMin = mode === 'run' ? 0.5 : 1.5;
-  const pauseMax = mode === 'run' ? 1.6 : 4.2;
-  const minSegments = mode === 'run' ? 8 : 6;
-  const deviationRadius = Math.max(8, routine.wanderRadius * (mode === 'run' ? 0.65 : 0.8));
+  const profile = routine.modeProfiles?.[mode] || DEFAULT_MODE_PROFILES[mode] || DEFAULT_MODE_PROFILES.walk;
+  const speed = profile.speed ?? (mode === 'run' ? RUN_PATROL_SPEED : WALK_PATROL_SPEED);
+  const pauseChance = profile.pauseChance ?? (mode === 'run' ? 0.1 : 0.32);
+  const pauseMin = profile.pauseMin ?? (mode === 'run' ? 0.5 : 1.5);
+  const pauseMax = profile.pauseMax ?? (mode === 'run' ? 1.6 : 4.2);
+  const minSegments = profile.minSegments ?? (mode === 'run' ? 8 : 6);
+  const deviationProfile = profile.deviation || {};
+  const radiusMultiplier = deviationProfile.radiusMultiplier ?? (mode === 'run' ? 0.65 : 0.8);
+  const deviationRadius = typeof deviationProfile.radius === 'number'
+    ? deviationProfile.radius
+    : Math.max(
+        deviationProfile.radiusMin ?? 8,
+        routine.wanderRadius * radiusMultiplier,
+      );
+  const speedMultiplier = deviationProfile.speedMultiplier ?? (mode === 'run' ? 0.85 : 0.95);
+  const deviationSpeed = typeof deviationProfile.speed === 'number'
+    ? deviationProfile.speed
+    : Math.max(
+        deviationProfile.speedMin ?? (mode === 'run' ? 5.5 : 4.2),
+        speed * speedMultiplier,
+      );
+  const deviationDurationMin = deviationProfile.durationMin ?? 2;
+  const deviationDurationMax = deviationProfile.durationMax ?? (mode === 'run' ? 18 : 26);
+  const deviationPauseChance = deviationProfile.pauseChance ?? (mode === 'run' ? 0.35 : 0.5);
+  const deviationPauseMin = deviationProfile.pauseMin ?? 0.7;
+  const deviationPauseMax = deviationProfile.pauseMax ?? (mode === 'run' ? 2.4 : 3.6);
+  const deviationChance = deviationProfile.chance ?? (mode === 'run' ? 0.25 : 0.4);
 
   const fallbackToWander = () => {
     startWander(npcGroup, routine, 18);
@@ -166,14 +298,14 @@ function startPatrol(npcGroup, routine, mode) {
         },
       },
       deviation: {
-        chance: mode === 'run' ? 0.25 : 0.4,
+        chance: deviationChance,
         radius: deviationRadius,
-        speed: mode === 'run' ? Math.max(5.5, speed * 0.85) : Math.max(4.2, speed * 0.95),
-        durationMin: 2,
-        durationMax: mode === 'run' ? 18 : 26,
-        pauseChance: mode === 'run' ? 0.35 : 0.5,
-        pauseMin: 0.7,
-        pauseMax: mode === 'run' ? 2.4 : 3.6,
+        speed: deviationSpeed,
+        durationMin: deviationDurationMin,
+        durationMax: deviationDurationMax,
+        pauseChance: deviationPauseChance,
+        pauseMin: deviationPauseMin,
+        pauseMax: deviationPauseMax,
         radiusCollision: npcGroup.userData?.collider?.radius ?? 2.0,
       },
       onError: fallbackToWander,
@@ -186,7 +318,10 @@ function startPatrol(npcGroup, routine, mode) {
 function startReturn(npcGroup, routine) {
   routine.state = 'returning';
   routine.loopTriggered = false;
-  const speed = routine.returnFromMode === 'run' ? RETURN_RUN_SPEED : RETURN_WALK_SPEED;
+  const speeds = routine.returnSpeeds || DEFAULT_RETURN_SPEEDS;
+  const speed = routine.returnFromMode === 'run'
+    ? (speeds.run ?? DEFAULT_RETURN_SPEEDS.run)
+    : (speeds.walk ?? DEFAULT_RETURN_SPEEDS.walk);
   routine.returnSpeed = speed;
   routine.returnTolerance = routine.returnTolerance || RETURN_TOLERANCE;
   npcGroup.userData.ai = {
@@ -208,10 +343,20 @@ export function attachNarutoRoutine(npcGroup, options = {}) {
     routineKey = '__narutoRoutine',
     modePool,
     startMode = 'walk',
+    wanderSettings,
+    modeProfiles,
+    returnSpeeds,
+    wanderCenterJitter,
   } = options || {};
   const spawn = spawnPosition && spawnPosition.isVector3
     ? spawnPosition.clone()
     : npcGroup.position.clone();
+  const mergedWanderSettings = { ...DEFAULT_WANDER_SETTINGS, ...(wanderSettings || {}) };
+  const mergedModeProfiles = {
+    walk: mergeModeProfile(DEFAULT_MODE_PROFILES.walk, modeProfiles?.walk),
+    run: mergeModeProfile(DEFAULT_MODE_PROFILES.run, modeProfiles?.run),
+  };
+  const mergedReturnSpeeds = { ...DEFAULT_RETURN_SPEEDS, ...(returnSpeeds || {}) };
   const routine = {
     state: 'init',
     spawn,
@@ -227,6 +372,10 @@ export function attachNarutoRoutine(npcGroup, options = {}) {
     lastPatrolMode: null,
     key: routineKey,
     startMode,
+    wanderSettings: mergedWanderSettings,
+    modeProfiles: mergedModeProfiles,
+    returnSpeeds: mergedReturnSpeeds,
+    wanderCenterJitter: wanderCenterJitter ?? WANDER_CENTER_JITTER,
   };
   npcGroup.userData.__narutoRoutineKey = routineKey;
   npcGroup.userData[routineKey] = routine;
