@@ -1,4 +1,6 @@
 Recent
+- NPC Animations: Cross-fade NPC locomotion clips so patrols blend smoothly instead of snapping between moves.
+- NPC Routines: Enriched Sasuke, Sakura, Neji, and Orochimaru patrol settings with bespoke wander, pause, and return profiles.
 - NPCs: Added a 7s post-chat cooldown and forced patrol animations to resume after stand-and-chat scenes.
 - NPCs: Resume wander walk cycles after interactions even for rigs without idle clips.
 - NPC Patrols: Naruto and Shikamaru now stroll their roads, wander off-route for moments, and return within half a minute.
