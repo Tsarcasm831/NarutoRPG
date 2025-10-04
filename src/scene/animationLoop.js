@@ -9,7 +9,7 @@ import { updateSakuraRoutine } from '/src/game/npcs/behaviors/sakuraRoutine.js';
 import { updateShikamaruRoutine } from '/src/game/npcs/behaviors/shikamaruRoutine.js';
 import { updateNejiRoutine } from '/src/game/npcs/behaviors/nejiRoutine.js';
 import { updateOrochimaruRoutine } from '/src/game/npcs/behaviors/orochimaruRoutine.js';
-import { ensureNpcCollisionIdle } from '/src/game/npcs/common.js';
+import { ensureNpcCollisionIdle, monitorNpcLocomotion } from '/src/game/npcs/common.js';
 import { INTERACTION_DISTANCE } from '../game/constants.js';
 import { multiplayerManager } from '../network/multiplayerManager.js';
 
@@ -333,6 +333,7 @@ export function startAnimationLoop({
                     try { updateShikamaruRoutine(g, delta, objectGridRef.current); } catch (_) {}
                     try { updateNejiRoutine(g, delta, objectGridRef.current); } catch (_) {}
                     try { updateOrochimaruRoutine(g, delta, objectGridRef.current); } catch (_) {}
+                    try { monitorNpcLocomotion(g, delta); } catch (_) {}
                     // Ensure mixer advances regardless
                     try { g?.userData?.mixer?.update(delta); } catch (_) {}
                 }
