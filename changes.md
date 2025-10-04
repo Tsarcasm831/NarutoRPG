@@ -65,3 +65,4 @@ Recent
 - NPCs: Keep the spatial grid in sync with moving characters so patrol animations play and chat collisions trigger reliably.
 - NPC Dialog: Release the interaction lock when conversations close so squadmates resume their patrol animations.
 - NPCs: Reset post-chat animations when collision conversations end so walkers immediately return to their locomotion cycles.
+- NPC Dialog: Interacting with NPCs now freezes their patrol movement, plays listening/chat poses, and resumes routes after the dialogue closes.

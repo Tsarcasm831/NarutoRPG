@@ -235,6 +235,7 @@ function stopAllAnimations(group) {
 function pickChatAnimation(actions) {
   if (!actions) return null;
   const candidates = [
+    'listeningGesture',
     'standAndChat',
     'talkWithRightHand',
     'talking',
@@ -249,23 +250,51 @@ function pickChatAnimation(actions) {
   return values.length ? values[0] : null;
 }
 
-function playChatAnimation(group, state) {
+function isActionRunning(action) {
+  if (!action) return false;
+  if (typeof action.isRunning === 'function') {
+    try {
+      return action.isRunning();
+    } catch (_) {
+      return !!action.enabled && !action.paused;
+    }
+  }
+  return !!action.enabled && !action.paused;
+}
+
+export function playNpcInteractionAnimation(group) {
   const actions = group?.userData?.animations;
-  if (!actions) return;
+  if (!actions) return false;
   const desired = pickChatAnimation(actions);
-  if (!desired) return;
-  if (state.playing === desired && group.userData?.currentAnimation === desired) return;
+  if (!desired) return false;
   const action = actions[desired];
-  if (!action) return;
+  if (!action) return false;
+  const targetName = action._clip?.name || desired;
+  if (group?.userData?.currentAnimation === targetName && isActionRunning(action)) {
+    return true;
+  }
   try {
     stopAllAnimations(group);
+    action.clampWhenFinished = false;
+    action.enabled = true;
+    action.paused = false;
     action.reset();
     action.setLoop(THREE.LoopRepeat);
-    action.clampWhenFinished = false;
     action.play();
-    group.userData.currentAnimation = desired;
-    state.playing = desired;
-  } catch (_) {}
+    if (group?.userData) {
+      group.userData.currentAnimation = targetName;
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function playChatAnimation(group, state) {
+  const played = playNpcInteractionAnimation(group);
+  if (played && group?.userData?.currentAnimation) {
+    state.playing = group.userData.currentAnimation;
+  }
 }
 
 function endCollisionState(group, state, { setCooldown = true } = {}) {
