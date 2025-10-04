@@ -275,6 +275,14 @@ function endCollisionState(group, state, { setCooldown = true } = {}) {
   state.partnerId = null;
   state.partnerRef = null;
   state.playing = null;
+  // Ensure any lingering interaction animation is cleared so locomotion logic
+  // can immediately pick the correct idle/walk cycle next frame.
+  try {
+    stopAllAnimations(group);
+    if (group?.userData) {
+      group.userData.currentAnimation = null;
+    }
+  } catch (_) {}
   if (setCooldown) {
     state.cooldown = COLLISION_CHAT_COOLDOWN;
   }
