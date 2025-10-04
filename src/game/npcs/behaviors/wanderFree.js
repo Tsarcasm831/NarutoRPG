@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
-import { ensureNpcCollisionIdle } from '../common.js';
+import { ensureNpcCollisionIdle, playNpcInteractionAnimation } from '../common.js';
 
 function normalizePolygon(points) {
   if (!Array.isArray(points)) return null;
@@ -158,33 +158,9 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
     return;
   }
 
-  // If interacting, freeze in place and play idle
+  // If interacting, freeze in place and play a conversation/listening pose
   if (npcGroup.userData?.interacting) {
-    try {
-      const actions = npcGroup.userData.animations || {};
-      const preferred = actions.idle12 ? 'idle12' : (actions.idle11 ? 'idle11' : (actions.idle ? 'idle' : null));
-      if (preferred) {
-        const action = actions[preferred];
-        const alreadyPlaying = npcGroup.userData.currentAnimation === preferred && isActionRunning(action);
-        if (!alreadyPlaying) {
-          Object.values(actions).forEach((a) => {
-            try { a.stop(); } catch (_) {}
-          });
-          try {
-            action.clampWhenFinished = false;
-            action.enabled = true;
-            action.paused = false;
-            action.reset();
-            action.setLoop(THREE.LoopRepeat);
-            action.play();
-          } catch (_) {}
-          npcGroup.userData.currentAnimation = preferred;
-        }
-      } else {
-        try { Object.values(actions).forEach((a) => { try { a.stop(); } catch (_) {}; }); } catch (_) {}
-        npcGroup.userData.currentAnimation = null;
-      }
-    } catch (_) {}
+    try { playNpcInteractionAnimation(npcGroup); } catch (_) {}
     try { npcGroup.userData.__wasInteracting = true; } catch (_) {}
     return;
   }
