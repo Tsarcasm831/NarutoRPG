@@ -66,3 +66,5 @@ Recent
 - NPC Dialog: Release the interaction lock when conversations close so squadmates resume their patrol animations.
 - NPCs: Reset post-chat animations when collision conversations end so walkers immediately return to their locomotion cycles.
 - NPC Dialog: Interacting with NPCs now freezes their patrol movement, plays listening/chat poses, and resumes routes after the dialogue closes.
+
+- NPCs: Freeze every squadmate in place during player conversations and resume their patrol paths immediately after dialogues close.

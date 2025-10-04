@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
-import { ensureNpcCollisionIdle, playNpcInteractionAnimation } from '../common.js';
+import {
+  ensureNpcCollisionIdle,
+  playNpcInteractionAnimation,
+  lockNpcInteractionPosition,
+  releaseNpcInteractionPosition,
+} from '../common.js';
 
 function normalizePolygon(points) {
   if (!Array.isArray(points)) return null;
@@ -160,10 +165,13 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
 
   // If interacting, freeze in place and play a conversation/listening pose
   if (npcGroup.userData?.interacting) {
+    try { lockNpcInteractionPosition(npcGroup); } catch (_) {}
     try { playNpcInteractionAnimation(npcGroup); } catch (_) {}
     try { npcGroup.userData.__wasInteracting = true; } catch (_) {}
     return;
   }
+
+  try { releaseNpcInteractionPosition(npcGroup); } catch (_) {}
 
   if (npcGroup.userData?.__wasInteracting && !npcGroup.userData.interacting) {
     try { npcGroup.userData.currentAnimation = null; } catch (_) {}

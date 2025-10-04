@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
-import { ensureNpcCollisionIdle, playNpcInteractionAnimation } from '../common.js';
+import {
+  ensureNpcCollisionIdle,
+  playNpcInteractionAnimation,
+  lockNpcInteractionPosition,
+  releaseNpcInteractionPosition,
+} from '../common.js';
 import { attachRoadPatrol } from './roadPatrol.js';
 import { attachWanderFree } from './wanderFree.js';
 
@@ -237,10 +242,13 @@ export function updateNarutoRoutine(npcGroup, delta, objectGrid) {
   if (!routine) return;
   const collisionLocked = ensureNpcCollisionIdle(npcGroup, delta, objectGrid);
   if (npcGroup.userData?.interacting) {
+    try { lockNpcInteractionPosition(npcGroup); } catch (_) {}
     try { npcGroup.userData.__wasInteractingRoutine = true; } catch (_) {}
     try { playNpcInteractionAnimation(npcGroup); } catch (_) {}
     return;
   }
+
+  try { releaseNpcInteractionPosition(npcGroup); } catch (_) {}
 
   if (npcGroup.userData?.__wasInteractingRoutine) {
     try { npcGroup.userData.currentAnimation = null; } catch (_) {}
