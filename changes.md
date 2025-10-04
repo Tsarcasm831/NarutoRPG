@@ -1,4 +1,5 @@
 Recent
+- NPCs: Added a 7s post-chat cooldown and forced patrol animations to resume after stand-and-chat scenes.
 - NPCs: Resume wander walk cycles after interactions even for rigs without idle clips.
 - NPC Patrols: Naruto and Shikamaru now stroll their roads, wander off-route for moments, and return within half a minute.
 - Tests: Added useWorldEvents hook coverage for countdown overlays, buffs, overrides, and dismiss flows.
