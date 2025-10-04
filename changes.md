@@ -69,3 +69,4 @@ Recent
 - NPC Dialog: Interacting with NPCs now freezes their patrol movement, plays listening/chat poses, and resumes routes after the dialogue closes.
 
 - NPCs: Freeze every squadmate in place during player conversations and resume their patrol paths immediately after dialogues close.
+- NPCs: Added a locomotion watchdog that checks long-distance movement and restarts stalled walk/run clips so characters stop sliding.

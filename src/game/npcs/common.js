@@ -209,6 +209,139 @@ const COLLISION_CHAT_DURATION = 15;
 const COLLISION_CHAT_COOLDOWN = 3.5;
 const COLLISION_CHAT_SEARCH_PADDING = 2.5;
 
+const LOCOMOTION_CHECK_DISTANCE = 6.5;
+const LOCOMOTION_CHECK_TIME = 4.5;
+const LOCOMOTION_MIN_MOVEMENT = 1.25;
+
+function ensureLocomotionState(npcGroup) {
+  if (!npcGroup?.userData) return null;
+  if (!npcGroup.userData.__locomotionMonitor) {
+    const pos = npcGroup.position || { x: 0, y: 0, z: 0 };
+    let lastPosition;
+    try {
+      lastPosition = pos.clone ? pos.clone() : new THREE.Vector3(pos.x || 0, pos.y || 0, pos.z || 0);
+    } catch (_) {
+      lastPosition = { x: Number(pos.x) || 0, y: Number(pos.y) || 0, z: Number(pos.z) || 0 };
+    }
+    npcGroup.userData.__locomotionMonitor = {
+      lastPosition,
+      distance: 0,
+      elapsed: 0,
+    };
+  }
+  return npcGroup.userData.__locomotionMonitor;
+}
+
+function pickLocomotion(actions) {
+  if (!actions) return null;
+  const candidates = ['walking', 'casualWalk', 'running', 'runFast', 'unsteadyWalk'];
+  for (const name of candidates) {
+    if (actions[name]) return name;
+  }
+  const keys = Object.keys(actions);
+  return keys.length ? keys[0] : null;
+}
+
+function pickIdle(actions) {
+  if (!actions) return null;
+  if (actions.idle12) return 'idle12';
+  if (actions.idle11) return 'idle11';
+  if (actions.idle) return 'idle';
+  if (actions.casualWalk) return 'casualWalk';
+  const keys = Object.keys(actions);
+  return keys.length ? keys[0] : null;
+}
+
+export function monitorNpcLocomotion(npcGroup, delta) {
+  if (!npcGroup?.userData || !npcGroup.position) return;
+  if (npcGroup.userData.interacting) return;
+  const ai = npcGroup.userData.ai;
+  if (ai && ai.conversationActive) return;
+
+  const state = ensureLocomotionState(npcGroup);
+  if (!state) return;
+
+  const pos = npcGroup.position;
+  const last = state.lastPosition;
+  let moved = 0;
+  if (last) {
+    const dx = (pos.x || 0) - (last.x || 0);
+    const dz = (pos.z || 0) - (last.z || 0);
+    moved = Math.hypot(dx, dz);
+  }
+
+  if (last?.copy && typeof last.copy === 'function') {
+    try { last.copy(pos); } catch (_) {}
+  } else {
+    state.lastPosition = pos.clone
+      ? pos.clone()
+      : { x: Number(pos.x) || 0, y: Number(pos.y) || 0, z: Number(pos.z) || 0 };
+  }
+
+  if (!Number.isFinite(moved)) moved = 0;
+  state.distance += moved;
+  state.elapsed += Number(delta) || 0;
+
+  if (state.distance < 1e-3 && state.elapsed < LOCOMOTION_CHECK_TIME) {
+    return;
+  }
+
+  const shouldCheck =
+    state.distance >= LOCOMOTION_CHECK_DISTANCE || state.elapsed >= LOCOMOTION_CHECK_TIME;
+  if (!shouldCheck) {
+    return;
+  }
+
+  const actions = npcGroup.userData.animations || {};
+  const currentName = npcGroup.userData.currentAnimation;
+  const currentAction = currentName ? actions[currentName] : null;
+  const isMoving = state.distance >= LOCOMOTION_MIN_MOVEMENT;
+
+  if (isMoving) {
+    const running = isActionRunning(currentAction);
+    if (!running) {
+      const locomotionName = pickLocomotion(actions);
+      if (locomotionName && actions[locomotionName]) {
+        const action = actions[locomotionName];
+        try {
+          Object.values(actions).forEach((anim) => {
+            if (anim === action) return;
+            try { anim.stop(); } catch (_) {}
+          });
+          action.clampWhenFinished = false;
+          action.enabled = true;
+          action.paused = false;
+          action.reset();
+          action.setLoop(THREE.LoopRepeat);
+          action.play();
+          npcGroup.userData.currentAnimation = action._clip?.name || locomotionName;
+        } catch (_) {}
+      }
+    }
+  } else if (currentAction && !isActionRunning(currentAction)) {
+    const idleName = pickIdle(actions);
+    if (idleName && actions[idleName]) {
+      const action = actions[idleName];
+      try {
+        Object.values(actions).forEach((anim) => {
+          if (anim === action) return;
+          try { anim.stop(); } catch (_) {}
+        });
+        action.clampWhenFinished = false;
+        action.enabled = true;
+        action.paused = false;
+        action.reset();
+        action.setLoop(THREE.LoopRepeat);
+        action.play();
+        npcGroup.userData.currentAnimation = action._clip?.name || idleName;
+      } catch (_) {}
+    }
+  }
+
+  state.distance = 0;
+  state.elapsed = 0;
+}
+
 function ensureCollisionState(npcGroup) {
   if (!npcGroup?.userData) return null;
   if (!npcGroup.userData.__collisionChatState) {
