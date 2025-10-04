@@ -423,47 +423,6 @@ export function playNpcInteractionAnimation(group) {
   }
 }
 
-export function lockNpcInteractionPosition(group) {
-  if (!group || !group.position || !group.userData) return;
-  try {
-    if (!group.userData.__interactionLockPosition) {
-      if (typeof group.position.clone === 'function') {
-        group.userData.__interactionLockPosition = group.position.clone();
-      } else {
-        group.userData.__interactionLockPosition = {
-          x: Number(group.position.x) || 0,
-          y: Number(group.position.y) || 0,
-          z: Number(group.position.z) || 0,
-        };
-      }
-    }
-
-    const lock = group.userData.__interactionLockPosition;
-    if (!lock) return;
-
-    if (typeof group.position.copy === 'function' && lock?.isVector3) {
-      group.position.copy(lock);
-    } else if (
-      typeof lock.x === 'number' &&
-      typeof lock.y === 'number' &&
-      typeof lock.z === 'number'
-    ) {
-      group.position.x = lock.x;
-      group.position.y = lock.y;
-      group.position.z = lock.z;
-    }
-  } catch (_) {}
-}
-
-export function releaseNpcInteractionPosition(group) {
-  if (!group?.userData?.__interactionLockPosition) return;
-  try {
-    delete group.userData.__interactionLockPosition;
-  } catch (_) {
-    group.userData.__interactionLockPosition = null;
-  }
-}
-
 function playChatAnimation(group, state) {
   const played = playNpcInteractionAnimation(group);
   if (played && group?.userData?.currentAnimation) {

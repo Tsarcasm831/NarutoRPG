@@ -1,7 +1,4 @@
 Recent
-- NPC Animations: Cross-fade NPC locomotion clips so patrols blend smoothly instead of snapping between moves.
-- NPC Routines: Enriched Sasuke, Sakura, Neji, and Orochimaru patrol settings with bespoke wander, pause, and return profiles.
-- NPCs: Added a 7s post-chat cooldown and forced patrol animations to resume after stand-and-chat scenes.
 - NPCs: Resume wander walk cycles after interactions even for rigs without idle clips.
 - NPC Patrols: Naruto and Shikamaru now stroll their roads, wander off-route for moments, and return within half a minute.
 - Tests: Added useWorldEvents hook coverage for countdown overlays, buffs, overrides, and dismiss flows.
@@ -69,6 +66,3 @@ Recent
 - NPC Dialog: Release the interaction lock when conversations close so squadmates resume their patrol animations.
 - NPCs: Reset post-chat animations when collision conversations end so walkers immediately return to their locomotion cycles.
 - NPC Dialog: Interacting with NPCs now freezes their patrol movement, plays listening/chat poses, and resumes routes after the dialogue closes.
-
-- NPCs: Freeze every squadmate in place during player conversations and resume their patrol paths immediately after dialogues close.
-- NPCs: Added a locomotion watchdog that checks long-distance movement and restarts stalled walk/run clips so characters stop sliding.

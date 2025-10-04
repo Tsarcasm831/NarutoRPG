@@ -2,12 +2,7 @@ import * as THREE from 'three';
 import { resolveCollisions } from '/src/game/player/movement/collision.js';
 import { loadKonohaRoads } from '/src/components/game/objects/konoha_roads.js';
 import { WORLD_SIZE } from '/src/scene/terrain.js';
-import {
-  ensureNpcCollisionIdle,
-  playNpcInteractionAnimation,
-  lockNpcInteractionPosition,
-  releaseNpcInteractionPosition,
-} from '../common.js';
+import { ensureNpcCollisionIdle, playNpcInteractionAnimation } from '../common.js';
 
 const WORLD_HALF = WORLD_SIZE / 2;
 
@@ -449,13 +444,10 @@ export function updateRoadPatrol(npcGroup, delta, objectGrid) {
   const collisionLocked = ensureNpcCollisionIdle(npcGroup, delta, objectGrid);
 
   if (npcGroup.userData?.interacting) {
-    try { lockNpcInteractionPosition(npcGroup); } catch (_) {}
     ai.__pausedForInteraction = true;
     try { playNpcInteractionAnimation(npcGroup); } catch (_) {}
     return;
   }
-
-  try { releaseNpcInteractionPosition(npcGroup); } catch (_) {}
 
   if (ai.__pausedForInteraction) {
     ai.__pausedForInteraction = false;
