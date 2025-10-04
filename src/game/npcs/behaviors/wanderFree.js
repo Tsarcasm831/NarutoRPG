@@ -103,6 +103,65 @@ function randDir() {
   return { x: Math.sin(a), z: Math.cos(a) };
 }
 
+function pickLocomotionAction(actions) {
+  if (!actions) return null;
+  return (
+    (actions.walking && 'walking') ||
+    (actions.casualWalk && 'casualWalk') ||
+    (actions.running && 'running') ||
+    (actions.runFast && 'runFast') ||
+    null
+  );
+}
+
+function forceLocomotionAnimation(group) {
+  if (!group?.userData) return;
+  try {
+    const actions = group.userData.animations || {};
+    const locomotion = pickLocomotionAction(actions);
+    const fallbackIdle = actions.idle12
+      ? 'idle12'
+      : (actions.idle11 ? 'idle11' : (actions.idle ? 'idle' : null));
+    const next = locomotion || fallbackIdle;
+    if (!next || !actions[next]) {
+      group.userData.currentAnimation = null;
+      return;
+    }
+    Object.values(actions).forEach((act) => {
+      if (!act || act === actions[next]) return;
+      try { act.stop(); } catch (_) {}
+    });
+    const action = actions[next];
+    try {
+      action.clampWhenFinished = false;
+      action.enabled = true;
+      action.paused = false;
+      action.reset();
+      action.setLoop(THREE.LoopRepeat);
+      action.play();
+    } catch (_) {}
+    group.userData.currentAnimation = next;
+  } catch (_) {}
+}
+
+function finishConversationAndResume(group, cooldownSeconds = 7) {
+  if (!group?.userData) return;
+  try {
+    const ai = group.userData.ai;
+    if (ai && ai.type === 'wanderFree') {
+      ai.conversationActive = false;
+      ai.wait = 0;
+      ai.dir = randDir();
+      const min = ai.dirChangeMin || 1.5;
+      const max = ai.dirChangeMax || min;
+      ai.changeIn = min + Math.random() * Math.max(0, max - min);
+      ai.convoCooldown = Math.max(0, cooldownSeconds);
+    }
+    group.userData.currentAnimation = null;
+    forceLocomotionAnimation(group);
+  } catch (_) {}
+}
+
 function isActionRunning(action) {
   if (!action) return false;
   if (typeof action.isRunning === 'function') {
@@ -301,12 +360,10 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
         // Begin conversation
         ai.conversationActive = true;
         ai.wait = 0;
-        ai.convoCooldown = 4 + Math.random() * 4;
         const partnerAI = partner.userData?.ai;
         if (partnerAI && partnerAI.type === 'wanderFree') {
           partnerAI.conversationActive = true;
           partnerAI.wait = 0;
-          partnerAI.convoCooldown = 4 + Math.random() * 4;
         }
 
         // Other NPC listens twice
@@ -321,12 +378,12 @@ export function updateWanderFree(npcGroup, delta, objectGrid) {
         // Naruto talks, then listens, then resume
         playOnce(npcGroup, narutoActions, meMixer, talkName, () => {
           playOnce(npcGroup, narutoActions, meMixer, listenNameMe || talkName, () => {
-            ai.conversationActive = false;
-            ai.wait = 0.5 + Math.random();
+            finishConversationAndResume(npcGroup, 7);
             const pAI = partner.userData?.ai;
             if (pAI && pAI.type === 'wanderFree') {
-              pAI.conversationActive = false;
-              pAI.wait = 0.5 + Math.random();
+              finishConversationAndResume(partner, 7);
+            } else {
+              forceLocomotionAnimation(partner);
             }
           });
         });
