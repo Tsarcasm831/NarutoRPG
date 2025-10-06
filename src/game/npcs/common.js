@@ -226,6 +226,7 @@ const COLLISION_CHAT_SEARCH_PADDING = 2.5;
 const LOCOMOTION_CHECK_DISTANCE = 6.5;
 const LOCOMOTION_CHECK_TIME = 4.5;
 const LOCOMOTION_MIN_MOVEMENT = 1.25;
+const LOCOMOTION_STICKY_CHECKS = 2;
 
 function ensureLocomotionState(npcGroup) {
   if (!npcGroup?.userData) return null;
@@ -241,6 +242,8 @@ function ensureLocomotionState(npcGroup) {
       lastPosition,
       distance: 0,
       elapsed: 0,
+      moveStrikes: 0,
+      idleStrikes: 0,
     };
   }
   return npcGroup.userData.__locomotionMonitor;
@@ -312,11 +315,22 @@ export function monitorNpcLocomotion(npcGroup, delta) {
   const isMoving = state.distance >= LOCOMOTION_MIN_MOVEMENT;
 
   if (isMoving) {
+    state.idleStrikes = 0;
     const running = isActionRunning(currentAction);
-    if (!running) {
-      const locomotionName = pickLocomotion(actions);
-      if (locomotionName && actions[locomotionName]) {
-        const action = actions[locomotionName];
+    const locomotionName = pickLocomotion(actions);
+    if (locomotionName && actions[locomotionName]) {
+      const action = actions[locomotionName];
+      const alreadyCurrent = currentName === (action._clip?.name || locomotionName);
+      if (!running || !alreadyCurrent) {
+        if (alreadyCurrent) {
+          state.moveStrikes = (state.moveStrikes || 0) + 1;
+          if (state.moveStrikes < LOCOMOTION_STICKY_CHECKS) {
+            state.distance = 0;
+            state.elapsed = 0;
+            return;
+          }
+        }
+        state.moveStrikes = 0;
         try {
           Object.values(actions).forEach((anim) => {
             if (anim === action) return;
@@ -330,26 +344,40 @@ export function monitorNpcLocomotion(npcGroup, delta) {
           action.play();
           npcGroup.userData.currentAnimation = action._clip?.name || locomotionName;
         } catch (_) {}
+      } else {
+        state.moveStrikes = 0;
       }
     }
   } else if (currentAction && !isActionRunning(currentAction)) {
     const idleName = pickIdle(actions);
     if (idleName && actions[idleName]) {
       const action = actions[idleName];
-      try {
-        Object.values(actions).forEach((anim) => {
-          if (anim === action) return;
-          try { anim.stop(); } catch (_) {}
-        });
-        action.clampWhenFinished = false;
-        action.enabled = true;
-        action.paused = false;
-        action.reset();
-        action.setLoop(THREE.LoopRepeat);
-        action.play();
-        npcGroup.userData.currentAnimation = action._clip?.name || idleName;
-      } catch (_) {}
+      const alreadyCurrent = currentName === (action._clip?.name || idleName);
+      if (!alreadyCurrent || state.idleStrikes >= LOCOMOTION_STICKY_CHECKS) {
+        state.idleStrikes = 0;
+        try {
+          Object.values(actions).forEach((anim) => {
+            if (anim === action) return;
+            try { anim.stop(); } catch (_) {}
+          });
+          action.clampWhenFinished = false;
+          action.enabled = true;
+          action.paused = false;
+          action.reset();
+          action.setLoop(THREE.LoopRepeat);
+          action.play();
+          npcGroup.userData.currentAnimation = action._clip?.name || idleName;
+        } catch (_) {}
+      } else {
+        state.idleStrikes += 1;
+        state.distance = 0;
+        state.elapsed = 0;
+        return;
+      }
     }
+  } else {
+    state.moveStrikes = 0;
+    state.idleStrikes = 0;
   }
 
   state.distance = 0;
