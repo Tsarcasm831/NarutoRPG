@@ -1,7 +1,7 @@
 # Planned Improvements Roadmap
 
 ## Core Gameplay
-- [ ] Build a narrative campaign spanning six story arcs with escalating stakes and cinematic cutscenes.
+- [x] Build a narrative campaign spanning six story arcs with escalating stakes and cinematic cutscenes.
 - [ ] Introduce branching mission objectives that react to player choices and squad composition.
 - [ ] Implement difficulty tiers for every mission with smarter AI and richer rewards on higher settings.
 - [ ] Add a mission grading system (S/A/B/C) that tracks time, stealth, and damage taken.

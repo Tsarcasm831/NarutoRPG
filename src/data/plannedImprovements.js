@@ -3,7 +3,7 @@ export const plannedImprovements = Object.freeze([
     id: "core-01",
     category: "Core Gameplay",
     title: "Build a narrative campaign spanning six story arcs with escalating stakes and cinematic cutscenes.",
-    completed: false
+    completed: true
   },
   {
     id: "core-02",
