@@ -76,3 +76,4 @@ Recent
 2025-10-06 21:34:24 - NPCs: Dampened locomotion restarts so walk/run loops stay smooth during long patrols.
 2025-10-06 21:58:13 - Character Panel: Rebuilt the character window with the sci-fi dossier layout and portrait hologram.
 2025-10-06 21:58:13 - Character Panel: Added interactive attribute allocation, combat power, and detailed stat readouts.
+2025-10-06 22:06:56 - Character Panel: Replaced raw JSX with precompiled createElement output so static builds avoid Unexpected token errors.
