@@ -12,7 +12,7 @@ export function createHashirama(scene, settings, position = new THREE.Vector3())
     scene,
     settings,
     name: 'Hashirama',
-    manifestPath: './src/components/json/kakashiAnimations.json',
+    manifestPath: './src/components/json/hashiramaAnimations.json',
     position,
     scale: 3.1,
     autoAdd: false,
