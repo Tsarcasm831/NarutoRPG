@@ -12,7 +12,7 @@ export function createJiraiya(scene, settings, position = new THREE.Vector3()) {
     scene,
     settings,
     name: 'Jiraiya',
-    manifestPath: './src/components/json/narutoAnimations.json',
+    manifestPath: './src/components/json/jiraiyaAnimations.json',
     position,
     scale: 3.2,
     autoAdd: false,

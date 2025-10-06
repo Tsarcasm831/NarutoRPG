@@ -12,7 +12,7 @@ export function createTsunade(scene, settings, position = new THREE.Vector3()) {
     scene,
     settings,
     name: 'Tsunade',
-    manifestPath: './src/components/json/sakuraAnimations.json',
+    manifestPath: './src/components/json/tsunadeAnimations.json',
     position,
     scale: 3.05,
     autoAdd: false,

@@ -12,7 +12,7 @@ export function createRockLee(scene, settings, position = new THREE.Vector3()) {
     scene,
     settings,
     name: 'RockLee',
-    manifestPath: './src/components/json/nejiAnimations.json',
+    manifestPath: './src/components/json/rockLeeAnimations.json',
     position,
     scale: 3.0,
     autoAdd: false,

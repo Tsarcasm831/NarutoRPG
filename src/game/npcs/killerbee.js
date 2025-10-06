@@ -12,7 +12,7 @@ export function createKillerBee(scene, settings, position = new THREE.Vector3())
     scene,
     settings,
     name: 'KillerBee',
-    manifestPath: './src/components/json/sasukeAnimations.json',
+    manifestPath: './src/components/json/killerBeeAnimations.json',
     position,
     scale: 3.15,
     autoAdd: false,
