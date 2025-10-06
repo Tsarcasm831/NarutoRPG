@@ -1,4 +1,5 @@
 Recent
+- Main Menu: Changelog button now opens the live changes.md file inside the modal for a single source of truth.
 - Docs: Added showcase automation playbook covering changelog review, running the server, and refreshing modal screenshots.
 - Campaign: Added a six-arc narrative campaign with sequential mission progression, cinematics, and a main menu overview panel.
 - NPCs: Resume wander walk cycles after interactions even for rigs without idle clips.

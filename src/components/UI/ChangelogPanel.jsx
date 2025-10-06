@@ -152,36 +152,108 @@ export const changelogData = [
   ] }
 ];
 
+const CHANGELOG_SOURCE_CANDIDATES = [
+  "changes.md",
+  "./changes.md",
+  "/changes.md"
+];
+
 const ChangelogPanel = ({ onClose }) => {
   const h = React.createElement;
+  const [content, setContent] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [sourceUrl, setSourceUrl] = React.useState(null);
 
-  // Partition changelog into Today (latest date) and Earlier
-  const latestDate = changelogData?.[0]?.date || "";
-  const todayEntries = (changelogData || []).filter(e => e.date === latestDate);
-  const olderEntries = (changelogData || []).filter(e => e.date !== latestDate);
+  React.useEffect(() => {
+    let isActive = true;
+    const loadChanges = async () => {
+      setIsLoading(true);
+      setError(null);
+      let lastError = null;
+      for (const candidate of CHANGELOG_SOURCE_CANDIDATES) {
+        try {
+          const response = await fetch(candidate, { cache: "no-store" });
+          if (!response.ok) {
+            lastError = new Error(`Request failed with status ${response.status}`);
+            continue;
+          }
+          const text = await response.text();
+          if (!isActive) {
+            return;
+          }
+          setContent(text.replace(/\r\n/g, "\n"));
+          setSourceUrl(candidate);
+          setIsLoading(false);
+          return;
+        } catch (fetchError) {
+          lastError = fetchError;
+        }
+      }
+      if (!isActive) {
+        return;
+      }
+      setError(lastError || new Error("Unable to load changes.md"));
+      setIsLoading(false);
+    };
 
-  const getItems = (entry) => entry.items || entry.changes || [];
+    loadChanges();
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
-  const renderEntry = (entry, idxPrefix = "") =>
-    h(
-      "section",
-      { key: `${idxPrefix}${entry.version}-${entry.date}`, className: "bg-gray-800/50 rounded-lg border border-yellow-700 p-4" },
-      [
-        h(
-          "div",
-          { key: "head", className: "flex items-center justify-between mb-2" },
-          [
-            h("h3", { key: "ver", className: "text-yellow-300 font-semibold" }, `v${entry.version}`),
-            h("span", { key: "date", className: "text-xs text-gray-300" }, entry.date)
-          ]
-        ),
-        h(
-          "ul",
-          { key: "list", className: "list-disc list-inside text-sm text-gray-200 space-y-1" },
-          getItems(entry).map((it, i) => h("li", { key: `i-${i}` }, it))
-        )
-      ]
+  const renderBody = () => {
+    if (isLoading) {
+      return h(
+        "div",
+        { className: "flex items-center justify-center h-full text-gray-300" },
+        "Loading changes.md…"
+      );
+    }
+
+    if (error) {
+      return h(
+        "div",
+        { className: "space-y-3" },
+        [
+          h(
+            "p",
+            { key: "error", className: "text-red-300" },
+            "We couldn't load changes.md right now."
+          ),
+          h(
+            "p",
+            { key: "details", className: "text-sm text-gray-300" },
+            error?.message || "Unknown error"
+          )
+        ]
+      );
+    }
+
+    return h(
+      "article",
+      {
+        className:
+          "font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-100 bg-gray-900/60 border border-gray-700 rounded-lg p-4"
+      },
+      content.trimEnd()
     );
+  };
+
+  const footerLink = sourceUrl
+    ? h(
+        "a",
+        {
+          key: "open",
+          href: sourceUrl,
+          target: "_blank",
+          rel: "noreferrer",
+          className: "text-sm text-yellow-300 hover:text-yellow-200 underline"
+        },
+        "Open changes.md in a new tab"
+      )
+    : null;
 
   return h(
     "div",
@@ -200,14 +272,14 @@ const ChangelogPanel = ({ onClose }) => {
             "div",
             { key: "header", className: "flex items-center justify-between px-5 py-3 bg-gray-800 border-b border-gray-700" },
             [
-              h("h2", { key: "title", className: "text-yellow-400 font-bold text-xl" }, "Changelog"),
+              h("h2", { key: "title", className: "text-yellow-400 font-bold text-xl" }, "changes.md"),
               h(
                 "button",
                 {
                   key: "close",
                   onClick: onClose,
                   className: "text-red-400 hover:text-red-300 text-2xl font-bold w-10 h-10 -mr-2 flex items-center justify-center",
-                  "aria-label": "Close changelog",
+                  "aria-label": "Close changes.md",
                   title: "Close"
                 },
                 "\u00D7"
@@ -216,27 +288,14 @@ const ChangelogPanel = ({ onClose }) => {
           ),
           h(
             "div",
-            { key: "content", className: "p-5 h-[calc(80vh-56px)] overflow-y-auto space-y-6" },
-            [
-              todayEntries.length > 0 &&
-                h(
+            { key: "content", className: "p-5 h-[calc(80vh-56px)] overflow-y-auto" },
+            [renderBody(), footerLink
+              ? h(
                   "div",
-                  { key: "today", className: "space-y-3" },
-                  [
-                    h("h3", { key: "t-h", className: "text-lg font-semibold text-yellow-200" }, "Today"),
-                    ...todayEntries.map(e => renderEntry(e, "t-"))
-                  ]
-                ),
-              olderEntries.length > 0 &&
-                h(
-                  "div",
-                  { key: "earlier", className: "space-y-3" },
-                  [
-                    h("h3", { key: "e-h", className: "text-lg font-semibold text-yellow-200" }, "Earlier"),
-                    ...olderEntries.map(e => renderEntry(e, "e-"))
-                  ]
+                  { key: "footer", className: "mt-4" },
+                  footerLink
                 )
-            ]
+              : null]
           )
         ]
       )
