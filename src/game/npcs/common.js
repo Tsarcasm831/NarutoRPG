@@ -103,44 +103,42 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
 
   const essentials = urls.filter((u) => essential.some((m) => u.endsWith(m)));
   const toLoad = essentials.length ? essentials : [urls[0]];
-  const normalizedTargets = toLoad.map((url) => normalizeUrl(url));
+  const normalizedTargets = Array.from(new Set(toLoad.map((url) => normalizeUrl(url)))).filter(Boolean);
 
-  let assets = (await Promise.all(
-    normalizedTargets.map((url) =>
-      new Promise((resolve) =>
-        loader.load(
-          url,
-          (gltf) => resolve({ gltf, url }),
-          undefined,
-          () => resolve(null)
+  const fileNames = toFileNames(urls);
+  const localUrls = fileNames.map((fn) => `${localBase}${fn}`);
+  const localEssentials = localUrls.filter((u) => essential.some((m) => u.endsWith(m)));
+  const localToLoad = Array.from(new Set((localEssentials.length ? localEssentials : localUrls))).filter(Boolean);
+
+  const loadTargets = async (targets) =>
+    (
+      await Promise.all(
+        targets.map(
+          (url) =>
+            new Promise((resolve) =>
+              loader.load(
+                url,
+                (gltf) => resolve({ gltf, url }),
+                undefined,
+                () => resolve(null)
+              )
+            )
         )
       )
-    )
-  )).filter(Boolean);
+    ).filter(Boolean);
 
-  // Fallback: if remote GLBs failed (e.g., CORS/404), try local temp files using the same filenames
-  if (!assets.length) {
+  let assets = [];
+
+  if (localToLoad.length) {
     try {
-      const fileNames = toFileNames(urls);
-      const localUrls = fileNames.map((fn) => `${localBase}${fn}`);
-      const localEssentials = localUrls.filter((u) => essential.some((m) => u.endsWith(m)));
-      const localToLoad = localEssentials.length ? localEssentials : localUrls;
-
-      assets = (await Promise.all(
-        localToLoad.map((url) =>
-          new Promise((resolve) =>
-            loader.load(
-              url,
-              (gltf) => resolve({ gltf, url }),
-              undefined,
-              () => resolve(null)
-            )
-          )
-        )
-      )).filter(Boolean);
+      assets = await loadTargets(localToLoad);
     } catch (_) {
-      // ignore, will error below if still empty
+      assets = [];
     }
+  }
+
+  if (!assets.length && normalizedTargets.length) {
+    assets = await loadTargets(normalizedTargets);
   }
 
   if (!assets.length) throw new Error(`Could not load any GLB from manifest: ${manifestPath}`);
