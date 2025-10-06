@@ -2,12 +2,12 @@
 
 Scope: Entire repository
 
-- Core reminder: After making any change, add a short, human‑readable note to `changes.md` at the repo root. This running log is the single source of truth for review and for later promotion into the in‑game changelog shown on the Main Menu.
+- Core reminder: After making any change, add a short, human‑readable note to `changes.md` at the repo root. This running log is the single source of truth for review and for later promotion into the in‑game changelog shown on the Main Menu. Do not bother saving time. Run tests and make sure everything works for the change you made. If it doesn't pass, fix it.
 
 ## Changelog Workflow
 
 - During development (every PR/commit)
-  - Append concise bullets to `changes.md` describing what changed and why if useful.
+  - Append concise bullets to `changes.md` describing what changed and why if useful. Include timestamps. Example: "2025-10-06 15:02:41 - Added new feature"
   - Prefer action‑oriented phrasing and keep items scannable. Examples: “Inventory: prevent invalid drops from equipping,” “Camera: preserve facing when exiting FPV.”
   - If you used tooling to generate file diffs (see `compare.py` below), keep or augment that summary, but still add human‑readable bullets about user‑visible changes.
 
