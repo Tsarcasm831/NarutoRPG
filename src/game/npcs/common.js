@@ -1,5 +1,6 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
+import { buildLocalNpcUrls, normalizeNpcAssetUrl } from '../../utils/npcAssetPaths.js';
 
 // Minimal set of filenames to prefer when spawning idle NPCs
 const DEFAULT_ESSENTIAL = [
@@ -39,48 +40,6 @@ function chooseDefaultAnimation(availableNames) {
   return availableNames[0] || null;
 }
 
-function toFileNames(urls) {
-  return urls.map((u) => u.substring(u.lastIndexOf('/') + 1)).filter(Boolean);
-}
-
-function localBaseFor(name) {
-  const normalized = (name || '').toLowerCase().split(/\s+/)[0];
-  switch (normalized) {
-    case 'naruto':
-      return 'temp/Naruto/biped/';
-    case 'sasuke':
-      return 'temp/Sasuke/';
-    case 'sakura':
-      return 'temp/Sakura/biped/';
-    case 'shikamaru':
-      return 'temp/Shikamaru/';
-    case 'neji':
-      return 'temp/Neji/biped/';
-    case 'orochimaru':
-      return 'temp/Orochimaru/biped/';
-    case 'kakashi':
-      return 'temp/Kakashi_Jonin/';
-    case 'hashirama':
-      return 'temp/hashirama/biped/';
-    case 'jiraiya':
-      return 'temp/jiraiya/biped/';
-    case 'killerbee':
-    case 'killer':
-    case 'bee':
-      return 'temp/killerbee/biped/';
-    case 'rocklee':
-    case 'rock':
-    case 'lee':
-      return 'temp/rocklee/biped/';
-    case 'tsunade':
-      return 'temp/tsunade/biped/';
-    default:
-      return 'temp/';
-  }
-}
-
-const ABSOLUTE_URL_REGEX = /^(?:https?:)?\/\//i;
-
 export async function loadCharacterAssetsFromManifest(manifestPath, essential = DEFAULT_ESSENTIAL, characterName = '') {
   const loader = new GLTFLoader();
 
@@ -90,24 +49,13 @@ export async function loadCharacterAssetsFromManifest(manifestPath, essential = 
   const urls = Array.isArray(data?.files) ? data.files : [];
   if (!urls.length) throw new Error(`No files in manifest: ${manifestPath}`);
 
-  const localBase = localBaseFor(characterName);
-  const normalizeUrl = (value) => {
-    const url = typeof value === 'string' ? value.trim() : '';
-    if (!url) return url;
-    if (ABSOLUTE_URL_REGEX.test(url) || url.startsWith('blob:') || url.startsWith('data:')) return url;
-    if (url.startsWith('/')) return url;
-    if (url.startsWith('temp/')) return url;
-    if (url.startsWith('./') || url.startsWith('../')) return url;
-    const fileName = url.substring(url.lastIndexOf('/') + 1);
-    return `${localBase}${fileName}`;
-  };
+  const normalizeUrl = (value) => normalizeNpcAssetUrl(value, characterName);
 
   const essentials = urls.filter((u) => essential.some((m) => u.endsWith(m)));
   const toLoad = essentials.length ? essentials : [urls[0]];
   const normalizedTargets = Array.from(new Set(toLoad.map((url) => normalizeUrl(url)))).filter(Boolean);
 
-  const fileNames = toFileNames(urls);
-  const localUrls = fileNames.map((fn) => `${localBase}${fn}`);
+  const localUrls = buildLocalNpcUrls(urls, characterName);
   const localEssentials = localUrls.filter((u) => essential.some((m) => u.endsWith(m)));
   const localToLoad = Array.from(new Set((localEssentials.length ? localEssentials : localUrls))).filter(Boolean);
 

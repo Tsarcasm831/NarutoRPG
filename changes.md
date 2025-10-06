@@ -1,4 +1,5 @@
 Recent
+- 2025-10-06 16:34:26 - Loading: Preload the selected shinobi's GLBs asynchronously and surface per-clip progress on the loading screen.
 - NPCs: Hashirama, Jiraiya, Killer Bee, Rock Lee, and Tsunade now load their temp-packaged GLBs before remote fallbacks so their updated models appear in-game.
 - Main Menu: Changelog button now opens the live changes.md file inside the modal for a single source of truth.
 - Docs: Added showcase automation playbook covering changelog review, running the server, and refreshing modal screenshots.

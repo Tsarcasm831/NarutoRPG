@@ -6,6 +6,7 @@ import { useThreeScene } from "./hooks/useThreeScene.js";
 import { usePlayerControls } from "./hooks/usePlayerControls.js";
 import { useWorldEvents } from "./hooks/useWorldEvents.js";
 import { initializeAssetLoader, startCaching } from "./utils/assetLoader.js";
+import { preloadNpcManifestAssets } from "./utils/npcAssetPreloader.js";
 import { loadDistrictLayouts } from "./utils/districtLayouts.js";
 import { prefetchLocationAssets } from "../scripts/prefetchLocationAssets.js";
 import { MainMenu } from "./components/UI/MainMenu.jsx";
@@ -384,6 +385,12 @@ const OpenWorldGame = () => {
       status: 'pending'
     },
     {
+      id: 'character',
+      label: 'Calibrating chosen shinobi',
+      description: 'Preloading animation rigs for your selected character.',
+      status: 'pending'
+    },
+    {
       id: 'audio',
       label: 'Priming soundtrack',
       description: 'Buffering key music tracks so the score can start immediately.',
@@ -425,6 +432,14 @@ const OpenWorldGame = () => {
     loadingStore.setProgress(0);
     loadingStore.setSteps(getInitialLoadingSteps());
 
+    const currentCharacter = getCharacterByKey(characterKey);
+    const heroName = currentCharacter?.name || 'Selected shinobi';
+    const heroManifest = currentCharacter?.manifest || '';
+    updateLoadingStep('character', {
+      label: `Calibrating ${heroName}`,
+      description: `Preloading animation rigs for ${heroName}.`
+    });
+
     if (!window.assetLoaderInitialized) {
       await initializeAssetLoader();
       window.assetLoaderInitialized = true;
@@ -436,33 +451,121 @@ const OpenWorldGame = () => {
       loadingStore.setProgress(mapped);
     };
 
+    const prefetchProgress = seg(0, 25);
     updateLoadingStep('prefetch', { status: 'active', note: 'Prefetching terrain tiles and location caches...' });
     try {
-      await prefetchLocationAssets(seg(0, 30));
+      await prefetchLocationAssets(prefetchProgress);
       updateLoadingStep('prefetch', { status: 'done', note: 'Terrain caches staged.' });
     } catch (e) {
-      try { seg(0, 30)(100); } catch (_) {}
+      try { prefetchProgress(100); } catch (_) {}
       updateLoadingStep('prefetch', { status: 'error', note: 'Unable to prefetch terrain; will stream live.' });
     }
 
+    const cacheProgress = seg(25, 20);
     updateLoadingStep('cache', { status: 'active', note: 'Caching character rigs, props, and textures...' });
     try {
-      await startCaching(seg(30, 50));
+      await startCaching(cacheProgress);
       updateLoadingStep('cache', { status: 'done', note: 'Asset cache ready.' });
     } catch (e) {
-      try { seg(30, 50)(100); } catch (_) {}
+      try { cacheProgress(100); } catch (_) {}
       updateLoadingStep('cache', { status: 'error', note: 'Asset caching skipped; loading will continue on demand.' });
     }
 
+    const heroProgress = seg(45, 20);
+    if (heroManifest) {
+      let heroTotal = 0;
+      let heroLoaded = 0;
+      let heroFailed = 0;
+      updateLoadingStep('character', { status: 'active', note: 'Reading animation manifest...' });
+      try {
+        const describeSource = (source) => {
+          if (!source) return '';
+          switch (source) {
+            case 'local':
+              return 'local cache';
+            case 'remote':
+              return 'remote CDN';
+            case 'manifest':
+              return 'manifest path';
+            default:
+              return source;
+          }
+        };
+        const result = await preloadNpcManifestAssets(heroManifest, {
+          characterName: heroName,
+          timeoutMs: 12000,
+          onAssetStart: ({ fileName, index, total, attempt, source }) => {
+            if (total) heroTotal = total;
+            const ordinal = index + 1;
+            const sourceLabel = describeSource(source);
+            const attemptSuffix = attempt > 1 ? ` (retry ${attempt}${sourceLabel ? ` via ${sourceLabel}` : ''})` : sourceLabel ? ` (${sourceLabel})` : '';
+            updateLoadingStep('character', {
+              status: 'active',
+              note: `${heroName}: loading ${fileName} [${ordinal}/${total || heroTotal}]${attemptSuffix}`
+            });
+          },
+          onAssetComplete: ({ ok, fileName, index, total, final }) => {
+            if (total) heroTotal = total;
+            if (!final) return;
+            if (ok) {
+              heroLoaded += 1;
+              const pct = heroTotal ? Math.round((heroLoaded / heroTotal) * 100) : 100;
+              try { heroProgress(pct); } catch (_) {}
+              updateLoadingStep('character', {
+                status: 'active',
+                note: `${heroName}: ready ${fileName} [${heroLoaded}/${heroTotal || heroLoaded}]`
+              });
+            } else {
+              heroFailed += 1;
+              const completed = heroLoaded + heroFailed;
+              const pct = heroTotal ? Math.round((completed / heroTotal) * 100) : 100;
+              try { heroProgress(pct); } catch (_) {}
+              updateLoadingStep('character', {
+                status: 'active',
+                note: `${heroName}: failed ${fileName} (${completed}/${heroTotal || completed}).`
+              });
+            }
+          }
+        });
+        try { heroProgress(100); } catch (_) {}
+        if (result.failed > 0) {
+          updateLoadingStep('character', {
+            status: 'error',
+            note: `${heroName}: loaded ${Math.max(0, result.total - result.failed)}/${result.total} clips. Missing ${result.failed}.`
+          });
+        } else {
+          updateLoadingStep('character', {
+            status: 'done',
+            note: `${heroName}: all ${result.total} animations ready.`
+          });
+        }
+      } catch (error) {
+        console.error('Failed to preload NPC animations', error);
+        try { heroProgress(100); } catch (_) {}
+        updateLoadingStep('character', {
+          status: 'error',
+          note: `${heroName}: preload failed; animations will stream during play.`
+        });
+      }
+    } else {
+      try { heroProgress(100); } catch (_) {}
+      updateLoadingStep('character', {
+        status: 'error',
+        note: `${heroName}: no animation manifest available.`
+      });
+    }
+
+    const audioProgress = seg(65, 15);
     updateLoadingStep('audio', { status: 'active', note: 'Buffering soundtrack for immediate playback...' });
     try {
-      await preloadMusic(seg(80, 15));
+      await preloadMusic(audioProgress);
       updateLoadingStep('audio', { status: 'done', note: 'Music primed.' });
     } catch (_) {
-      try { seg(80, 15)(100); } catch (_) {}
+      try { audioProgress(100); } catch (_) {}
       updateLoadingStep('audio', { status: 'error', note: 'Music will stream as needed.' });
     }
 
+    const layoutProgress = seg(80, 15);
     updateLoadingStep('layouts', { status: 'active', note: 'Deploying Hidden Leaf district layouts...' });
     try {
       const ids = Object.keys(MAP_DEFAULT_MODEL?.districts || {}).filter((id) => {
@@ -471,10 +574,10 @@ const OpenWorldGame = () => {
       });
       await loadDistrictLayouts(ids);
       updateLoadingStep('layouts', { status: 'done', note: 'District plans applied.' });
-      loadingStore.updateProgress((prev) => Math.max(prev, 95));
+      try { layoutProgress(100); } catch (_) {}
     } catch (_) {
       updateLoadingStep('layouts', { status: 'error', note: 'Using fallback district layout.' });
-      loadingStore.updateProgress((prev) => Math.max(prev, 95));
+      try { layoutProgress(100); } catch (_) {}
     }
 
     updateLoadingStep('scene', { status: 'active', note: 'Initializing Hidden Leaf scene...' });

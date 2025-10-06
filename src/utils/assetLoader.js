@@ -2,7 +2,7 @@ const JSON_DIRECTORY = './src/components/json/';
 const CACHE_NAME = 'game-assets-v1';
 const REQUEST_TIMEOUT_MS = 8000;
 
-function fetchWithTimeout(input, init = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+export function fetchWithTimeout(input, init = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort('timeout'), timeoutMs);
     const merged = { ...init, signal: controller.signal };
