@@ -216,7 +216,19 @@ const OpenWorldGame = () => {
     }
 
     if (stepId !== 'squad') return;
-    const fallbackRoster = ['Naruto', 'Sasuke', 'Sakura', 'Shikamaru', 'Neji', 'Orochimaru'];
+    const fallbackRoster = [
+      'Naruto',
+      'Sasuke',
+      'Sakura',
+      'Shikamaru',
+      'Neji',
+      'Orochimaru',
+      'Hashirama',
+      'Jiraiya',
+      'Killer Bee',
+      'Rock Lee',
+      'Tsunade'
+    ];
     const roster = Array.isArray(payload?.roster) && payload.roster.length ? payload.roster : fallbackRoster;
     if (status === 'active') {
       const note = roster.length

@@ -58,6 +58,21 @@ function localBaseFor(name) {
       return 'temp/Neji/biped/';
     case 'orochimaru':
       return 'temp/Orochimaru/biped/';
+    case 'kakashi':
+      return 'temp/Kakashi_Jonin/';
+    case 'hashirama':
+      return 'temp/Kakashi_Jonin/';
+    case 'jiraiya':
+      return 'temp/Naruto/biped/';
+    case 'killerbee':
+    case 'bee':
+      return 'temp/Sasuke/';
+    case 'rocklee':
+    case 'rock':
+    case 'lee':
+      return 'temp/Neji/biped/';
+    case 'tsunade':
+      return 'temp/Sakura/biped/';
     default:
       return 'temp/';
   }

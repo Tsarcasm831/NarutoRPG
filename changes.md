@@ -68,3 +68,6 @@ Recent
 - NPCs: Keep the spatial grid in sync with moving characters so patrol animations play and chat collisions trigger reliably.
 - NPC Dialog: Release the interaction lock when conversations close so squadmates resume their patrol animations.
 - Campaign: Redesigned the campaign modal with an 80% viewport layout and tabbed sections for cleaner navigation.
+
+- NPCs: Added Hashirama, Jiraiya, Killer Bee, Rock Lee, and Tsunade with bespoke patrol tuning and dialog badges.
+- Systems: Expanded squad spawning and roster fallbacks so the new legends join existing patrol updates.

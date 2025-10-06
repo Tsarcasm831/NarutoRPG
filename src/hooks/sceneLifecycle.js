@@ -7,6 +7,11 @@ import { createSakura } from '../game/npcs/sakura.js';
 import { createShikamaru } from '../game/npcs/shikamaru.js';
 import { createNeji } from '../game/npcs/neji.js';
 import { createOrochimaru } from '../game/npcs/orochimaru.js';
+import { createHashirama } from '../game/npcs/hashirama.js';
+import { createJiraiya } from '../game/npcs/jiraiya.js';
+import { createKillerBee } from '../game/npcs/killerbee.js';
+import { createRockLee } from '../game/npcs/rocklee.js';
+import { createTsunade } from '../game/npcs/tsunade.js';
 import { getPlayerIdentity } from '../game/player/identity.js';
 import { parseGridLabel, posForCell } from '../game/objects/utils/gridLabel.js';
 import { WORLD_SIZE } from '../scene/terrain.js';
@@ -67,7 +72,12 @@ export function initThreeScene({
               { key: 'sakura', label: 'Sakura', spawnLabel: 'KN318', create: createSakura },
               { key: 'shikamaru', label: 'Shikamaru', spawnLabel: 'RJ416', create: createShikamaru },
               { key: 'neji', label: 'Neji', offset: new THREE.Vector3(8, 0, 8), create: createNeji },
-              { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru }
+              { key: 'orochimaru', label: 'Orochimaru', offset: new THREE.Vector3(-8, 0, 8), create: createOrochimaru },
+              { key: 'hashirama', label: 'Hashirama', spawnLabel: 'QP410', create: createHashirama },
+              { key: 'jiraiya', label: 'Jiraiya', spawnLabel: 'PP392', create: createJiraiya },
+              { key: 'killerbee', label: 'Killer Bee', offset: new THREE.Vector3(-14, 0, -10), create: createKillerBee },
+              { key: 'rocklee', label: 'Rock Lee', offset: new THREE.Vector3(14, 0, -8), create: createRockLee },
+              { key: 'tsunade', label: 'Tsunade', spawnLabel: 'MO376', create: createTsunade }
             ];
 
             const activeEntries = spawnEntries.filter((entry) => entry.key !== identityKey);
