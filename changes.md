@@ -65,3 +65,4 @@ Recent
 - NPCs: Added dedicated behavior modules for Sasuke, Sakura, Shikamaru, Neji, and Orochimaru that plug into the shared updater.
 - NPCs: Keep the spatial grid in sync with moving characters so patrol animations play and chat collisions trigger reliably.
 - NPC Dialog: Release the interaction lock when conversations close so squadmates resume their patrol animations.
+- Campaign: Redesigned the campaign modal with an 80% viewport layout and tabbed sections for cleaner navigation.
