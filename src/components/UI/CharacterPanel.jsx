@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import "./CharacterPanel.css";
 const DEFAULT_STATS = {
   name: "Adventurer",
   level: 1,
