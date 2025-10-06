@@ -98,7 +98,15 @@ const STATIC_SHOWCASE_IMAGES = (() => {
   results.sort((a, b) => a.name.localeCompare(b.name));
   return results;
 })();
-const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
+const MainMenu = ({
+  onStart,
+  onOptions,
+  onChangelog,
+  onCredits,
+  onCampaign,
+  version,
+  campaignProgress
+}) => {
   const [showMapModal, setShowMapModal] = React.useState(false);
   const [showWelcome, setShowWelcome] = React.useState(() => !safeGetWelcomeFlag());
   const [showHints, setShowHints] = React.useState(false);
@@ -112,6 +120,7 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
   const mapModalContentRef = React.useRef(null);
   const previouslyFocusedElementRef = React.useRef(null);
   const showcaseButtonRef = React.useRef(null);
+  const campaignButtonRef = React.useRef(null);
   const plannedImprovementsButtonRef = React.useRef(null);
   const plannedImprovementsCloseButtonRef = React.useRef(null);
   const plannedImprovementsModalContentRef = React.useRef(null);
@@ -135,6 +144,18 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
     if (!plannedImprovementStats.total) return 0;
     return Math.round((plannedImprovementStats.completed / plannedImprovementStats.total) * 100);
   }, []);
+  const campaignButtonDetails = React.useMemo(() => {
+    if (!campaignProgress || !campaignProgress.totalMissions) {
+      return null;
+    }
+    const percent = Number.isFinite(campaignProgress.percent)
+      ? Math.max(0, Math.min(100, campaignProgress.percent))
+      : 0;
+    const statusLine = `${campaignProgress.completedMissions ?? 0}/${campaignProgress.totalMissions} missions`;
+    const nextMissionTitle = campaignProgress.nextMission?.title || null;
+    return { percent, statusLine, nextMissionTitle };
+  }, [campaignProgress]);
+
   React.useEffect(() => {
     if (!showMapModal || !mapModalContentRef.current) return;
     const modalNode = mapModalContentRef.current;
@@ -526,6 +547,45 @@ const MainMenu = ({ onStart, onOptions, onChangelog, onCredits, version }) => {
               {
                 fileName: "<stdin>",
                 lineNumber: 52,
+                columnNumber: 21
+              }
+            ),
+            /* @__PURE__ */ jsxDEV(
+              "button",
+              {
+                ref: campaignButtonRef,
+                onClick: () => {
+                  if (typeof onCampaign === "function") {
+                    onCampaign();
+                  }
+                },
+                className: "bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200 text-left",
+                children: campaignButtonDetails ? [
+                  /* @__PURE__ */ jsxDEV("span", { className: "block text-xl font-semibold", children: "Campaign" }, void 0, false, {
+                    fileName: "<stdin>",
+                    lineNumber: 60,
+                    columnNumber: 23
+                  }),
+                  /* @__PURE__ */ jsxDEV("span", { className: "block text-sm text-yellow-200/80", children: `${campaignButtonDetails.percent}% complete` }, void 0, false, {
+                    fileName: "<stdin>",
+                    lineNumber: 61,
+                    columnNumber: 23
+                  }),
+                  /* @__PURE__ */ jsxDEV("span", {
+                    className: "block text-xs text-yellow-100/70",
+                    children: campaignButtonDetails.nextMissionTitle ? `Next: ${campaignButtonDetails.nextMissionTitle}` : campaignButtonDetails.statusLine
+                  }, void 0, false, {
+                    fileName: "<stdin>",
+                    lineNumber: 64,
+                    columnNumber: 23
+                  })
+                ] : "Campaign"
+              },
+              void 0,
+              campaignButtonDetails ? true : false,
+              {
+                fileName: "<stdin>",
+                lineNumber: 59,
                 columnNumber: 21
               }
             ),

@@ -39,6 +39,15 @@ import { PLAYER_CHARACTERS, getCharacterByKey, getDefaultCharacter, buildStatsFo
 import { setPlayerIdentity } from "./game/player/identity.js";
 import { multiplayerManager } from "./network/multiplayerManager.js";
 import { loadingStore } from "./state/loadingStore.js";
+import CampaignPanel from "./components/UI/CampaignPanel.jsx";
+import {
+  loadCampaignSave,
+  persistCampaignSave,
+  deriveCampaignState,
+  completeCampaignMission,
+  resetCampaignSave,
+  campaignProgressMetrics
+} from "./game/campaign.js";
 const VERSION_PREFIX = "v";
 const OVERRIDE_VERSION = null;
 const OpenWorldGame = () => {
@@ -129,7 +138,14 @@ const OpenWorldGame = () => {
   const [showKitbashModal, setShowKitbashModal] = useState(false);
   const [kitbashDetails, setKitbashDetails] = useState(null);
   const [showJutsuModal, setShowJutsuModal] = useState(false);
+  const [showCampaignPanel, setShowCampaignPanel] = useState(false);
   const [quests, setQuests] = useState(() => createInitialQuests());
+  const [campaignSave, setCampaignSave] = useState(() => loadCampaignSave());
+  const campaignState = React.useMemo(() => deriveCampaignState(campaignSave), [campaignSave]);
+  const campaignProgress = React.useMemo(() => campaignProgressMetrics(campaignSave), [campaignSave]);
+  useEffect(() => {
+    persistCampaignSave(campaignSave);
+  }, [campaignSave]);
   // In-game time must be computed before passing to world events
   const { timeOfDayHours, formattedTime: gameClock, setTimeOfDay } = useGameTime({ isRunning: gameState === "Playing", initialHour: 8, resetKey: timeResetKey });
   const timeOfDayRef = useRef(timeOfDayHours);
@@ -168,6 +184,12 @@ const OpenWorldGame = () => {
       return stats;
     });
   }, [xpMultiplier]);
+  const handleCampaignMissionComplete = useCallback((missionId) => {
+    setCampaignSave((prev) => completeCampaignMission(prev, missionId));
+  }, []);
+  const handleCampaignReset = useCallback(() => {
+    setCampaignSave(resetCampaignSave());
+  }, []);
   const keysRef = usePlayerControls({ ...uiState, onGainExperience: gainExperience });
   const joystickRef = useRef(null);
   const reportBootStatus = useCallback((stepId, status, payload) => {
@@ -473,7 +495,7 @@ const OpenWorldGame = () => {
     setGameState("MainMenu");
   }, [selectedCharacterKey]);
   return /* @__PURE__ */ jsxDEV("div", { className: "relative w-full h-screen overflow-hidden bg-black", children: [
-    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGameRequest, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true) }, void 0, false, {
+    gameState === "MainMenu" && /* @__PURE__ */ jsxDEV(MainMenu, { version, onStart: handleStartGameRequest, onOptions: () => setShowSettings(true), onChangelog: () => setShowChangelog(true), onCredits: () => setShowCredits(true), onCampaign: () => setShowCampaignPanel(true), campaignProgress }, void 0, false, {
       fileName: "<stdin>",
       lineNumber: 54,
       columnNumber: 9
@@ -608,6 +630,15 @@ const OpenWorldGame = () => {
       fileName: "<stdin>",
       lineNumber: 71,
       columnNumber: 21
+    }),
+    showCampaignPanel && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(CampaignPanel, { campaignState, campaignMetrics: campaignProgress, onClose: () => setShowCampaignPanel(false), onMarkMissionComplete: handleCampaignMissionComplete, onResetProgress: handleCampaignReset }, void 0, false, {
+      fileName: "<stdin>",
+      lineNumber: 72,
+      columnNumber: 41
+    }) }, void 0, false, {
+      fileName: "<stdin>",
+      lineNumber: 72,
+      columnNumber: 25
     }),
     gameState === "Playing" && showAnimations && /* @__PURE__ */ jsxDEV(ErrorBoundary, { children: /* @__PURE__ */ jsxDEV(AnimationsPanel, { playerRef, onClose: () => setShowAnimations(false) }, void 0, false, {
       fileName: "<stdin>",
