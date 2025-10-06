@@ -73,3 +73,4 @@ Recent
 - NPCs: Added Hashirama, Jiraiya, Killer Bee, Rock Lee, and Tsunade with bespoke patrol tuning and dialog badges.
 - Systems: Expanded squad spawning and roster fallbacks so the new legends join existing patrol updates.
 2025-10-06 21:27:43 - NPCs: Point new legends to their dedicated animation manifests and local temp rigs.
+2025-10-06 21:34:24 - NPCs: Dampened locomotion restarts so walk/run loops stay smooth during long patrols.
