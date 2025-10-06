@@ -1,4 +1,5 @@
 Recent
+- Docs: Added showcase automation playbook covering changelog review, running the server, and refreshing modal screenshots.
 - Campaign: Added a six-arc narrative campaign with sequential mission progression, cinematics, and a main menu overview panel.
 - NPCs: Resume wander walk cycles after interactions even for rigs without idle clips.
 - NPC Patrols: Naruto and Shikamaru now stroll their roads, wander off-route for moments, and return within half a minute.
